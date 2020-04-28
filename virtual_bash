@@ -1,0 +1,48 @@
+# ######################################
+# In Simulation
+# ######################################
+# Necessary packages for the sensors in Gazebo: 
+# ros-kinetic-hector-gazebo-pluginss and ros-kinetic-geographic-msgs
+roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
+rosrun am_driver hrp_teleop.py
+
+# tf publish
+rosrun tf2_ros static_transform_publisher 0 0 0 0 0 0 map odom 
+rqt &
+
+
+# ######################################
+# In practice
+# ######################################
+# USB cable control: /dev/ttyACM0
+# UART control: /dev/ttyUSB0
+roslaunch am_driver_safe automower_hrp.launch
+rosrun am_driver hrp_teleop.py
+
+# Trun off the sensor or set the control mode.
+rostopic pub -1 cmd_mode std_msgs/UInt16 "data: 275" 
+
+
+# ######################################
+# Localization node
+# ######################################
+roslaunch robot_localization ekf_template.launch
+
+# IMU launch 
+roslaunch am_driver_safe sensors.launch
+roslaunch phidgets_imu imu.launch
+# imu_filter_madgwick is already launched in phidgets_imu
+# rosrun imu_filter_madgwick imu_filter_node
+
+
+# Approx. the true latitude & longitude at my desk at RISE.
+# 59.40455 17.94965
+
+
+
+# Tracking by markers.
+rosrun sensor_decoder tracking_marker_pub
+
+# Calibrate the IMU. Zero the angular velocity. 
+# Done automically when started.
+rosservice call /imu/calibrate

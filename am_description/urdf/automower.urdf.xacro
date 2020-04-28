@@ -130,44 +130,113 @@
 
 
 
-  <!-- GAZEBO STUFF -->
+  <!-- IMU01 -->
+  <link name="imu01_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.035 0.01"/>
+      </geometry>
+      <material name="Black" />
+    </visual>
+  </link>
+
+  <joint name="imu01_link_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="imu01_link" />
+    <origin xyz="0 0.16 0.34" rpy="3.142 0 1.571" />
+  </joint>
+
+    <!-- IMU02 -->
+  <link name="imu02_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.035 0.01"/>
+      </geometry>
+      <material name="Black" />
+    </visual>
+  </link>
+
+  <joint name="imu02_link_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="imu02_link" />
+    <origin xyz="0 -0.16 0.34" rpy="3.142 0 1.571" />
+  </joint>
+
+
+  <!-- GNSS01 -->
+  <link name="gnss01_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+      <material name="Black" />
+    </visual>
+  </link>
+
+  <joint name="gnss01_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="gnss01_link" />
+    <origin xyz="0.4 0.15 0.25" rpy="0 0 0" />
+  </joint>
+
+    <!-- GNSS02 -->
+  <link name="gnss02_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+      <material name="Black" />
+    </visual>
+  </link>
+
+  <joint name="gnss02_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="gnss02_link" />
+    <origin xyz="0.4 -0.15 0.25" rpy="0 0 0" />
+  </joint>
+
+
+  <!-- GAZEBO STUFF FISHY PART!!! -->
   <gazebo>
     <plugin name="automower_gazebo_controller" filename="libam_gazebo_controller_2wd.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>100.0</updateRate>
-      <leftJoint>back_right_wheel_joint</leftJoint>
-      <rightJoint>back_left_wheel_joint</rightJoint>
+      <leftJoint>back_left_wheel_joint</leftJoint>
+      <rightJoint>back_right_wheel_joint</rightJoint>
       <wheelSeparation>0.4645</wheelSeparation>
       <wheelDiameter>0.245</wheelDiameter>
       <wheelTorque>100</wheelTorque>
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
-      <odometryFrame>odom_gazebo</odometryFrame>
-      <robotBaseFrame>base_link_gazebo</robotBaseFrame>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_link</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
+      <publishTf>true</publishTf>
+      <!-- <wheelAcceleration>0</wheelAcceleration> -->
       <publishWheelJointState>false</publishWheelJointState>
+      <odometrySource>encoder</odometrySource>
     </plugin>
 
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" >
+      <legacyModeNS>true</legacyModeNS>
+    </plugin>
 
-    <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
+    
+
+
+    <plugin name="imu_plugin_01" filename="libhector_gazebo_ros_imu.so">
       <alwaysOn>true</alwaysOn>
-      <bodyName>base_link</bodyName>
-      <topicName>imu</topicName>
-      <serviceName>imu_service</serviceName>
-      <updateRate>100.0</updateRate>
-      <rpyOffsets>0 0 0</rpyOffsets> <!-- deprecated -->
-<!--
-      <gaussianNoise>0.0</gaussianNoise>
-      <accelDrift>0.5 0.5 0.5</accelDrift>
-      <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
-      <rateDrift>0.1 0.1 0.1</rateDrift>
-      <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
-      <headingDrift>0.1</headingDrift>
-      <headingGaussianNoise>1.00</headingGaussianNoise>
--->
+      <bodyName>imu01_link</bodyName>
+      <topicName>imu_01</topicName>
+      <serviceName>imu01_service</serviceName>
+      <updateRate>10.0</updateRate>
+      <rpyOffsets>0 0 0</rpyOffsets>
 
-      <gaussianNoise>0.0</gaussianNoise>  <!-- deprecated -->
+      <gaussianNoise>0.0</gaussianNoise>  
       <accelDrift>0.0 0.0 0.0</accelDrift>
       <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
       <rateDrift>0.0 0.0 0.0</rateDrift>
@@ -176,21 +245,59 @@
       <headingGaussianNoise>0.00</headingGaussianNoise>
     </plugin>
 
-    <plugin name="am_gazebo_wheelencoder" filename="libam_gazebo_wheelencoder.so">
+
+
+    <plugin name="imu_plugin_02" filename="libhector_gazebo_ros_imu.so">
+      <alwaysOn>true</alwaysOn>
+      <bodyName>imu02_link</bodyName>
+      <topicName>imu_02</topicName>
+      <serviceName>imu02_service</serviceName>
+      <updateRate>10.0</updateRate>
+      <rpyOffsets>0 0 0</rpyOffsets>
+
+      <gaussianNoise>0.0</gaussianNoise>  
+      <accelDrift>0.0 0.0 0.0</accelDrift>
+      <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
+      <rateDrift>0.0 0.0 0.0</rateDrift>
+      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+      <headingDrift>0.0</headingDrift>
+      <headingGaussianNoise>0.00</headingGaussianNoise>
     </plugin>
 
-    <plugin name="automower_gps_sim" filename="libhector_gazebo_ros_gps.so">
+
+
+    <plugin name="gnss01_sim" filename="libhector_gazebo_ros_gps.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>4.0</updateRate>
-      <bodyName>base_link</bodyName>
-      <topicName>fix</topicName>
-      <velocityTopicName>fix_vel</velocityTopicName>
+      <bodyName>gnss01_link</bodyName>
+      <topicName>fix01</topicName>
+      <velocityTopicName>fix_vel02</velocityTopicName>
       <drift>5.0 5.0 5.0</drift>
       <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
       <velocityDrift>0 0 0</velocityDrift>
       <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
     </plugin>
+
+    <plugin name="gnss02_sim" filename="libhector_gazebo_ros_gps.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>4.0</updateRate>
+      <bodyName>gnss02_link</bodyName>
+      <topicName>fix02</topicName>
+      <velocityTopicName>fix_vel01</velocityTopicName>
+      <drift>5.0 5.0 5.0</drift>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+    </plugin>
+
+
+    <plugin name="am_gazebo_wheelencoder" filename="libam_gazebo_wheelencoder.so"></plugin>
   </gazebo>
+
+
+
+
+  
 
   <gazebo reference="base_link">
     <sensor name="automower_sensor" type="contact">
@@ -209,5 +316,75 @@
       </plugin>
     </sensor>
   </gazebo>
+
+
+  <!-- Camera -->
+<!--   <joint name="camera_joint" type="fixed">
+    <axis xyz="1 0 0" />
+    <origin xyz="0.4 0 0.15" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+  </joint>
+
+  <link name="camera_link">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+    <box size="0.05 1 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.1 0.05"/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+
+  <gazebo reference="camera_link">
+    <sensor type="camera" name="camera1">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>camera_test</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo> -->
 
 </robot>

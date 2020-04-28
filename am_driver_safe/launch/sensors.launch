@@ -1,0 +1,59 @@
+<launch>
+
+
+  <!-- Select which sensors are to be used -->
+  <arg name="useLeftGNSS" default="False" />
+  <arg name="useRightGNSS" default="False" />
+  <arg name="useLeftIMU" default="True" />
+  <arg name="useRightIMU" default="False" />
+
+  <!-- convert the original gnss measurement -->
+  <group if="$(arg useLeftGNSS)" 
+    ns="gnss_left">
+    <node name="gnss_left_pub"
+          pkg="sensor_decoder"
+          type="gnss_pub.py">
+      <param name="device_serial_number" value="285614" />
+    </node>
+  </group>
+
+  <group if="$(arg useRightGNSS)" 
+    ns="gnss_right">
+    <node name="gnss_right_pub"
+          pkg="sensor_decoder"
+          type="gnss_pub.py">
+    <param name="device_serial_number" value="285332" />
+    </node>
+  </group>
+
+  <!-- launch the IMUs -->
+  <group if="$(arg useLeftIMU)"
+    ns="imu_left">
+    <param name="serial_number" value="596014" />
+    <include file="$(find phidgets_imu)/launch/imu.launch" />
+
+    <node name="imu_trans_pub"
+          pkg="sensor_decoder"
+          type="imu_trans">
+      <param name="topic_name" value="imu/data"/>
+      <param name="frame_name" value="imu01_link"/>
+    </node>
+
+  </group>
+
+  <group if="$(arg useRightIMU)"
+    ns="imu_right">
+    <param name="serial_number" value="596088" />
+    <include file="$(find phidgets_imu)/launch/imu.launch" />
+
+    <node name="imu_trans_pub"
+          pkg="sensor_decoder"
+          type="imu_trans">
+      <param name="topic_name" value="imu/data"/>
+      <param name="frame_name" value="imu02_link_joint" />
+    </node>
+
+  </group>
+
+
+</launch>

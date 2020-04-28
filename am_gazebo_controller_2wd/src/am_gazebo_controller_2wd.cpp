@@ -91,8 +91,8 @@ void GazeboRosDiffDrive::Load ( physics::ModelPtr _parent, sdf::ElementPtr _sdf 
     gazebo_ros_->getParameterBoolean ( publishOdomTF_, "publishOdomTF", true);
 #endif
 
-    gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.34 );
-    gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.15 );
+    gazebo_ros_->getParameter<double> ( wheel_separation_, "wheelSeparation", 0.46 );
+    gazebo_ros_->getParameter<double> ( wheel_diameter_, "wheelDiameter", 0.24 );
     gazebo_ros_->getParameter<double> ( wheel_accel, "wheelAcceleration", 0.0 );
     gazebo_ros_->getParameter<double> ( wheel_torque, "wheelTorque", 5.0 );
     gazebo_ros_->getParameter<double> ( update_rate_, "updateRate", 100.0 );
@@ -335,8 +335,8 @@ void GazeboRosDiffDrive::getWheelVelocities()
     double vr = x_;
     double va = rot_;
 
-    wheel_speed_[LEFT] = vr + va * wheel_separation_ / 2.0;
-    wheel_speed_[RIGHT] = vr - va * wheel_separation_ / 2.0;
+    wheel_speed_[LEFT] = vr - va * wheel_separation_ / 2.0;
+    wheel_speed_[RIGHT] = vr + va * wheel_separation_ / 2.0;
 }
 
 void GazeboRosDiffDrive::cmdVelCallback ( const geometry_msgs::Twist::ConstPtr& cmd_msg )
@@ -386,6 +386,11 @@ void GazeboRosDiffDrive::UpdateOdometryEncoder()
 
     double w = dtheta/seconds_since_last_update;
     double v = sqrt ( dx*dx+dy*dy ) /seconds_since_last_update;
+
+    if (ssum < 0)
+    {
+        v = -v;
+    }
 
     tf::Quaternion qt;
     tf::Vector3 vt;
@@ -468,8 +473,8 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
         ignition::math::Pose3d pose = parent->GetWorldPose().Ign();
          #endif
          
-       qt = tf::Quaternion ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
-       vt = tf::Vector3 ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
+        qt = tf::Quaternion ( pose.Rot().X(), pose.Rot().Y(), pose.Rot().Z(), pose.Rot().W() );
+        vt = tf::Vector3 ( pose.Pos().X(), pose.Pos().Y(), pose.Pos().Z() );
 
         odom_.pose.pose.position.x = vt.x();
         odom_.pose.pose.position.y = vt.y();
@@ -484,14 +489,14 @@ void GazeboRosDiffDrive::publishOdometry ( double step_time )
         //OLD        
          //math::Vector3 linear;
         //linear = parent->GetWorldLinearVel();
-ignition::math::Vector3d linear;
-#if GAZEBO_MAJOR_VERSION >= 8
-        linear = parent->WorldLinearVel();
-        odom_.twist.twist.angular.z = parent->WorldAngularVel().Z();
-#else
-        linear = parent->GetWorldLinearVel().Ign();
-        odom_.twist.twist.angular.z = parent->GetWorldAngularVel().Ign().Z();
-#endif
+        ignition::math::Vector3d linear;
+        #if GAZEBO_MAJOR_VERSION >= 8
+                linear = parent->WorldLinearVel();
+                odom_.twist.twist.angular.z = parent->WorldAngularVel().Z();
+        #else
+                linear = parent->GetWorldLinearVel().Ign();
+                odom_.twist.twist.angular.z = parent->GetWorldAngularVel().Ign().Z();
+        #endif
         
         // Limit twist-values to be more like real HW, i.e. based on wheel ticks
         //Needed
