@@ -4,8 +4,8 @@
   <!-- Select which sensors are to be used -->
   <arg name="useLeftGNSS"   default="False" />
   <arg name="useRightGNSS"  default="False" />
-  <arg name="useLeftIMU"    default="True" />
-  <arg name="useRightIMU"   default="False" />
+  <arg name="useLeftIMU"    default="False" />
+  <arg name="useRightIMU"   default="True" />
 
   <!-- convert the original gnss measurement -->
   <group if="$(arg useLeftGNSS)" 
