@@ -112,9 +112,7 @@ catkin_package(
 include_directories(${catkin_INCLUDE_DIRS})
 
 ## Declare a cpp library
-# add_library(am_driver
-#   src/${PROJECT_NAME}/am_driver.cpp
-# )
+# add_library(am_driver   src/${PROJECT_NAME}/am_driver.cpp)
 
 ## Declare a cpp executable
 # add_executable(am_driver_node src/am_driver_node.cpp src/automower.cpp src/amproto.cpp)

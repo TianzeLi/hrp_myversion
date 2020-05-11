@@ -46,3 +46,6 @@ rosrun sensor_decoder tracking_marker_pub
 # Calibrate the IMU. Zero the angular velocity. 
 # Done automically when started.
 rosservice call /imu/calibrate
+
+# Launch Realsense D435
+roslaunch realsense2_camera rs_camera.launch filters:=pointcloud 
