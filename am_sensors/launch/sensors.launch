@@ -36,10 +36,6 @@
   </group>
 
 
-  #### IMU Nodelet manager 
-  <node pkg="nodelet" type="nodelet" name="imu_manager" 
-    args="manager" output="screen" />
-
   <!-- launch the IMUs -->
   <group if="$(arg useLeftIMU)"
     ns="imu_left">
