@@ -29,7 +29,7 @@ rostopic pub -1 cmd_mode std_msgs/UInt16 "data: 275"
 roslaunch robot_localization ekf_template.launch
 
 # IMU launch 
-roslaunch am_driver_safe sensors.launch
+roslaunch am_sensors sensors.launch
 roslaunch phidgets_imu imu.launch
 # imu_filter_madgwick is already launched in phidgets_imu
 # rosrun imu_filter_madgwick imu_filter_node
@@ -41,7 +41,7 @@ roslaunch phidgets_imu imu.launch
 
 
 # Tracking by markers.
-rosrun sensor_decoder tracking_marker_pub
+rosrun am_sensors tracking_marker_pub
 
 # Calibrate the IMU. Zero the angular velocity. 
 # Done automically when started.

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>sensor_decoder</name>
+  <name>am_sensors</name>
   <version>0.0.0</version>
   <description>The sensor_decoder package</description>
 

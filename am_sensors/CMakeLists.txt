@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(sensor_decoder)
+project(am_sensors)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -137,9 +137,9 @@ ${catkin_INCLUDE_DIRS}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(encoder_odo encoder_odo.cpp)
-add_executable(tracking_marker_pub tracking_marker_pub.cpp)
-add_executable(imu_trans imu_trans.cpp)
+add_executable(encoder_odo src/encoder_odo.cpp)
+add_executable(tracking_marker_pub src/tracking_marker_pub.cpp)
+add_executable(imu_trans src/imu_trans.cpp)
 
 
 ## Rename C++ executable without prefix
@@ -152,7 +152,7 @@ add_executable(imu_trans imu_trans.cpp)
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_dependencies(de_wheel_encoder ${catkin_EXPORTED_TARGETS})
+add_dependencies(encoder_odo ${catkin_EXPORTED_TARGETS})
 
 
 ## Specify libraries to link a library or executable target against

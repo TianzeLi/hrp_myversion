@@ -12,11 +12,9 @@ class encoder_odo_pub
 public:
 	encoder_odo_pub()
 	{
-		// Create a subscriber object.
-		ros::Subscriber sub = nh.subscribe("/wheel_encoder", 
-								10, &poseMessageReceived);
-		// Create a publisher object
-		ros::Publisher pub = nh.advertise<nav_msgs::Odometry>
+		encoder_sub_ = nh_.subscribe("/wheel_encoder", 
+								10, &encoder_odo_pub::poseMessageReceived, this);
+		encoder_pub_ = nh_.advertise<nav_msgs::Odometry>
 								("/odom_encoder", 1000);
 		// Running at 10Hz
 		ros::Rate loop_rate(10);
@@ -60,7 +58,7 @@ public:
 		    odom.twist.covariance[35] = 0.001;
 
 			// Publish the message.
-			pub.publish(odom);
+			encoder_pub_.publish(odom);
 
 			// // Send a message to rosout with the details
 			// ROS_INFO_STREAM("Sending random velocity command: "
@@ -96,7 +94,7 @@ private:
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "encoder_odo_pub");
-	imu_sub_pub imu_object;
+	encoder_odo_pub encoder_object;
 
 	ros::spin();
 	return 0;
