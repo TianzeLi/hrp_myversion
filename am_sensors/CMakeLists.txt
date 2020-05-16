@@ -137,7 +137,7 @@ ${catkin_INCLUDE_DIRS}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(de_wheel_encoder de_wheel_encoder.cpp)
+add_executable(encoder_odo encoder_odo.cpp)
 add_executable(tracking_marker_pub tracking_marker_pub.cpp)
 add_executable(imu_trans imu_trans.cpp)
 
@@ -156,7 +156,7 @@ add_dependencies(de_wheel_encoder ${catkin_EXPORTED_TARGETS})
 
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(de_wheel_encoder 
+target_link_libraries(encoder_odo 
    ${catkin_LIBRARIES}
  )
 

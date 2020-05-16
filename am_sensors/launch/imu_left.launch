@@ -2,10 +2,7 @@
 
 <launch>
 
-  #### Nodelet manager ######################################################
 
-  <node pkg="nodelet" type="nodelet" name="imu_manager" 
-    args="manager" output="screen" />
 
   #### IMU Driver ###########################################################
 
