@@ -4,12 +4,12 @@
 
   #### Nodelet manager ######################################################
 
-  <node pkg="nodelet" type="nodelet" name="imu_manager_right" 
+  <node pkg="nodelet" type="nodelet" name="imu_manager" 
     args="manager" output="screen" />
 
   #### IMU Driver ###########################################################
 
-  <node pkg="nodelet" type="nodelet" name="PhidgetsImuNodeletRight" 
+  <node pkg="nodelet" type="nodelet" name="PhidgetsImuNodelet" 
     args="load phidgets_imu/PhidgetsImuNodelet imu_manager" 
     output="screen">
 
@@ -40,7 +40,7 @@
 
   #### IMU Orientation Filter ###############################################
 
-  <node pkg="nodelet" type="nodelet" name="ImuFilterNodeletRight" 
+  <node pkg="nodelet" type="nodelet" name="ImuFilterNodelet" 
     args="load imu_filter_madgwick/ImuFilterNodelet imu_manager" 
     output="screen">
 
