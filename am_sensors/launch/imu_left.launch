@@ -8,7 +8,7 @@
 
   #### IMU Driver ###########################################################
 
-  <node pkg="nodelet" type="nodelet" name="PhidgetsImuNodelet" 
+  <node pkg="nodelet" type="nodelet" name="PhidgetsImuNodeletLeft" 
     args="load phidgets_imu/PhidgetsImuNodelet imu_manager" 
     output="screen">
 
@@ -39,7 +39,7 @@
 
   #### IMU Orientation Filter ###############################################
 
-  <node pkg="nodelet" type="nodelet" name="ImuFilterNodelet" 
+  <node pkg="nodelet" type="nodelet" name="ImuFilterNodeletLeft" 
     args="load imu_filter_madgwick/ImuFilterNodelet imu_manager" 
     output="screen">
 
