@@ -44,7 +44,7 @@
   <group if="$(arg useLeftIMU)"
     ns="imu_left">
 
-    <include file="$(find am_driver_safe)/launch/imu_left.launch" />
+    <include file="$(find am_sensors)/launch/imu_left.launch" />
 
     <node name="imu_trans_pub"
           pkg="am_sensors"
@@ -58,7 +58,7 @@
   <group if="$(arg useRightIMU)"
     ns="imu_right">
 
-    <include file="$(find am_driver_safe)/launch/imu_left.launch" />
+    <include file="$(find am_sensors)/launch/imu_left.launch" />
 
     <node name="imu_trans_pub"
           pkg="am_sensors"
