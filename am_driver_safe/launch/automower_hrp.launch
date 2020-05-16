@@ -73,7 +73,4 @@
     <param name="publish_frequency" value="20" /> <!-- Hz -->
   </node>
 
-  <!-- publish processed encoder data -->
-  <node pkg="sensor_decoder" type="de_wheel_encoder" name="encoder_decode" />
-
 </launch>
