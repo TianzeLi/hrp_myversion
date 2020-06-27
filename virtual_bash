@@ -54,3 +54,7 @@ roslaunch am_sensors rs_camera.launch
 roslaunch realsense2_camera rs_camera.launch filters:=pointcloud 
 roslaunch realsense2_camera rs_camera.launch filters:=pointcloud enable_infra1:=false enable_infra2:=false
 
+
+
+# View the map.
+rtabmap-databaseViewer ~/.ros/rtabmap.db
