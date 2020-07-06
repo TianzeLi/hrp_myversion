@@ -7,7 +7,7 @@
 	<arg name="show_rqt" default="true"/>
 
 	<!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
-	<include file="$(find am_gazebo)/launch/lawn0.launch">
+	<include file="$(find am_gazebo)/launch/lawn1.launch">
 		<arg name="paused" value="$(arg paused)" />
 		<arg name="debug" value="$(arg debug)" />
 		<arg name="gui" value="$(arg gui)" />    
