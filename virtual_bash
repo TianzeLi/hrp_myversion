@@ -50,10 +50,12 @@ rosrun am_sensors tracking_marker_pub
 rosservice call /imu/calibrate
 
 # Launch Realsense D435, now also available in am_sensors
-roslaunch am_sensors rs_camera.launch
 roslaunch realsense2_camera rs_camera.launch filters:=pointcloud 
 roslaunch realsense2_camera rs_camera.launch filters:=pointcloud enable_infra1:=false enable_infra2:=false
 roslaunch realsense2_camera rs_camera.launch align_depth:=true
+
+# Change cameara control values.
+rosrun rqt_reconfigure rqt_reconfigure
 
 # Launch RTAB-Map 
 roslaunch rtabmap_ros rtabmap.launch \

@@ -46,7 +46,10 @@
           pkg="am_sensors"
           type="imu_trans">
       <param name="topic_name" value="imu/data"/>
-      <param name="frame_name" value="imu01_link"/>
+      <param name="frame_name" value="imu01_test"/>
+      <param name="pub_testtf" value="0"/>
+      <param name="xyz" value="0 0.16 0.34"/>
+      <param name="rpy" value="3.142 0 1.571"/>
     </node>
 
   </group>
