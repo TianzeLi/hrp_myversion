@@ -24,6 +24,9 @@
   <!-- urdf xml robot description loaded on the Parameter Server-->
   <param name="robot_description" unless="$(arg driver_only)" command="xacro --inorder '$(find am_description)/urdf/automower.urdf.xacro'" />
 
+  <!-- For the additional sensors -->
+  <param name="useIMU" default="0" />
+
   <!-- Start the am_driver -->
   <node name="am_driver_safe"
         pkg="am_driver_safe"
@@ -72,5 +75,11 @@
         unless="$(arg driver_only)">
     <param name="publish_frequency" value="20" /> <!-- Hz -->
   </node>
+
+
+  <!-- For the additional sensors -->
+    <group if="$(arg useIMUGNSS)" >
+      <include file="$(find am_sensors)/launch/sensors.launch" />
+    </group>
 
 </launch>
