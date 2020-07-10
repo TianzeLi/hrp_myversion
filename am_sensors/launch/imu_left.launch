@@ -43,7 +43,8 @@
     args="load imu_filter_madgwick/ImuFilterNodelet imu_manager" 
     output="screen">
 
-    <param name="use_mag"                 value="true"/>
+    <param name="use_mag"                 value="false"/>
+    <param name="zero_yaw_init"           value="true" />
     <param name="use_magnetic_field_msg"  value="true"/>
     <param name="remove_gravity_vector"   value="false"/>
     <param name="world_frame"             value="enu"/>
