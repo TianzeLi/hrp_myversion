@@ -11,7 +11,15 @@ class encoder_odo_pub
 {
 public:
 	encoder_odo_pub()
-	{
+	{	
+  		// From automower_safe.cpp
+  		// AUTMOWER_WHEEL_BASE_WIDTH = 0.464500;
+        // WHEEL_DIAMETER = 0.245;
+        // WHEEL_PULSES_PER_TURN = 349;
+        // WHEEL_METER_PER_TICK = (2.0 * M_PI * WHEEL_DIAMETER / 2.0) / (double)WHEEL_PULSES_PER_TURN;
+		RADIANS_PER_TICK = M_PI*2.0/1093.0;
+  		WHEEL_METER_PER_TICK = 0.002205;
+
 		encoder_sub_ = nh_.subscribe("/wheel_encoder", 
 								10, &encoder_odo_pub::poseMessageReceived, this);
 		encoder_pub_ = nh_.advertise<nav_msgs::Odometry>
@@ -39,12 +47,12 @@ public:
 
 
 			tcs.twist.twist.linear.x = 
-				(wheel_encoder_tmp.lwheel + wheel_encoder_tmp.rwheel)*10.0/2.5;
-			tcs.twist.twist.linear.y = 0;
+				(wheel_encoder_tmp.lwheel + wheel_encoder_tmp.rwheel)/2.0;
+			tcs.twist.twist.linear.y = 0.0;
 
 			// may need to fix
 			tcs.twist.twist.angular.z = 
-				(-wheel_encoder_tmp.lwheel + wheel_encoder_tmp.rwheel)*20.0/2.5/0.4645;
+				(-wheel_encoder_tmp.lwheel + wheel_encoder_tmp.rwheel)/0.4645;
 
 			// tcs.twist.covariance = 
 
@@ -81,9 +89,9 @@ private:
   ros::Publisher encoder_pub_;
   ros::Subscriber encoder_sub_;
 
-  double RADIANS_PER_TICK = M_PI*2.0/1093.0;
-  double WHEEL_METER_PER_TICK = 0.000704;
-  std::string frame_name = "notgiven";
+  double RADIANS_PER_TICK;
+  double WHEEL_METER_PER_TICK;
+  std::string frame_name;
 
   am_driver::WheelEncoder wheel_encoder_tmp;
 

@@ -73,6 +73,7 @@ world_frame: map          # Defaults to the value of odom_frame if unspecified
 # odom0: /wheel_encoder_decoded
 odom0: /odom_encoder
 
+
 # Each sensor reading updates some or all of the filter's state. These options give you greater control over which
 # values from each measurement are fed to the filter. For example, if you have an odometry message as input, but only
 # want to use its Z position value, then set the entire vector to false, except for the third entry. The order of the
@@ -83,7 +84,7 @@ odom0: /odom_encoder
 odom0_config: [false,  false,  false,
                false, false, false,
                true, true, false,
-               false, false, false,
+               false, false, true,
                false, false, false]
 
 # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
@@ -142,15 +143,15 @@ imu0_config: [false, false, false,
               false,  false,  false]
 imu0_nodelay: false
 imu0_differential: false
-imu0_relative: true
+imu0_relative: false
 imu0_queue_size: 10
-imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-imu0_twist_rejection_threshold: 0.8                #
-imu0_linear_acceleration_rejection_threshold: 0.8  #
+# imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
+# imu0_twist_rejection_threshold: 0.8                #
+# imu0_linear_acceleration_rejection_threshold: 0.8  #
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
-imu0_remove_gravitational_acceleration: true
+# imu0_remove_gravitational_acceleration: true
 
 imu1: imu_right/imu/data/processed
 imu1_config: [false, false, false,
@@ -160,15 +161,15 @@ imu1_config: [false, false, false,
               false,  false,  false]
 imu1_nodelay: false
 imu1_differential: false
-imu1_relative: true
+imu1_relative: false
 imu1_queue_size: 10
-imu1_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-imu1_twist_rejection_threshold: 0.8                #
-imu1_linear_acceleration_rejection_threshold: 0.8  #
+# imu1_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
+# imu1_twist_rejection_threshold: 0.8                #
+# imu1_linear_acceleration_rejection_threshold: 0.8  #
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
-imu1_remove_gravitational_acceleration: falsed
+# imu1_remove_gravitational_acceleration: falsed
 
 # Here can take in GNSS measurements.
 # pose0: gnss_left/gnss/pose
@@ -243,9 +244,9 @@ control_timeout: 0.05
 # Which velocities are being controlled. Order is vx, vy, vz, vroll, vpitch, vyaw.
 control_config: [true, false, false, false, false, true]
 # Places limits on how large the acceleration term will be. Should match your robot's kinematics.
-acceleration_limits: [100.0, 0.0, 0.0, 0.0, 0.0, 100.0]
+# acceleration_limits: [100.0, 0.0, 0.0, 0.0, 0.0, 100.0]
 # Acceleration and deceleration limits are not always the same for robots.
-deceleration_limits: [100.0, 0.0, 0.0, 0.0, 0.0, 100.0]
+# deceleration_limits: [100.0, 0.0, 0.0, 0.0, 0.0, 100.0]
 # If your robot cannot instantaneously reach its acceleration limit, the permitted change can be controlled with these
 # gains
 # acceleration_gains: [0.8, 0.0, 0.0, 0.0, 0.0, 0.9]
@@ -287,7 +288,7 @@ initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,
                               0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                              0,    0,    0,    0,    0,    1e-9, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    1e1, 0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    1e-9, 0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,     0,     0,     0,    0,    0,

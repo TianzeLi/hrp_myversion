@@ -1,3 +1,5 @@
+# NOW IS USING catkin build
+
 # ######################################
 # In Simulation
 # ######################################
@@ -47,14 +49,22 @@ rosrun am_sensors tracking_marker_pub
 # Done automically when started.
 rosservice call /imu/calibrate
 
-# Launch Realsense D435.
-roslaunch realsense2_camera rs_camera.launch filters:=pointcloud
+# Launch Realsense D435, now also available in am_sensors
+roslaunch realsense2_camera rs_camera.launch filters:=pointcloud 
+roslaunch realsense2_camera rs_camera.launch filters:=pointcloud enable_infra1:=false enable_infra2:=false
 roslaunch realsense2_camera rs_camera.launch align_depth:=true
 
-# Launch the RTAB-Map for D435.
+# Change cameara control values.
+rosrun rqt_reconfigure rqt_reconfigure
+
+# Launch RTAB-Map 
 roslaunch rtabmap_ros rtabmap.launch \
     rtabmap_args:="--delete_db_on_start" \
     depth_topic:=/camera/aligned_depth_to_color/image_raw \
     rgb_topic:=/camera/color/image_raw \
     camera_info_topic:=/camera/color/camera_info \
     approx_sync:=false
+
+
+# View the map.
+rtabmap-databaseViewer ~/.ros/rtabmap.db
