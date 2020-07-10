@@ -5,7 +5,7 @@
   <arg name="useCustomOdom" default="True"  />
   <arg name="useLeftGNSS"   default="False" />
   <arg name="useRightGNSS"  default="False" />
-  <arg name="useLeftIMU"    default="True" />
+  <arg name="useLeftIMU"    default="False" />
   <arg name="useRightIMU"   default="True" />
 
   <group if="$(arg useCustomOdom)" >
