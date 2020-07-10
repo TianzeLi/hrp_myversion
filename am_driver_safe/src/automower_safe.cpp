@@ -2732,6 +2732,10 @@ bool AutomowerSafe::update(ros::Duration dt)
         double vx = distance / dt.toSec();
         double vy = 0.0;
 
+        /************************************************************************************
+         * Odom position seems reliable, yet twist is very wrong. The issus might lies in dt?
+        *************************************************************************************/
+
         xpos = xpos + xdist;
         ypos = ypos + ydist;
 

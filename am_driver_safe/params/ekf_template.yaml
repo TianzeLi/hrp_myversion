@@ -84,7 +84,7 @@ odom0: /odom
 odom0_config: [false,  false,  false,
                false, false, false,
                true, true, false,
-               false, false, false,
+               false, false, true,
                false, false, false]
 
 # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
@@ -135,34 +135,34 @@ odom0_relative: false
 # odom1_twist_rejection_threshold: 0.2
 # odom1_nodelay: false
 
-imu0: imu_left/imu/data/processed
-imu0_config: [false, false, false,
-              true,  true,  true,
-              false, false, false,
-              true,  true,  true,
-              false,  false,  false]
-imu0_nodelay: false
-imu0_differential: false
-imu0_relative: true
-imu0_queue_size: 10
+# imu0: imu_left/imu/data/processed
+# imu0_config: [false, false, false,
+#               true,  true,  true,
+#               false, false, false,
+#               true,  true,  true,
+#               false,  false,  false]
+# imu0_nodelay: false
+# imu0_differential: false
+# imu0_relative: true
+# imu0_queue_size: 10
 # imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
 # imu0_twist_rejection_threshold: 0.8                #
 # imu0_linear_acceleration_rejection_threshold: 0.8  #
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
-imu0_remove_gravitational_acceleration: true
+# imu0_remove_gravitational_acceleration: true
 
-imu1: imu_right/imu/data/processed
-imu1_config: [false, false, false,
-              true,  true,  true,
-              false, false, false,
-              true,  true,  true,
-              false,  false,  false]
-imu1_nodelay: false
-imu1_differential: false
-imu1_relative: true
-imu1_queue_size: 10
+# imu1: imu_right/imu/data/processed
+# imu1_config: [false, false, false,
+#               true,  true,  true,
+#               false, false, false,
+#               true,  true,  true,
+#               false,  false,  false]
+# imu1_nodelay: false
+# imu1_differential: false
+# imu1_relative: true
+# imu1_queue_size: 10
 # imu1_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
 # imu1_twist_rejection_threshold: 0.8                #
 # imu1_linear_acceleration_rejection_threshold: 0.8  #
