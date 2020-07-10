@@ -41,13 +41,12 @@ public:
 	}
 
 	void imu_callback(const sensor_msgs::Imu &msg)
-	{
+	{	
 		sensor_msgs::Imu imu_tmp = msg;
 		imu_tmp.header.frame_id = frame_name;
-		imu_tmp.orientation_covariance=[0.1, 0.0, 0.0,
-										0.0, 0.1, 0.0,
-										0.0, 0.0, 0.5];
-
+		imu_tmp.orientation_covariance[0] = 0.1;
+		imu_tmp.orientation_covariance[4] = 0.1;
+		imu_tmp.orientation_covariance[8] = 0.5;
 		imu_pub_.publish(imu_tmp);
 	}
 
