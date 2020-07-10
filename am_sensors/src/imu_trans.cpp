@@ -3,11 +3,8 @@
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/String.h>
 #include <sstream>
-<<<<<<< HEAD
 #include "geometry_msgs/Vector3.h"
-=======
 #include <tf/transform_broadcaster.h>
->>>>>>> f980f7bec8abaa6f7adabd74f601907d4389b8e6
 
 
 class imu_sub_pub
