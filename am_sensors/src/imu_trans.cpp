@@ -44,6 +44,10 @@ public:
 	{
 		sensor_msgs::Imu imu_tmp = msg;
 		imu_tmp.header.frame_id = frame_name;
+		imu_tmp.orientation_covariance=[0.1, 0.0, 0.0,
+										0.0, 0.1, 0.0,
+										0.0, 0.0, 0.5];
+
 		imu_pub_.publish(imu_tmp);
 	}
 
