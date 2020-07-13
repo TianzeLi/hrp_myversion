@@ -137,7 +137,6 @@ ${catkin_INCLUDE_DIRS}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(encoder_odo src/encoder_odo.cpp)
 add_executable(tracking_marker_pub src/tracking_marker_pub.cpp)
 add_executable(imu_trans src/imu_trans.cpp)
 
@@ -152,13 +151,8 @@ add_executable(imu_trans src/imu_trans.cpp)
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_dependencies(encoder_odo ${catkin_EXPORTED_TARGETS})
-
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(encoder_odo 
-   ${catkin_LIBRARIES}
- )
 
  target_link_libraries(tracking_marker_pub 
    ${catkin_LIBRARIES}
