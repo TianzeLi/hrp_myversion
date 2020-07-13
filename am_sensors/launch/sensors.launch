@@ -6,7 +6,8 @@
   <arg name="useLeftGNSS"   default="False" />
   <arg name="useRightGNSS"  default="False" />
   <arg name="useLeftIMU"    default="True" />
-  <arg name="useRightIMU"   default="False" />
+  <arg name="useRightIMU"   default="True" />
+  <arg name="useCptFilter"  default="False"/>
 
   <group if="$(arg useCustomOdom)" >
     <node name="encoder_odo_pub"
@@ -40,7 +41,7 @@
   <group if="$(arg useLeftIMU)"
     ns="imu_left">
 
-    <include file="$(find am_sensors)/launch/imu_left.launch" />
+    <include file="$(find am_sensors)/launch/imu_left_cpt.launch" />
 
     <node name="imu_trans_pub"
           pkg="am_sensors"

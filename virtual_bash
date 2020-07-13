@@ -49,15 +49,8 @@ rosrun am_sensors tracking_marker_pub
 # Done automically when started.
 rosservice call /imu/calibrate
 
-<<<<<<< HEAD
-# Launch Realsense D435.
-roslaunch realsense2_camera rs_camera.launch filters:=pointcloud
-roslaunch realsense2_camera rs_camera.launch align_depth:=true
-
 # Launch the RTAB-Map for D435.
-=======
 # Launch Realsense D435, now also available in am_sensors
-roslaunch realsense2_camera rs_camera.launch filters:=pointcloud 
 roslaunch realsense2_camera rs_camera.launch filters:=pointcloud enable_infra1:=false enable_infra2:=false
 roslaunch realsense2_camera rs_camera.launch align_depth:=true
 
@@ -65,17 +58,22 @@ roslaunch realsense2_camera rs_camera.launch align_depth:=true
 rosrun rqt_reconfigure rqt_reconfigure
 
 # Launch RTAB-Map 
->>>>>>> f980f7bec8abaa6f7adabd74f601907d4389b8e6
 roslaunch rtabmap_ros rtabmap.launch \
     rtabmap_args:="--delete_db_on_start" \
     depth_topic:=/camera/aligned_depth_to_color/image_raw \
     rgb_topic:=/camera/color/image_raw \
     camera_info_topic:=/camera/color/camera_info \
-<<<<<<< HEAD
     approx_sync:=false
-=======
-    approx_sync:=false
+
 
 # View the map.
 rtabmap-databaseViewer ~/.ros/rtabmap.db
->>>>>>> f980f7bec8abaa6f7adabd74f601907d4389b8e6
+
+# Making ros bag
+rosbag record -o indoor_localization_test_20200712.bag cmd_mode cmd_vel imu_left/imu/data imu_left/imu/data/processed imu_left/imu/data_raw imu_left/imu/mag imu_left/imu_manager/bond imu_right/ImuFilterNodelet/parameter_descriptions imu_right/imu/data /imu_right/imu/data/processed imu_right/imu/data_raw imu_right/imu/mag initialpose joint_states odom pose tf tf_static wheel_current wheel_encoder
+
+
+# SVO 
+roslaunch svo_ros test_rig3.launch
+rosrun rviz rviz -d /home/tianze/husqvarna_automower/src/rgb_svo/svo_ros/rviz_config.rviz
+rosbag play airground_rig_s3_2013-03-18_21-38-48.bag

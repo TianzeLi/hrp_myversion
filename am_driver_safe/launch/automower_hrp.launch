@@ -7,7 +7,7 @@
 
   <arg name="GPSCheckFreq" default="1" />
   <arg name="sensorStatusCheckFreq" default="5" />
-  <arg name="encoderSensorFreq" default="10" />
+  <arg name="encoderSensorFreq" default="200" />
   <arg name="batteryCheckFreq" default="1" />
   <arg name="loopSensorFreq" default="1" />
   <arg name="wheelSensorFreq" default="50" />
@@ -25,7 +25,7 @@
   <param name="robot_description" unless="$(arg driver_only)" command="xacro --inorder '$(find am_description)/urdf/automower.urdf.xacro'" />
 
   <!-- For the additional sensors -->
-  <param name="useIMU" default="0" />
+  <arg name="useIMUGNSS" default="1" />
 
   <!-- Start the am_driver -->
   <node name="am_driver_safe"
