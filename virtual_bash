@@ -67,3 +67,9 @@ roslaunch rtabmap_ros rtabmap.launch \
 
 # View the map.
 rtabmap-databaseViewer ~/.ros/rtabmap.db
+
+
+# Making ros bag
+rosbag record -o indoor_localization_test_20200712.bag cmd_mode cmd_vel imu_left/imu/data imu_left/imu/data/processed imu_left/imu/data_raw imu_left/imu/mag imu_left/imu_manager/bond imu_right/ImuFilterNodelet/parameter_descriptions imu_right/imu/data /imu_right/imu/data/processed imu_right/imu/data_raw imu_right/imu/mag initialpose joint_states odom pose tf tf_static wheel_current wheel_encoder
+
+

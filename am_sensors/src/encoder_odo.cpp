@@ -1,5 +1,8 @@
 /* Subscribes to /wheel_encoder and publish the correspinding odometry. */
 
+
+// WASTED!! USE /odom !!
+
 #include <ros/ros.h>
 #include <am_driver/WheelEncoder.h>
 #include<geometry_msgs/TwistWithCovarianceStamped.h>
@@ -26,62 +29,58 @@ public:
 								("/odom_encoder", 1000);
 		// Running at 10Hz
 		ros::Rate loop_rate(10);
-		ros::spinOnce();
+		ros::spin();
 
-
-		while(ros::ok())
-		{
-			// Create and fill in the message
-			nav_msgs::Odometry odom;
-			geometry_msgs::TwistWithCovarianceStamped tcs;
-					
-			// This represents an estimate of a position and velocity in free space.  
-			// The pose in this message should be specified in the coordinate frame given by header.frame_id.
-			// The twist in this message should be specified in the coordinate frame given by the child_frame_id
-			odom.header.frame_id = "odom";
-			odom.header.stamp = wheel_encoder_tmp.header.stamp;
-			odom.child_frame_id = "base_link";
-			// Angular speed of each wheel.
-			// msg.lwheel;
-			// msg.rwheel;
-
-
-			tcs.twist.twist.linear.x = 
-				(wheel_encoder_tmp.lwheel + wheel_encoder_tmp.rwheel)/2.0;
-			tcs.twist.twist.linear.y = 0.0;
-
-			// may need to fix
-			tcs.twist.twist.angular.z = 
-				(-wheel_encoder_tmp.lwheel + wheel_encoder_tmp.rwheel)/0.4645;
-
-			// tcs.twist.covariance = 
-
-			odom.twist = tcs.twist;
-
-		    odom.twist.covariance[0] = 0.001;
-		    odom.twist.covariance[7] = 0.001;
-		    // odom.twist.covariance[14] = 1000.0;
-		    // odom.twist.covariance[21] = 1000.0;
-		    // odom.twist.covariance[28] = 1000.0;
-		    odom.twist.covariance[35] = 0.001;
-
-			// Publish the message.
-			encoder_pub_.publish(odom);
-
-			// // Send a message to rosout with the details
-			// ROS_INFO_STREAM("Sending random velocity command: "
-			// << " linear=" << wheel_encoder_tmp.linear.x
-			// << " angular=" << wheel_encoder_tmp.angular.z);
-
-			ros::spinOnce();
-			loop_rate.sleep();
-		}
 	}
 
 	// A callback function Executed each time a new pose message arrives.
 	void poseMessageReceived(const am_driver::WheelEncoder &msg)
 	{
 		wheel_encoder_tmp = msg;
+
+		// Create and fill in the message
+		nav_msgs::Odometry odom;
+		geometry_msgs::TwistWithCovarianceStamped tcs;
+				
+		// This represents an estimate of a position and velocity in free space.  
+		// The pose in this message should be specified in the coordinate frame given by header.frame_id.
+		// The twist in this message should be specified in the coordinate frame given by the child_frame_id
+		odom.header.frame_id = "odom";
+		odom.header.stamp = wheel_encoder_tmp.header.stamp;
+		odom.child_frame_id = "base_link";
+		// Angular speed of each wheel.
+		// msg.lwheel;
+		// msg.rwheel;
+		ros::Time current_time = ros::Time::now();
+		ros::Duration dt = current_time - last_time;
+		last_time = current_time;
+
+		tcs.twist.twist.linear.x = 
+			(wheel_encoder_tmp.lwheel + wheel_encoder_tmp.rwheel)/2.0;
+		tcs.twist.twist.linear.y = 0.0;
+
+		// may need to fix
+		tcs.twist.twist.angular.z = 
+			(-wheel_encoder_tmp.lwheel + wheel_encoder_tmp.rwheel)/0.4645;
+
+		// tcs.twist.covariance = 
+
+		odom.twist = tcs.twist;
+
+	    odom.twist.covariance[0] = 0.001;
+	    odom.twist.covariance[7] = 0.001;
+	    // odom.twist.covariance[14] = 1000.0;
+	    // odom.twist.covariance[21] = 1000.0;
+	    // odom.twist.covariance[28] = 1000.0;
+	    odom.twist.covariance[35] = 0.001;
+
+		// Publish the message.
+		encoder_pub_.publish(odom);
+
+		// // Send a message to rosout with the details
+		// ROS_INFO_STREAM("Sending random velocity command: "
+		// << " linear=" << wheel_encoder_tmp.linear.x
+		// << " angular=" << wheel_encoder_tmp.angular.z);
 	}
 
 private:

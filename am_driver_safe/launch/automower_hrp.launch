@@ -10,7 +10,7 @@
   <arg name="encoderSensorFreq" default="200" />
   <arg name="batteryCheckFreq" default="1" />
   <arg name="loopSensorFreq" default="1" />
-  <arg name="wheelSensorFreq" default="200" />
+  <arg name="wheelSensorFreq" default="50" />
   <arg name="regulatorFreq" default="50" />
   <arg name="setPowerFreq" default="0" />
   <arg name="pitchRollFreq" default="10" />
