@@ -30,34 +30,28 @@ rostopic pub -1 cmd_mode std_msgs/UInt16 "data: 275"
 # ######################################
 roslaunch robot_localization ekf_template.launch
 
-# IMU launch 
+# IMU&GNSS launch 
 roslaunch am_sensors sensors.launch
-roslaunch phidgets_imu imu.launch
-# imu_filter_madgwick is already launched in phidgets_imu
-# rosrun imu_filter_madgwick imu_filter_node
-
-
-# Approx. the true latitude & longitude at my desk at RISE.
-# 59.40455 17.94965
-
-
-
-# Tracking by markers.
-rosrun am_sensors tracking_marker_pub
 
 # Calibrate the IMU. Zero the angular velocity. 
 # Done automically when started.
 rosservice call /imu/calibrate
 
-# Launch the RTAB-Map for D435.
+# Approx. the true latitude & longitude at my desk at RISE.
+# 59.40455 17.94965
+
+# Tracking by markers.
+rosrun am_sensors tracking_marker_pub
+
 # Launch Realsense D435, now also available in am_sensors
 roslaunch realsense2_camera rs_camera.launch filters:=pointcloud enable_infra1:=false enable_infra2:=false
 roslaunch realsense2_camera rs_camera.launch align_depth:=true
+roslaunch am_sensors rs_camrra.launch
 
 # Change cameara control values.
 rosrun rqt_reconfigure rqt_reconfigure
 
-# Launch RTAB-Map 
+# Launch RTAB-Map for D435. 
 roslaunch rtabmap_ros rtabmap.launch \
     rtabmap_args:="--delete_db_on_start" \
     depth_topic:=/camera/aligned_depth_to_color/image_raw \
