@@ -1,14 +1,76 @@
 Mobile Robot Localization Module
 ======
 
+## Documentation
+This project is forked from ![Husqvarna Research Platform](https://github.com/HusqvarnaResearch/hrp), here you may find the original README file at the bottom.
 
 
+## Run in simulation
+	Necessary packages for the sensors in Gazebo: 
+	ros-kinetic-hector-gazebo-pluginss and ros-kinetic-geographic-msgs
+	```
+	roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
+	rosrun am_driver hrp_teleop.py
+	```
 
-### Documentation
+## Run in practice
+In general, start with the launch file below. `hrp_teleop` is for keyboard remote control. 
+```
+roslaunch am_driver_safe automower_hrp.launch
+rosrun am_driver hrp_teleop.py
+```
+Parameter | Value
+----------|-------
+USB cable control | /dev/ttyACM0
+UART control      | /dev/ttyUSB0
 
+### EKF launch
+For ekf localization using `robot_localization` package. While the yaml file the node refers to is within `am_description` folder.
+```
+roslaunch robot_localization ekf_template.launch
+```
 
+### IMU&GNSS launch
+``` 
+roslaunch am_sensors sensors.launch
+```
+Parameter | Value
+----------|-------
+... 		| ...
+...      	| ...
 
-This project is forked from ![Husqvarna Research Platform](https://github.com/HusqvarnaResearch/hrp), here you may find the original README file below:
+### Realsense D435 launch
+For Rviz:
+```
+roslaunch realsense2_camera rs_camera.launch filters:=pointcloud enable_infra1:=false enable_infra2:=false
+```
+For RTAB-Map:
+```
+roslaunch realsense2_camera rs_camera.launch align_depth:=true
+```
+or follow the setup in this project:  
+```
+roslaunch am_sensors rs_camrra.launch
+```
+For changing cameara control values:
+```
+rosrun rqt_reconfigure rqt_reconfigure
+```
+
+### RTAB-Map launch for D435
+``` 
+roslaunch rtabmap_ros rtabmap.launch \
+    rtabmap_args:="--delete_db_on_start" \
+    depth_topic:=/camera/aligned_depth_to_color/image_raw \
+    rgb_topic:=/camera/color/image_raw \
+    camera_info_topic:=/camera/color/camera_info \
+    approx_sync:=false
+```
+To view the map:
+```
+rtabmap-databaseViewer ~/.ros/rtabmap.db
+```
+
 
 >## Husqvarna Research Platform
 >
