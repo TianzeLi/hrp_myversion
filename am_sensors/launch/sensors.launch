@@ -3,12 +3,13 @@
 
   <!-- Select which sensors are to be used -->
   <arg name="useCustomOdom" default="False"  />
-  <arg name="useLeftGNSS"   default="False" />
+  <arg name="useLeftGNSS"   default="True" />
   <arg name="useRightGNSS"  default="True" />
-  <arg name="useLeftIMU"    default="False" />
-  <arg name="useRightIMU"   default="False" />
+  <arg name="useLeftIMU"    default="True" />
+  <arg name="useRightIMU"   default="True" />
 
-  <arg name="useCptFilter"  default="False"/>
+  <!-- Only indicating if using cpt filter or magdwick. -->
+  <arg name="useCptFilter"  default="True"/>
 
   <group if="$(arg useCustomOdom)" >
     <node name="encoder_odo_pub"
@@ -28,7 +29,7 @@
       <!-- Unit: in second or meter -->
       <param name="warming_time"   value="10"/> 
       <param name="pub_frequency"  value="10"/>
-      <param name="control_stdev"  value="5" />      
+      <param name="control_stdev"  value="10" />      
 
     </node>
   </group>
@@ -42,7 +43,7 @@
     <!-- Unit: in second or meter -->
     <param name="warming_time"   value="30"/> 
     <param name="pub_frequency"  value="10"/>
-    <param name="control_stdev"  value="5" /> 
+    <param name="control_stdev"  value="10" /> 
 
     </node>
   </group>
@@ -69,7 +70,7 @@
   <group if="$(arg useRightIMU)"
     ns="imu_right">
 
-    <include file="$(find am_sensors)/launch/imu_right.launch" />
+    <include file="$(find am_sensors)/launch/imu_right_cpt.launch" />
 
     <node name="imu_trans_pub"
           pkg="am_sensors"

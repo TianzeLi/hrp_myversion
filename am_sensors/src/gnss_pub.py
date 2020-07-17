@@ -16,18 +16,16 @@ import numpy as np
 
 # Define the initial position and standard variance of measurement of the GNSS  
 # Unit: meter
-TRUE_INITIAL_LATITUDE = -1
-TRUE_INITIAL_LATITUDE = -1
+DECI_DEGREE_TO_METER = 111320
 INITIAL_LATITUDE = 59.40455 
 INITIAL_LONGITUDE = 17.94965
 LATITUDE_STDEV = 5
 LONGITUDE_STDEV = 5
-DECI_DEGREE_TO_METER = 111320
 
 # For warming up.
 device_serial_number = 0
 ENABLE_PUBLISH = 0
-warming_time = 60
+warming_time = 30
 pub_frequency = 10
 CONTROL_STDEV = 5
 warming_queue = []
@@ -38,8 +36,6 @@ pose_pub = rospy.Publisher("pose", PoseWithCovarianceStamped, queue_size=10)
 
 def onPositionChange(self, latitude, longitude, altitude):
 
-	global TRUE_INITIAL_LATITUDE
-	global TRUE_INITIAL_LATITUDE
 	global INITIAL_LATITUDE
 	global INITIAL_LONGITUDE
 	global LATITUDE_STDEV
@@ -85,7 +81,7 @@ def onPositionChange(self, latitude, longitude, altitude):
 			# rospy.logdebug("Current latitude variance: [%f]", lati_var )
 			# rospy.logdebug("Initial longitude stdev: [%f]", np.sqrt(long_var + lati_var)*DECI_DEGREE_TO_METER )
 
-			if (np.sqrt(long_var + lati_var) <= CONTROL_STDEV):
+			if (np.sqrt(long_var + lati_var) < CONTROL_STDEV):
 				ENABLE_PUBLISH = 1
 				LONGITUDE_STDEV = np.sqrt(long_var)
 				LATITUDE_STDEV = np.sqrt(lati_var)
@@ -100,7 +96,7 @@ def onPositionChange(self, latitude, longitude, altitude):
 			else: 
 				# rospy.logdebug("Current average longitude: [%f]", long_average )
 				# rospy.logdebug("Current average latitude: [%f]", lati_average )
-				rospy.logdebug("Initial position stdev in meter: [%f]", np.sqrt(long_var + lati_var) )
+				rospy.logdebug("Current position stdev in meter: [%f]", np.sqrt(long_var + lati_var) )
 
 
 
@@ -123,9 +119,9 @@ def onPositionChange(self, latitude, longitude, altitude):
 
 
 def onError(self, code, description):
-	print("Code: " + ErrorEventCode.getName(code))
-	print("Description: " + str(description))
-	print("----------")
+	rospy.logerr("Code: %s", ErrorEventCode.getName(code))
+	rospy.logerr("Description: %s", str(description))
+	rospy.logerr("----------")
 
 def gnss_pub_node():
 	rospy.init_node("gnss_pub", anonymous=True,  log_level=rospy.DEBUG)
