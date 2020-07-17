@@ -27,41 +27,68 @@ DECI_DEGREE_TO_METER = 111320
 # For warming up.
 device_serial_number = 0
 ENABLE_PUBLISH = 0
-warming_time = 30
+warming_time = 60
 pub_frequency = 10
 CONTROL_STDEV = 5
 warming_queue = []
-long_sum = 0
-lati_sum = 0
-long_var = 0
-lati_var = 0
 
 # ROS elements.
-pose_pub = rospy.Publisher("gnss/pose", PoseWithCovarianceStamped, queue_size=10)
+pose_pub = rospy.Publisher("pose", PoseWithCovarianceStamped, queue_size=10)
 
 
 def onPositionChange(self, latitude, longitude, altitude):
 
-	# Store in the warming_queue and compute 
-	warming_queue.append((longitude, latitude))
-	queue_len = len(warming_queue)
+	global TRUE_INITIAL_LATITUDE
+	global TRUE_INITIAL_LATITUDE
+	global INITIAL_LATITUDE
+	global INITIAL_LONGITUDE
+	global LATITUDE_STDEV
+	global LONGITUDE_STDEV
+	global DECI_DEGREE_TO_METER
+
+	global device_serial_number
+	global ENABLE_PUBLISH
+	global warming_time
+	global pub_frequency
+	global CONTROL_STDEV
+	global warming_queue
 
 	if (ENABLE_PUBLISH == 0):
-		if (array_len > warming_time*pub_frequency):
-			for i in warming_queue:
-				long_sum += warming_queue[i,0]
-				lati_sum += warming_queue[i,1]
-				long_var += warming_queue[i,0]**2
-				lati_var += warming_queue[i,1]**2
+		# Store in the warming_queue and compute 
+		queue_len = len(warming_queue)
+		warming_queue.append((longitude, latitude))
+
+		if (queue_len >= warming_time*pub_frequency):
+			warming_queue.pop(0)
+
+			long_sum = 0.0
+			lati_sum = 0.0
+			long_var = 0.0
+			lati_var = 0.0
+
+			for i in range(queue_len):
+				long_sum += warming_queue[i][0]
+				lati_sum += warming_queue[i][1]
+				long_var += warming_queue[i][0]**2
+				lati_var += warming_queue[i][1]**2
+			# rospy.logdebug("Current longitude variance: [%f]", long_var )
+			# rospy.logdebug("Current latitude variance: [%f]", lati_var )
+
 			long_average = long_sum/queue_len
 			lati_average = lati_sum/queue_len
-			long_var = long_var/queue_len - long_average**2
-			lati_var = lati_var/queue_len - lati_average**2
+			long_var = (long_var/queue_len - long_average**2)*DECI_DEGREE_TO_METER**2
+			lati_var = (lati_var/queue_len - lati_average**2)*DECI_DEGREE_TO_METER**2
+			
+			rospy.logdebug("Current average longitude: [%f]", long_average )
+			rospy.logdebug("Current average latitude: [%f]", lati_average )
+			# rospy.logdebug("Current longitude variance: [%f]", long_var )
+			# rospy.logdebug("Current latitude variance: [%f]", lati_var )
+			# rospy.logdebug("Initial longitude stdev: [%f]", np.sqrt(long_var + lati_var)*DECI_DEGREE_TO_METER )
 
-			if ( sqrt(long_var + lati_var) <= CONTROL_STDEV/DECI_DEGREE_TO_METER):
+			if (np.sqrt(long_var + lati_var) <= CONTROL_STDEV):
 				ENABLE_PUBLISH = 1
-				LONGITUDE_STDEV = sqrt(long_var)
-				LATITUDE_STDEV = sqrt(lati_var)
+				LONGITUDE_STDEV = np.sqrt(long_var)
+				LATITUDE_STDEV = np.sqrt(lati_var)
 				INITIAL_LONGITUDE = long_average
 				INITIAL_LATITUDE = latitude
 
@@ -71,10 +98,13 @@ def onPositionChange(self, latitude, longitude, altitude):
 				rospy.loginfo("Initial longitude stdev: [%f]", LONGITUDE_STDEV )
 				rospy.loginfo("Initial latitude stdev: [%f]", LATITUDE_STDEV )
 			else: 
-				warming_queue.pop(0)
+				# rospy.logdebug("Current average longitude: [%f]", long_average )
+				# rospy.logdebug("Current average latitude: [%f]", lati_average )
+				rospy.logdebug("Initial position stdev in meter: [%f]", np.sqrt(long_var + lati_var) )
 
 
-	if(ENABLE_PUBLISH):
+
+	if(ENABLE_PUBLISH == 1):
 		# Converting from decimal degree into meter and into the map frame.
 		#############################################################
 		# TODO: take in the orientation difference of map and north??
@@ -98,13 +128,13 @@ def onError(self, code, description):
 	print("----------")
 
 def gnss_pub_node():
-	rospy.init_node("gnss_pub", anonymous=True)
+	rospy.init_node("gnss_pub", anonymous=True,  log_level=rospy.DEBUG)
 
 	# Fetch the parameters
 	device_serial_number = rospy.get_param('~device_serial_number')
 	warming_time = rospy.get_param('~warming_time')
-	pub_frequency = rospy.get_param('~publish_frequency')
-	CONTROL_STDEV = rospy.getparam('~control_stdev')
+	pub_frequency = rospy.get_param('~pub_frequency')
+	CONTROL_STDEV = rospy.get_param('~control_stdev')
 
 	time_sleep = 1.0/pub_frequency
 

@@ -2,11 +2,12 @@
 
 
   <!-- Select which sensors are to be used -->
-  <arg name="useCustomOdom" default="True"  />
+  <arg name="useCustomOdom" default="False"  />
   <arg name="useLeftGNSS"   default="False" />
-  <arg name="useRightGNSS"  default="False" />
-  <arg name="useLeftIMU"    default="True" />
-  <arg name="useRightIMU"   default="True" />
+  <arg name="useRightGNSS"  default="True" />
+  <arg name="useLeftIMU"    default="False" />
+  <arg name="useRightIMU"   default="False" />
+
   <arg name="useCptFilter"  default="False"/>
 
   <group if="$(arg useCustomOdom)" >
@@ -25,9 +26,9 @@
           type="gnss_pub.py">
       <param name="device_serial_number"  value="285614" />
       <!-- Unit: in second or meter -->
-      <param name="warming_time"   value="30"/> 
+      <param name="warming_time"   value="10"/> 
       <param name="pub_frequency"  value="10"/>
-      <param name="control_stdev"  value="5"       
+      <param name="control_stdev"  value="5" />      
 
     </node>
   </group>
@@ -41,7 +42,7 @@
     <!-- Unit: in second or meter -->
     <param name="warming_time"   value="30"/> 
     <param name="pub_frequency"  value="10"/>
-    <param name="control_stdev"  value="5"  
+    <param name="control_stdev"  value="5" /> 
 
     </node>
   </group>
