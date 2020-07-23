@@ -45,7 +45,7 @@ rosrun am_sensors tracking_marker_pub
 
 # Launch Realsense D435, now also available in am_sensors
 roslaunch realsense2_camera rs_camera.launch filters:=pointcloud enable_infra1:=false enable_infra2:=false
-roslaunch realsense2_camera rs_camera.launch align_depth:=true
+roslaunch realsense2_camera rs_camera.launch align_depth:=true enable_infra1:=false enable_infra2:=false
 roslaunch am_sensors rs_camrra.launch
 
 # Change cameara control values.

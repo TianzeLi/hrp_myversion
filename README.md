@@ -6,12 +6,13 @@ This project is forked from ![Husqvarna Research Platform](https://github.com/Hu
 
 
 ## Run in simulation
-	Necessary packages for the sensors in Gazebo: 
-	ros-kinetic-hector-gazebo-pluginss and ros-kinetic-geographic-msgs
-	```
-	roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
-	rosrun am_driver hrp_teleop.py
-	```
+Necessary packages for the sensors in Gazebo: 
+`ros-kinetic-hector-gazebo-pluginss and ros-kinetic-geographic-msgs`
+
+```
+roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
+rosrun am_driver hrp_teleop.py
+```
 
 ## Run in practice
 In general, start with the launch file below. `hrp_teleop` is for keyboard remote control. 

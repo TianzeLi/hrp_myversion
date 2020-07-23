@@ -130,12 +130,12 @@
 
 
 
-  <!-- IMU01 -->
+  <!-- IMU01-left -->
   <link name="imu01_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.04 0.035 0.01"/>
+        <box size="0.04 0.035 0.02"/>
       </geometry>
       <material name="Black" />
     </visual>
@@ -144,15 +144,15 @@
   <joint name="imu01_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="imu01_link" />
-    <origin xyz="0 0.16 0.34" rpy="3.142 0 1.571" />
+    <origin xyz="0.0 0.16 0.43" rpy="3.142 0.0 0.0" />
   </joint>
 
-    <!-- IMU02 -->
+    <!-- IMU02-right -->
   <link name="imu02_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.04 0.035 0.01"/>
+        <box size="0.04 0.035 0.02"/>
       </geometry>
       <material name="Black" />
     </visual>
@@ -161,11 +161,11 @@
   <joint name="imu02_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="imu02_link" />
-    <origin xyz="0 -0.16 0.34" rpy="3.142 0 1.571" />
+    <origin xyz="0.0 -0.16 0.43" rpy="3.142 0.0 1.571" />
   </joint>
 
 
-  <!-- GNSS01 -->
+  <!-- GNSS01-left -->
   <link name="gnss01_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -179,10 +179,10 @@
   <joint name="gnss01_joint" type="fixed">
     <parent link="base_link" />
     <child link="gnss01_link" />
-    <origin xyz="0.4 0.15 0.25" rpy="0 0 0" />
+    <origin xyz="0.21 0.182 0.37" rpy="0 0 0" />
   </joint>
 
-    <!-- GNSS02 -->
+    <!-- GNSS02-right -->
   <link name="gnss02_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -196,7 +196,7 @@
   <joint name="gnss02_joint" type="fixed">
     <parent link="base_link" />
     <child link="gnss02_link" />
-    <origin xyz="0.4 -0.15 0.25" rpy="0 0 0" />
+    <origin xyz="0.21 -0.182 0.37" rpy="0 0 0" />
   </joint>
 
 
@@ -225,8 +225,6 @@
       <legacyModeNS>true</legacyModeNS>
     </plugin>
 
-    
-
 
     <plugin name="imu_plugin_01" filename="libhector_gazebo_ros_imu.so">
       <alwaysOn>true</alwaysOn>
@@ -246,7 +244,6 @@
     </plugin>
 
 
-
     <plugin name="imu_plugin_02" filename="libhector_gazebo_ros_imu.so">
       <alwaysOn>true</alwaysOn>
       <bodyName>imu02_link</bodyName>
@@ -263,7 +260,6 @@
       <headingDrift>0.0</headingDrift>
       <headingGaussianNoise>0.00</headingGaussianNoise>
     </plugin>
-
 
 
     <plugin name="gnss01_sim" filename="libhector_gazebo_ros_gps.so">
@@ -295,10 +291,6 @@
   </gazebo>
 
 
-
-
-  
-
   <gazebo reference="base_link">
     <sensor name="automower_sensor" type="contact">
       <always_on>true</always_on>
@@ -318,14 +310,7 @@
   </gazebo>
 
 
-  <!-- Camera -->
-<!--   <joint name="camera_joint" type="fixed">
-    <axis xyz="1 0 0" />
-    <origin xyz="0.4 0 0.15" rpy="0 0 0"/>
-    <parent link="base_link"/>
-    <child link="camera_link"/>
-  </joint>
-
+  <!-- Camera, in practice for D435  -->
   <link name="camera_link">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -333,11 +318,11 @@
     <box size="0.05 1 0.05"/>
       </geometry>
     </collision>
-
+  <!-- 90 mm x 25 mm x 25 mm -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.05 0.1 0.05"/>
+        <box size="0.025 0.09 0.025"/>
       </geometry>
     </visual>
 
@@ -348,9 +333,16 @@
     </inertial>
   </link>
 
+  <joint name="camera_link_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="camera_link" />
+    <origin xyz="0.23 0.03 0.33" rpy="0.0 -0.01 0.0" />
+  </joint>
 
-  <gazebo reference="camera_link">
-    <sensor type="camera" name="camera1">
+
+<!-- Hide the simulation for the moment. The true D435 model is available at https://github.com/pal-robotics/realsense_gazebo_plugin  -->
+<!--   <gazebo reference="camera_link">
+    <sensor type="camera" name="D435">
       <update_rate>30.0</update_rate>
       <camera name="head">
         <horizontal_fov>1.3962634</horizontal_fov>

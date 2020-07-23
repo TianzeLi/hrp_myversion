@@ -17,7 +17,7 @@
     <!-- # optional param serial_number, default is -1 -->
     <param name="serial_number" value="596014"/>
     
-    <param name="frame_id" value="imu02_test"/>
+    <param name="frame_id" value="imu01_test"/>
 
 
     # compass correction params (see http://www.phidgets.com/docs/1044_User_Guide)
@@ -43,7 +43,7 @@
       name="complementary_filter_gain_node" output="screen">
     <param name="do_bias_estimation" value="true"/>
     <param name="do_adaptive_gain" value="true"/>
-    <param name="use_mag" value="false"/>
+    <param name="use_mag" value="true"/>
     <param name="gain_acc" value="0.01"/>
     <param name="gain_mag" value="0.01"/>
 
