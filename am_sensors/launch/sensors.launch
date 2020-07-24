@@ -3,9 +3,9 @@
 
   <!-- Select which sensors are to be used -->
   <arg name="useCustomOdom" default="False"  />
-  <arg name="useLeftGNSS"   default="True" />
-  <arg name="useRightGNSS"  default="True" />
-  <arg name="useLeftIMU"    default="True" />
+  <arg name="useLeftGNSS"   default="False" />
+  <arg name="useRightGNSS"  default="False" />
+  <arg name="useLeftIMU"    default="False" />
   <arg name="useRightIMU"   default="True" />
 
   <!-- Only indicating if using cpt filter or magdwick. -->
@@ -60,7 +60,7 @@
           type="imu_trans">
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu01_link"/>
-      <param name="pub_testtf" value="0"/>
+      <param name="pub_testtf" value="1"/>
       <param name="xyz" value="0.0 0.16 0.43"/>
       <param name="rpy" value="3.142 0.0 0.0"/>
     </node>

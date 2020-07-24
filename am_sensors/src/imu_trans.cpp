@@ -5,6 +5,7 @@
 #include <sstream>
 #include "geometry_msgs/Vector3.h"
 #include <tf/transform_broadcaster.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 
 class imu_sub_pub
@@ -46,10 +47,24 @@ public:
 	void imu_callback(const sensor_msgs::Imu &msg)
 	{	
 		sensor_msgs::Imu imu_tmp = msg;
+		tf2::Quaternion q_nwu, q_rot, q_enu;
+
+		// Set the covariance for rpy in orientation.
 		imu_tmp.header.frame_id = frame_name;
-		imu_tmp.orientation_covariance[0] = 0.1;
-		imu_tmp.orientation_covariance[4] = 0.1;
-		imu_tmp.orientation_covariance[8] = 0.5;
+		imu_tmp.orientation_covariance[0] = 0.05;
+		imu_tmp.orientation_covariance[4] = 0.05;
+		imu_tmp.orientation_covariance[8] = 0.1;
+
+		// Converting from NWU to ENU.
+		tf2::convert(imu_tmp.orientation, q_nwu);
+		double r = 0.0, p = 0.0, y = +1.57080;  // Rotate the previous pose by 180* about X
+		q_rot.setRPY(r, p, y);
+		// Problems lies here?
+		q_enu = q_nwu*q_rot;  // Calculate the new orientation
+		q_enu.normalize();
+		// Stuff the new rotation back into the pose. This requires conversion into a msg type
+		tf2::convert(q_enu, imu_tmp.orientation);
+
 		imu_pub_.publish(imu_tmp);
 
 		tf::Quaternion q(
