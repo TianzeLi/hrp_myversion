@@ -3,7 +3,8 @@
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/String.h>
 #include <sstream>
-#include "geometry_msgs/Vector3.h"
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Quaternion.h>
 #include <tf/transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
@@ -57,10 +58,15 @@ public:
 
 		// Converting from NWU to ENU.
 		tf2::convert(imu_tmp.orientation, q_nwu);
-		double r = 0.0, p = 0.0, y = +1.57080;  // Rotate the previous pose by 180* about X
-		q_rot.setRPY(r, p, y);
+		geometry_msgs::Quaternion quat_msg;
+		quat_msg.x=0.0;
+		quat_msg.y=0.0;
+		quat_msg.z=0.707;
+		quat_msg.w=0.707;
+
+	   	tf2::convert(quat_msg , q_rot); 
 		// Problems lies here?
-		q_enu = q_nwu*q_rot;  // Calculate the new orientation
+		q_enu = q_rot*q_nwu;  // Calculate the new orientation
 		q_enu.normalize();
 		// Stuff the new rotation back into the pose. This requires conversion into a msg type
 		tf2::convert(q_enu, imu_tmp.orientation);
