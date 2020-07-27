@@ -135,7 +135,7 @@ odom0_relative: false
 # odom1_twist_rejection_threshold: 0.2
 # odom1_nodelay: false
 
-imu0: imu_left/imu/data/processed
+imu0: /imu_left/imu/data/processed
 imu0_config: [false, false, false,
               true,  true,  true,
               false, false, false,
@@ -153,7 +153,7 @@ imu0_queue_size: 10
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
 # imu0_remove_gravitational_acceleration: true
 
-imu1: imu_right/imu/data/processed
+imu1: /imu_right/imu/data/processed
 imu1_config: [false, false, false,
               true,  true,  true,
               false, false, false,
