@@ -24,19 +24,19 @@
 
     # compass correction params (see http://www.phidgets.com/docs/1044_User_Guide)
     <!-- Now only copying from the left IMU -->
-    <param name="cc_mag_field" value="0.52324"/>
-         <param name="cc_offset0" value="0.08461"/>
-         <param name="cc_offset1" value="-0.15021"/>
-         <param name="cc_offset2" value="0.06808"/>
-         <param name="cc_gain0" value="1.92494"/>
-         <param name="cc_gain1" value="1.94154"/>
-         <param name="cc_gain2" value="1.86704"/>
-         <param name="cc_t0" value="0.02454"/>
-         <param name="cc_t1" value="-0.00407"/>
-         <param name="cc_t2" value="0.02325 "/>
-         <param name="cc_t3" value="-0.09369"/>
-         <param name="cc_t4" value="-0.00493"/>
-         <param name="cc_t5" value="-0.09300"/> 
+    <param name="cc_mag_field"  value="0.51184"/>
+    <param name="cc_offset0"    value="0.01299"/>
+    <param name="cc_offset1"    value="-0.06331"/>
+    <param name="cc_offset2"    value="0.07697"/>
+    <param name="cc_gain0"      value="1.99980"/>
+    <param name="cc_gain1"      value="1.91687"/>
+    <param name="cc_gain2"      value="1.94454"/>
+    <param name="cc_t0"         value="0.05849"/>
+    <param name="cc_t1"         value="-0.00238"/>
+    <param name="cc_t2"         value="0.05333 "/>
+    <param name="cc_t3"         value="-0.05728"/>
+    <param name="cc_t4"         value="-0.00283"/>
+    <param name="cc_t5"         value="-0.05803"/> 
   </node>
 
   #### IMU Orientation Filter ###############################################

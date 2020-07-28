@@ -1,0 +1,38 @@
+<launch>
+  <!-- In case the gnss are launched seperatedly,-->
+  <!-- especailly when gnss are only launched on pi-I -->
+  
+  <!-- Select which sensors are to be used -->
+  <arg name="useLeftGNSS"   default="True" />
+  <arg name="useRightGNSS"  default="True" />
+
+  <!-- convert the original gnss measurement -->
+  <group if="$(arg useLeftGNSS)" 
+    ns="gnss_left">
+    <node name="gnss_left_pub"
+          pkg="am_sensors"
+          type="gnss_pub.py">
+      <param name="device_serial_number"  value="285614" />
+      <!-- Unit: in second or meter -->
+      <param name="warming_time"   value="10"/> 
+      <param name="pub_frequency"  value="10"/>
+      <param name="control_stdev"  value="10" />      
+
+    </node>
+  </group>
+
+  <group if="$(arg useRightGNSS)" 
+    ns="gnss_right">
+    <node name="gnss_right_pub"
+          pkg="am_sensors"
+          type="gnss_pub.py">
+    <param name="device_serial_number" value="285332" />
+    <!-- Unit: in second or meter -->
+    <param name="warming_time"   value="30"/> 
+    <param name="pub_frequency"  value="10"/>
+    <param name="control_stdev"  value="10" /> 
+
+    </node>
+  </group>
+
+</launch>
