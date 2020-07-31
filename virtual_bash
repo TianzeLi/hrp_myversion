@@ -1,5 +1,3 @@
-# NOW IS USING catkin build
-
 # ######################################
 # In Simulation
 # ######################################
@@ -22,13 +20,14 @@ roslaunch am_driver_safe automower_hrp.launch
 rosrun am_driver hrp_teleop.py
 
 # Trun off the sensor or set the control mode.
+# Also can achieve in hrp_teleop node.
 rostopic pub -1 cmd_mode std_msgs/UInt16 "data: 275" 
 
 
 # ######################################
 # Localization node
 # ######################################
-roslaunch robot_localization ekf_template.launch
+roslaunch am_driver_safe ekf_template.launch
 
 # IMU&GNSS launch 
 roslaunch am_sensors sensors.launch
