@@ -70,6 +70,7 @@ rosbag record -o indoor_localization_test_20200712.bag cmd_mode cmd_vel imu_left
 
 
 # SVO 
-roslaunch svo_ros test_rig3.launch
+roslaunch am_sensors svo_test_rig3.launch
+roslaunch am_sensors svo_live.launch
 rosrun rviz rviz -d /home/tianze/husqvarna_automower/src/rgb_svo/svo_ros/rviz_config.rviz
 rosbag play airground_rig_s3_2013-03-18_21-38-48.bag
