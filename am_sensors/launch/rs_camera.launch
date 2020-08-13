@@ -45,7 +45,7 @@
 
   <arg name="align_depth"               default="true"/>
 
-  <arg name="publish_tf"                default="false"/>
+  <arg name="publish_tf"                default="true"/>
   <arg name="tf_publish_rate"           default="0"/>
 
   <arg name="filters"                   default=""/>
