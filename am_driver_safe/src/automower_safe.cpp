@@ -2805,11 +2805,17 @@ bool AutomowerSafe::update(ros::Duration dt)
         odom.pose.pose.position.y = robot_pose.pose.position.y;
         odom.pose.pose.position.z = robot_pose.pose.position.z;
         odom.pose.pose.orientation = robot_pose.pose.orientation;
+        odom.pose.covariance[0] = 0.2;
+        odom.pose.covariance[7] = 0.2;
+        odom.pose.covariance[35] = 0.15;
 
         // Set the velocity
         odom.twist.twist.linear.x = vx;
         odom.twist.twist.linear.y = vy;
         odom.twist.twist.angular.z = vYaw;
+        odom.twist.covariance[0] = 0.02;
+        odom.twist.covariance[7] = 0.000001;
+        odom.twist.covariance[35] = 0.05;
 
         // Publish the message
         odom_pub.publish(odom);

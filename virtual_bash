@@ -52,7 +52,7 @@ roslaunch am_sensors rs_camera.launch
 rosrun rqt_reconfigure rqt_reconfigure
 
 # Default launch RTAB-Map for D435. 
-roslaunch rtabmap_ros rtabmap.launch \
+roslaunch am_sensors rtabmap.launch \
     rtabmap_args:="--delete_db_on_start" \
     depth_topic:=/camera/aligned_depth_to_color/image_raw \
     rgb_topic:=/camera/color/image_raw \
@@ -65,12 +65,70 @@ roslaunch am_sensors rtabmap.launch
 # View the map.
 rtabmap-databaseViewer ~/.ros/rtabmap.db
 
-# Making ros bag
-rosbag record -o indoor_localization_test_20200712.bag cmd_mode cmd_vel imu_left/imu/data imu_left/imu/data/processed imu_left/imu/data_raw imu_left/imu/mag imu_left/imu_manager/bond imu_right/ImuFilterNodelet/parameter_descriptions imu_right/imu/data /imu_right/imu/data/processed imu_right/imu/data_raw imu_right/imu/mag initialpose joint_states odom pose tf tf_static wheel_current wheel_encoder
-
 
 # SVO 
 roslaunch am_sensors svo_test_rig3.launch
 roslaunch am_sensors svo_live.launch
 rosrun rviz rviz -d /home/tianze/husqvarna_automower/src/rgb_svo/svo_ros/rviz_config.rviz
 rosbag play airground_rig_s3_2013-03-18_21-38-48.bag
+
+
+# Making ros bag
+rosbag record -o outdoor_<what>_test_<date>.bag \
+/cmd_vel /current_status \
+/gnss_left/fix /gnss_left/hv /gnss_left/pose    \
+/gnss_right/fix /gnss_right/hv /gnss_right/pose \
+/imu_left/imu/data /imu_left/imu/data/processed /imu_left/imu/data_raw /imu_left/imu/mag     \
+/imu_right/imu/data /imu_right/imu/data/processed /imu_right/imu/data_raw /imu_right/imu/mag \
+/joint_states /loop \
+/odom /rosout /rosout_agg\
+/tf /tf_static /wheel_encoder\
+/camera/color/image_raw \
+/camera/aligned_depth_to_color/image_raw \
+/camera/color/camera_info
+
+# Only for rtabmap to process data from D435 
+rosbag record -o D435bag_test.bag \
+/camera/color/image_raw \
+/camera/aligned_depth_to_color/image_raw \
+/camera/color/camera_info \
+/tf \
+/tf_static
+
+
+# Not recording
+/GPSfix /battery_status /cmd_mode /cmd_power /decision_making/am_driver_safe/events 
+/decision_making/monitoring /diagnostics /motor_feedback_diff_drive
+/imu_euler /imu_left/imu/is_calibrated /imu_left/imu_manager/bond /imu_left/rpy
+/imu_right/imu/is_calibrated /imu_right/imu_manager/bond /imu_right/rpy
+/nano2 /pose /scriptable_monitor/add_script
+/scriptable_monitor/remove_script /sensor_status /wheel_power /wheel_current
+
+##########################
+# Launch for outdoor test.
+##########################
+# On laptop
+rosrun am_driver hrp_teleop.py
+
+# On Pi-II (rosmaster)
+roslaunch am_driver_safe automower_hrp.launch
+roslaunch am_sensors sensors.launch
+
+
+# On pi-I
+roslaunch am_sensors rs_camera.launch
+roslaunch am_sensors gnss.launch 
+
+rosbag record -o test.bag \
+/cmd_vel /current_status \
+/gnss_left/fix /gnss_left/hv /gnss_left/pose    \
+/gnss_right/fix /gnss_right/hv /gnss_right/pose \
+/imu_left/imu/data /imu_left/imu/data/processed /imu_left/imu/data_raw /imu_left/imu/mag     \
+/imu_right/imu/data /imu_right/imu/data/processed /imu_right/imu/data_raw /imu_right/imu/mag \
+/joint_states /loop \
+/odom /rosout /rosout_agg \
+/tf \
+/tf_static /wheel_encoder\
+/camera/color/image_raw \
+/camera/aligned_depth_to_color/image_raw \
+/camera/color/camera_info

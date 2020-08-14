@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 """
 
-	Get the latitude and longitude from the GNSS and publish the postion 
-	in the type of geometry_msgs/PoseWithCovarianceStamped.
+	Get the latitude and longitude from the GNSS and publish: 
+	1. latitude, longitude and altitude in sensor_msgs/NavSatFix
+	2. relative postion to the initial point in ENU 
+	   in geometry_msgs/PoseWithCovarianceStamped.
 
 """
 
 import rospy
-from geometry_msgs.msg import PoseWithCovarianceStamped 
+from geometry_msgs.msg import PoseWithCovarianceStamped, Vector3
+from sensor_msgs.msg import NavSatFix 
 from Phidget22.PhidgetException import *
 from Phidget22.Phidget import *
 from Phidget22.Devices.GPS import *
@@ -31,7 +34,9 @@ CONTROL_STDEV = 5
 warming_queue = []
 
 # ROS elements.
-pose_pub = rospy.Publisher("pose", PoseWithCovarianceStamped, queue_size=10)
+global_pose_pub = rospy.Publisher("fix", NavSatFix, queue_size=10)
+local_pose_pub = rospy.Publisher("pose", PoseWithCovarianceStamped, queue_size=10)
+global_hv_pub = rospy.Publisher("hv", Vector3, queue_size=10)
 
 
 def onPositionChange(self, latitude, longitude, altitude):
@@ -48,6 +53,14 @@ def onPositionChange(self, latitude, longitude, altitude):
 	global pub_frequency
 	global CONTROL_STDEV
 	global warming_queue
+
+	fix = NavSatFix()
+	fix.header.stamp = rospy.Time.now()
+	fix.header.frame_id = "world"
+	fix.latitude = latitude
+	fix.longitude = longitude
+	fix.altitude = altitude
+	global_pose_pub.publish(fix)
 
 	if (ENABLE_PUBLISH == 0):
 		# Store in the warming_queue and compute 
@@ -113,10 +126,16 @@ def onPositionChange(self, latitude, longitude, altitude):
 		pose.header.frame_id = "map"
 		pose.pose.pose.position.x = MOVE_X
 		pose.pose.pose.position.y = MOVE_Y
-		pose.pose.covariance[0] = LATITUDE_STDEV
-		pose.pose.covariance[7] = LONGITUDE_STDEV
-		pose_pub.publish(pose)
+		# When processing, double the covariance
+		pose.pose.covariance[0] = LATITUDE_STDEV*2
+		pose.pose.covariance[7] = LONGITUDE_STDEV*2
+		local_pose_pub.publish(pose)
 
+def onHeadingChange(self, heading, velocity):
+	hv = Vector3()
+	hv.x = heading
+	hv.y = velocity
+	global_hv_pub.publish(hv)
 
 def onError(self, code, description):
 	rospy.logerr("Code: %s", ErrorEventCode.getName(code))
@@ -140,7 +159,7 @@ def gnss_pub_node():
 	gps0.setDeviceSerialNumber(device_serial_number)
 	#Assign any event handlers you need before calling open so that no events are missed.
 	gps0.setOnPositionChangeHandler(onPositionChange)
-	# gps0.setOnHeadingChangeHandler(onHeadingChange)
+	gps0.setOnHeadingChangeHandler(onHeadingChange)
 	# gps0.setOnAttachHandler(onAttach)
 	# gps0.setOnDetachHandler(onDetach)
 	gps0.setOnErrorHandler(onError)
