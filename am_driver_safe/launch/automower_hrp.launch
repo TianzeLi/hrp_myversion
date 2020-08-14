@@ -25,7 +25,7 @@
   <param name="robot_description" unless="$(arg driver_only)" command="xacro --inorder '$(find am_description)/urdf/automower.urdf.xacro'" />
 
   <!-- For the additional sensors -->
-  <arg name="useIMUGNSS" default="1" />
+  <arg name="useIMUGNSS" default="0" />
 
   <!-- Start the am_driver -->
   <node name="am_driver_safe"

@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   am_driver
   std_msgs
   geometry_msgs
+  sensor_msgs
   nav_msgs
   visualization_msgs
   tf2_geometry_msgs

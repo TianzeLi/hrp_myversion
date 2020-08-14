@@ -27,7 +27,7 @@
           type="gnss_pub.py">
       <param name="device_serial_number"  value="285614" />
       <!-- Unit: in second or meter -->
-      <param name="warming_time"   value="10"/> 
+      <param name="warming_time"   value="50"/> 
       <param name="pub_frequency"  value="10"/>
       <param name="control_stdev"  value="10" />      
 
@@ -41,7 +41,7 @@
           type="gnss_pub.py">
     <param name="device_serial_number" value="285332" />
     <!-- Unit: in second or meter -->
-    <param name="warming_time"   value="30"/> 
+    <param name="warming_time"   value="50"/> 
     <param name="pub_frequency"  value="10"/>
     <param name="control_stdev"  value="10" /> 
 

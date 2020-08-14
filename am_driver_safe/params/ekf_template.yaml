@@ -172,41 +172,41 @@ imu1_queue_size: 10
 # imu1_remove_gravitational_acceleration: falsed
 
 # Here can take in GNSS measurements.
-# pose0: gnss_left/gnss/pose
-# pose0_config: [true,  true,  false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false]
-# pose0_differential: true
-# pose0_relative: true
-# pose0_queue_size: 5
-# # pose0_rejection_threshold: 2  # Note the difference in parameter name
-# pose0_nodelay: false
+pose0: gnss_left/gnss/pose
+pose0_config: [true,  true,  false,
+               false, false, false,
+               false, false, false,
+               false, false, false,
+               false, false, false]
+pose0_differential: true
+pose0_relative: true
+pose0_queue_size: 3
+# pose0_rejection_threshold: 2  # Note the difference in parameter name
+pose0_nodelay: false
 
 
-# # Here can take in GNSS velocity measurement.
-# # twist0: example/twist
-# # twist0_config: [false, false, false,
-# #                 false, false, false,
-# #                 true,  true,  true,
-# #                 false, false, false,
-# #                 false, false, false]
-# # twist0_queue_size: 3
-# # twist0_rejection_threshold: 2
-# # twist0_nodelay: false
+# Here can take in GNSS velocity measurement.
+# twist0: example/twist
+# twist0_config: [false, false, false,
+#                 false, false, false,
+#                 true,  true,  true,
+#                 false, false, false,
+#                 false, false, false]
+# twist0_queue_size: 3
+# twist0_rejection_threshold: 2
+# twist0_nodelay: false
 
-# pose1: gnss_right/gnss/pose
-# pose1_config: [true,  true,  false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false]
-# pose1_differential: true
-# pose1_relative: true
-# pose1_queue_size: 5
-# # pose1_rejection_threshold: 2  # Note the difference in parameter name
-# pose1_nodelay: false
+pose1: gnss_right/gnss/pose
+pose1_config: [true,  true,  false,
+               false, false, false,
+               false, false, false,
+               false, false, false,
+               false, false, false]
+pose1_differential: true
+pose1_relative: true
+pose1_queue_size: 3
+# pose1_rejection_threshold: 2  # Note the difference in parameter name
+pose1_nodelay: false
 
 
 # Here can take in GNSS velocity measurement.
