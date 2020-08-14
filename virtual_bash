@@ -104,8 +104,9 @@ rosbag record -o D435bag_test.bag \
 /nano2 /pose /scriptable_monitor/add_script
 /scriptable_monitor/remove_script /sensor_status /wheel_power /wheel_current
 
-
+##########################
 # Launch for outdoor test.
+##########################
 # On laptop
 rosrun am_driver hrp_teleop.py
 
@@ -118,15 +119,16 @@ roslaunch am_sensors sensors.launch
 roslaunch am_sensors rs_camera.launch
 roslaunch am_sensors gnss.launch 
 
-rosbag record -o outdoor_<what>_test_<date>.bag \
+rosbag record -o test.bag \
 /cmd_vel /current_status \
 /gnss_left/fix /gnss_left/hv /gnss_left/pose    \
 /gnss_right/fix /gnss_right/hv /gnss_right/pose \
 /imu_left/imu/data /imu_left/imu/data/processed /imu_left/imu/data_raw /imu_left/imu/mag     \
 /imu_right/imu/data /imu_right/imu/data/processed /imu_right/imu/data_raw /imu_right/imu/mag \
 /joint_states /loop \
-/odom /rosout /rosout_agg\
-/tf /tf_static /wheel_encoder\
+/odom /rosout /rosout_agg \
+/tf \
+/tf_static /wheel_encoder\
 /camera/color/image_raw \
 /camera/aligned_depth_to_color/image_raw \
 /camera/color/camera_info
