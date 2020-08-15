@@ -128,7 +128,7 @@ rosbag record -o test.bag \
 /joint_states /loop \
 /odom /rosout /rosout_agg \
 /tf \
-/tf_static /wheel_encoder\
+/tf_static /wheel_encoder \
 /camera/color/image_raw \
 /camera/aligned_depth_to_color/image_raw \
 /camera/color/camera_info
