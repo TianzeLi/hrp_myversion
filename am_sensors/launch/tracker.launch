@@ -1,0 +1,17 @@
+<launch>
+
+  <node name="trace_pub"
+        pkg="am_sensors"
+        type="tracking_marker_pub">
+    <param name="trace_amount"  value="2" />
+    <param name="frequency"     value="30" />
+
+    <param name="pose_topic1"   value="/odom"/> 
+    <param name="color1"        value="red"/>
+
+    <param name="pose_topic2"   value="/odometry/filtered" />
+    <param name="color1"        value="green"/>
+
+  </node>
+
+</launch>
