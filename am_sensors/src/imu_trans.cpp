@@ -37,7 +37,7 @@ public:
 		}
 
 		std::stringstream ss_tmp;
-		ss_tmp << topic_name << "/processed";
+		ss_tmp << topic_name << "/processed_bagtest";
 		imu_new_topic = ss_tmp.str();
 
 		imu_pub_= nh_.advertise<sensor_msgs::Imu>(imu_new_topic, 200);

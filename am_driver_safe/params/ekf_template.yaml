@@ -41,6 +41,7 @@ publish_tf: true
 # Whether to publish the acceleration state. Defaults to false if unspecified.
 publish_acceleration: false
 
+
 # REP-105 (http://www.ros.org/reps/rep-0105.html) specifies four principal coordinate frames: base_link, odom, map, and
 # earth. base_link is the coordinate frame that is affixed to the robot. Both odom and map are world-fixed frames.
 # The robot's position in the odom frame will drift over time, but is accurate in the short term and should be
@@ -145,9 +146,9 @@ imu0_nodelay: false
 imu0_differential: false
 imu0_relative: true
 imu0_queue_size: 4
-# imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
+imu0_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
 imu0_twist_rejection_threshold: 1.5                #
-# imu0_linear_acceleration_rejection_threshold: 2.0  #
+imu0_linear_acceleration_rejection_threshold: 2.0  #
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
@@ -163,9 +164,9 @@ imu1_nodelay: false
 imu1_differential: false
 imu1_relative: true
 imu1_queue_size: 4
-# imu1_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
+imu1_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
 imu1_twist_rejection_threshold: 1.5                #
-# imu1_linear_acceleration_rejection_threshold: 2.0  #
+imu1_linear_acceleration_rejection_threshold: 2.0  #
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
@@ -196,17 +197,17 @@ pose0_nodelay: false
 # twist0_rejection_threshold: 2
 # twist0_nodelay: false
 
-pose1: gnss_right/pose
-pose1_config: [true,  true,  false,
-               false, false, false,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-pose1_differential: false
-pose1_relative: false
-pose1_queue_size: 2
-pose1_rejection_threshold: 5  # Note the difference in parameter name
-pose1_nodelay: false
+# pose1: gnss_right/pose
+# pose1_config: [true,  true,  false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# pose1_differential: false
+# pose1_relative: false
+# pose1_queue_size: 2
+# pose1_rejection_threshold: 5  # Note the difference in parameter name
+# pose1_nodelay: false
 
 
 # Here can take in GNSS velocity measurement.
@@ -300,9 +301,17 @@ initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
 
 
-
 initial_state: [0.0,  0.0,  0.0,
                 0.0,  0.0,  0.0,
                 0.0,  0.0,  0.0,
                 0.0,  0.0,  0.0,
                 0.0,  0.0,  0.0]
+
+
+# Additional choosen parameters. 
+
+# Setting this parameter to true will enable the filter, upon reception of lagged data, to revert to the last state prior 
+# to the lagged measurement, then process all measurements until the current time. 
+smooth_lagged_data: true
+dynamic_process_noise_covariance: true
+reset_on_time_jump: true

@@ -132,3 +132,9 @@ rosbag record -o test.bag \
 /camera/color/image_raw \
 /camera/aligned_depth_to_color/image_raw \
 /camera/color/camera_info
+
+
+rosrun plotjuggler PlotJuggler  
+
+rosparam set use_sim_time true
+rosbag play xxxx.bag --clock
