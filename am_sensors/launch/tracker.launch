@@ -2,7 +2,8 @@
 
   <node name="trace_pub"
         pkg="am_sensors"
-        type="tracking_marker_pub">
+        type="tracking_marker_pub"
+        output="screen">
     <param name="trace_amount"  value="2" />
     <param name="frequency"     value="30" />
 
@@ -10,7 +11,7 @@
     <param name="color1"        value="red"/>
 
     <param name="pose_topic2"   value="/odometry/filtered" />
-    <param name="color1"        value="green"/>
+    <param name="color2"        value="green"/>
 
   </node>
 
