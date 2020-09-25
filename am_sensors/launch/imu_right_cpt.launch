@@ -2,26 +2,26 @@
 <launch>
   #### Nodelet manager ######################################################
 
-  <node pkg="nodelet" type="nodelet" name="imu_manager" 
-    args="manager" output="screen" />
+<!--   <node pkg="nodelet" type="nodelet" name="imu_manager" 
+    args="manager" output="screen" /> -->
 
   #### IMU Driver ###########################################################
 
-  <node pkg="nodelet" type="nodelet" name="PhidgetsImuNodelet" 
+<!--   <node pkg="nodelet" type="nodelet" name="PhidgetsImuNodelet" 
     args="load phidgets_imu/PhidgetsImuNodelet imu_manager" 
-    output="screen">
+    output="screen"> -->
 
     # supported data rates: 4 8 16 24 32 40 ... 1000 (in ms)
-    <param name="period" value="4"/>
+    <!-- <param name="period" value="4"/> -->
 
     <!-- # optional param serial_number, default is -1 -->
-    <param name="serial_number" value="596088"/>
+<!--     <param name="serial_number" value="596088"/>
     
-    <param name="frame_id" value="imu02_test"/>
+    <param name="frame_id" value="imu02_test"/> -->
 
 
     # compass correction params (see http://www.phidgets.com/docs/1044_User_Guide)
-    <param name="cc_mag_field"  value="0.51184"/>
+<!--     <param name="cc_mag_field"  value="0.51184"/>
     <param name="cc_offset0"    value="0.01299"/>
     <param name="cc_offset1"    value="-0.06331"/>
     <param name="cc_offset2"    value="0.07697"/>
@@ -34,7 +34,7 @@
     <param name="cc_t3"     value="-0.05728"/>
     <param name="cc_t4"     value="-0.00283"/>
     <param name="cc_t5"     value="-0.05803"/> 
-  </node>
+  </node> -->
 
   #### Complementary filter
 
@@ -43,18 +43,22 @@
     <param name="do_bias_estimation" value="true"/>
     <param name="do_adaptive_gain" value="true"/>
     <param name="use_mag" value="true"/>
-    <param name="gain_acc" value="0.02"/>
+    <param name="gain_acc" value="0.1"/>
     <param name="gain_mag" value="0.01"/>
     <param name="fixed_frame" value="map"/>
     <param name="publish_tf"  value="true"/>
+    <param name="orientation_stddev" value="0.001"/>
+
     <!-- Customized part, low-pass filters for acc and mag added -->
-    <param name="do_acc_lowpass" value="false"/>
-    <param name="do_mag_lowpass" value="false"/>
+    <param name="do_acc_lowpass" value="true"/>
+    <param name="do_mag_lowpass" value="true"/>
     <param name="alpha_acc" value="0.9"/>
-    <param name="alpha_mag" value="0.1"/>
+    <param name="alpha_mag" value="0.9"/>
   
   </node>
   
 
 
 </launch>
+
+

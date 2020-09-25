@@ -5,7 +5,7 @@
   <arg name="useCustomOdom" default="False"  />
   <arg name="useLeftGNSS"   default="False" />
   <arg name="useRightGNSS"  default="False" />
-  <arg name="useLeftIMU"    default="False" />
+  <arg name="useLeftIMU"    default="True" />
   <arg name="useRightIMU"   default="True" />
 
   <!-- Only indicating if using cpt filter or magdwick. -->
@@ -55,7 +55,7 @@
 
     <include file="$(find am_sensors)/launch/imu_left_cpt.launch" />
 
-    <node name="imu_trans_pub"
+<!--     <node name="imu_trans_pub"
           pkg="am_sensors"
           type="imu_trans">
       <param name="topic_name" value="imu/data"/>
@@ -63,7 +63,7 @@
       <param name="pub_testtf" value="0"/>
       <param name="xyz" value="0.0 0.16 0.43"/>
       <param name="rpy" value="3.142 0.0 0.0"/>
-    </node>
+    </node> -->
 
   </group>
 
@@ -72,7 +72,7 @@
 
     <include file="$(find am_sensors)/launch/imu_right_cpt.launch" />
 
-    <node name="imu_trans_pub"
+<!--     <node name="imu_trans_pub"
           pkg="am_sensors"
           type="imu_trans">
       <param name="topic_name" value="imu/data"/>
@@ -81,7 +81,7 @@
       <param name="xyz" value="0.0 -0.16 0.43"/>
       <param name="rpy" value="3.142 0 1.571"/>
     </node>
-
+ -->
   </group>
 
 

@@ -43,6 +43,9 @@ Parameter | Value
 ... 		| ...
 ...      	| ...
 
+The CPT filter from (forked)![imu_tool](https://github.com/TianzeLi/imu_tools) is applied. Yet optional low-pass filters for accelerometers and magnetometers are provided in my version. 
+
+
 ### Realsense D435 launch
 For Rviz:
 ```
