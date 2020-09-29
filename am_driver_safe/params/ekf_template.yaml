@@ -314,4 +314,4 @@ initial_state: [0.0,  0.0,  0.0,
 # to the lagged measurement, then process all measurements until the current time. 
 smooth_lagged_data: true
 dynamic_process_noise_covariance: true
-reset_on_time_jump: true
+reset_on_time_jump: false

@@ -1,0 +1,17 @@
+<launch>
+	
+	<arg name="" default=""/>
+
+
+	<group if="$(arg )">
+		<node name="path_follow"
+			  pkg="am_driver"
+			  type="path_follow">
+
+		  <param name="" value=""/>
+
+
+		</node>
+	</group>
+
+</launch>
