@@ -3,7 +3,7 @@
 
 #include "imu_process.h"
 
-namespace am_sensors {
+namespace am_sensors_imu{
 
 IMUProcess::IMUProcess(
     const ros::NodeHandle& nh,
@@ -17,8 +17,9 @@ IMUProcess::IMUProcess(
 
 	imu_pub_= nh_.advertise<sensor_msgs::Imu>(pub_topic_, 200);
 	imu_sub_ = nh_.subscribe(topic_name_, 10, &IMUProcess::IMUCallback, this);
-	cmd_vel_sub_ = nh_.subscribe("/cmd/vel", 10, &IMUProcess::CmdVelCallback, this);
-	imu_pub_rpy_ = nh_.advertise<geometry_msgs::Vector3>("rpy", 200);
+	cmd_vel_sub_ = nh_.subscribe("/cmd_vel", 10, &IMUProcess::CmdVelCallback, this);
+	if(publish_rpy_)
+		imu_pub_rpy_ = nh_.advertise<geometry_msgs::Vector3>("rpy", 200);
 }
 
 IMUProcess::~IMUProcess()
@@ -43,6 +44,8 @@ void IMUProcess::initializeParams()
 		topic_name_ = "imu/data";
 	if (!nh_private_.getParam("fixed_frame", fixed_frame_))
 		fixed_frame_ = "map";
+	if (!nh_private_.getParam("publish_rpy", publish_rpy_))
+		publish_rpy_ = false;
 	if (!nh_private_.getParam("pub_test_tf", pub_test_tf_))
 		pub_test_tf_ = "false";
 	if(pub_test_tf_){
@@ -78,7 +81,7 @@ void IMUProcess::initializeParams()
  		orientation_stddev_r_ = 0.001;
 
 
-	ss_tmp << topic_name_ << "/processed";
+	ss_tmp << topic_name_ << "/processed_again";
 	pub_topic_ = ss_tmp.str();
 	orientation_dev_r_ = orientation_stddev_r_*orientation_stddev_r_;
 	orientation_dev_p_ = orientation_stddev_p_*orientation_stddev_p_;
@@ -125,22 +128,28 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 	if(imu_shall_pub_)
 		imu_pub_.publish(imu_tmp);
 
-	tf::Quaternion q(
-    	msg.orientation.x,
-    	msg.orientation.y,
-    	msg.orientation.z,
-    	msg.orientation.w);
-	tf::Matrix3x3 m(q);
-	geometry_msgs::Vector3 rpy;
-	m.getRPY(rpy.x, rpy.y, rpy.z);
-	imu_pub_rpy_.publish(rpy);
+	if(publish_rpy_)
+	{
+		tf::Quaternion q(
+	    	msg.orientation.x,
+	    	msg.orientation.y,
+	    	msg.orientation.z,
+	    	msg.orientation.w);
+		tf::Matrix3x3 m(q);
+		geometry_msgs::Vector3 rpy;
+		m.getRPY(rpy.x, rpy.y, rpy.z);
+		imu_pub_rpy_.publish(rpy);
+	}
 }
 
 void IMUProcess::CmdVelCallback(const geometry_msgs::Twist msg)
 {
 	double vt, vr;
-	vt = msg.linear.x;
-	vr = msg.angular.z;
+
+	// Convert to the absolute value here.
+	vt = std::abs(msg.linear.x);
+	vr = std::abs(msg.angular.z);
+
 	if (do_pub_control_)
 	{
 		if (vt > trans_velocity_threshod_ || vr > angular_velocity_threshod_)
@@ -155,8 +164,8 @@ void IMUProcess::CmdVelCallback(const geometry_msgs::Twist msg)
 	{	
 		// customized coeffecient, should be tuned. 
 		uncertainty_coef_r_ = 1.0 + 10*vr + 5*vt;
-		uncertainty_coef_r_ = 1.0 + 10*vr + 5*vt;
-		uncertainty_coef_r_ = 1.0 + 20*vr + 10*vt;
+		uncertainty_coef_p_ = 1.0 + 10*vr + 5*vt;
+		uncertainty_coef_y_ = 1.0 + 20*vr + 10*vt;
 	}
 }
 
@@ -178,8 +187,7 @@ void IMUProcess::pub_tf(double x, double y, double z, double r, double p, double
 	}
 }
 
-}// namespace am_sensors
-
+}// namespace am_sensors_imu
 
 
 
@@ -188,14 +196,8 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "IMUProcess");
 	ros::NodeHandle nh;
 	ros::NodeHandle nh_private("~");
-	am_sensors::IMUProcess imu_instance(nh, nh_private);
+	am_sensors_imu::IMUProcess imu_instance(nh, nh_private);
 	ros::spin();
 	return 0;
 }
 
-
-  // <joint name="imu01_link_joint" type="fixed">
-  //   <parent link="base_link" />
-  //   <child link="imu01_link" />
-  //   <origin xyz="0 0.16 0.34" rpy="3.142 0 1.571" />
-  // </joint>

@@ -9,7 +9,7 @@
 #include <tf/transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-namespace am_sensors{
+namespace am_sensors_imu{
 
 class IMUProcess 
 {
@@ -32,6 +32,7 @@ class IMUProcess
   std::string pub_topic_;
   std::string fixed_frame_;
   bool imu_shall_pub_;
+  bool publish_rpy_;
   bool pub_test_tf_;
   double x_, y_, z_;
   double roll_, pitch_, yaw_;
@@ -51,16 +52,13 @@ class IMUProcess
   double trans_velocity_threshod_;
   double angular_velocity_threshod_;
 
-  double vt_;
-  double vr_;
-
   void initializeParams();
   void IMUCallback(const sensor_msgs::Imu &msg);
   void CmdVelCallback(const geometry_msgs::Twist msg);
   void pub_tf(double x, double y, double z, double r, double p, double yaw, const std::string frame_name);
 };
 
-} // namespace am_sensors
+} // namespace am_sensors_imu
 
 #endif // AM_SENSORS_IMU_PROCESS_H
 
