@@ -1,6 +1,5 @@
 <launch>
 
-
   <!-- Select which sensors are to be used -->
   <arg name="useCustomOdom" default="False"  />
   <arg name="useLeftGNSS"   default="False" />
@@ -55,16 +54,26 @@
 
     <include file="$(find am_sensors)/launch/imu_left_cpt.launch" />
 
-<!--     <node name="imu_trans_pub"
+    <node name="imu_process"
           pkg="am_sensors"
-          type="imu_trans">
+          type="imu_process">
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu01_link"/>
-      <param name="pub_testtf" value="0"/>
+      <param name="pub_test_tf" value="false"/>
       <param name="xyz" value="0.0 0.16 0.43"/>
       <param name="rpy" value="3.142 0.0 0.0"/>
-    </node> -->
+      <param name="publish_rpy" value="false"/>
 
+      <!-- On operation walkaround: to omit orientation ouput during drastic turn -->
+      <param name="do_pub_control" value="true"/>
+      <param name="trans_velocity_threshod" value="1.0"/>
+      <param name="angular_velocity_threshod" value="0.1"/>
+      <param name="do_covariance_adaption" value="true"/>
+      <param name="orientation_stddev_r" value="0.005"/>
+      <param name="orientation_stddev_p" value="0.005"/>
+      <param name="orientation_stddev_y" value="0.010"/>
+
+    </node>
   </group>
 
   <group if="$(arg useRightIMU)"
@@ -72,16 +81,25 @@
 
     <include file="$(find am_sensors)/launch/imu_right_cpt.launch" />
 
-<!--     <node name="imu_trans_pub"
+    <node name="imu_process"
           pkg="am_sensors"
-          type="imu_trans">
+          type="imu_process">
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu02_link"/>
-      <param name="pub_testtf" value="0"/>
+      <param name="pub_test_tf" value="false"/>
       <param name="xyz" value="0.0 -0.16 0.43"/>
       <param name="rpy" value="3.142 0 1.571"/>
+      <param name="publish_rpy" value="false"/>
+
+      <param name="do_pub_control" value="true"/>
+      <param name="trans_velocity_threshod" value="1.0"/>
+      <param name="angular_velocity_threshod" value="0.1"/>
+      <param name="do_covariance_adaption" value="true"/>
+      <param name="orientation_stddev_r" value="0.005"/>
+      <param name="orientation_stddev_p" value="0.005"/>
+      <param name="orientation_stddev_y" value="0.010"/>
+
     </node>
- -->
   </group>
 
 
