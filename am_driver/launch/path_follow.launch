@@ -1,15 +1,21 @@
 <launch>
 	
-	<arg name="" default=""/>
+	<arg name="do_path_following" default="true"/>
 
+	<!-- Example of path laoding. -->
+	<rosparam file="$(find am_driver)/param/path_config.yaml" 
+			  command="load" 
+			  ns="am_driver_path" /> 
 
-	<group if="$(arg )">
+	<group if="$(arg do_path_following)" ns="am_driver_path">
 		<node name="path_follow"
 			  pkg="am_driver"
 			  type="path_follow">
 
-		  <param name="" value=""/>
+		  <param name="position_topic" value="/odometry/filtered">
 
+		  <param name="trans_velocity_max" value="0.5"/>
+		  <param name="angular_velocity_max" value="1.0"/>
 
 		</node>
 	</group>
