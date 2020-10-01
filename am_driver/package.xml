@@ -7,7 +7,7 @@
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="ubuntu@todo.todo">ubuntu</maintainer>
+  <maintainer email="tianze.li.eu@gmail.com">ubuntu</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -41,6 +41,7 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <depend>rospy</depend>
+  <depend>roscpp</depend>>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>sensor_msgs</depend>

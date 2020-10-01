@@ -12,10 +12,15 @@
 			  pkg="am_driver"
 			  type="path_follow">
 
-		  <param name="position_topic" value="/odometry/filtered">
+		  <param name="position_topic" value="/odometry/filtered"/>
 
 		  <param name="trans_velocity_max" value="0.5"/>
 		  <param name="angular_velocity_max" value="1.0"/>
+
+		  <param name="KP_rotate" value="0.1"/>
+		  <param name="KP_trans" value="0.1"/>
+		  <param name="p_value" value="1.0"/>
+
 
 		</node>
 	</group>
