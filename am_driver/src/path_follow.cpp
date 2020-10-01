@@ -6,6 +6,7 @@
  */
 
 #include <math.h>
+#include <xmlrpcpp/XmlRpcDecl.h>
 
 #include "path_follow.h"
 
@@ -52,6 +53,9 @@ PathFollow::~PathFollow()
 
 void PathFollow::initializeParam()
 {	
+	double x_tmp, y_tmp;
+	geometry_msgs::PoseStamped pose_stamped_tmp;
+
 	current_goal_no_ = -1;
 	goal_set_size_ = -1;
 
@@ -66,12 +70,35 @@ void PathFollow::initializeParam()
 
 	path_.header.stamp = ros::Time::now();
 
-	if (!nh_private_.getParam("path_planned", path_.poses))
-		ROS_INFO("Queue Empty.");
-	else 
-		goal_set_size_ = path_.poses.size(); 
+	XmlRpc::XmlRpcValue path_list;
+
 	if (!nh_private_.getParam("path_frame", path_.header.frame_id))
 		path_.header.frame_id = "map";
+
+	if (!nh_private_.getParam("path_planned", path_list))
+		ROS_INFO("Queue Empty.");
+	else 
+	{
+		goal_set_size_ = path_list.size()/2;
+
+		ROS_ASSERT(path_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+
+		for (int32_t i = 0; i < path_list.size(); i+2) 
+		{
+		  	ROS_ASSERT(path_list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);	  
+
+		  	x_tmp = static_cast<double>(path_list[i]);
+		  	y_tmp = static_cast<double>(path_list[i+1]);
+
+		    pose_stamped_tmp.pose.position.x = x_tmp;
+		    pose_stamped_tmp.pose.position.y = y_tmp;
+		    pose_stamped_tmp.header.seq = i/2 + 1;
+		    pose_stamped_tmp.header.stamp = path_.header.stamp;
+		    pose_stamped_tmp.header.frame_id = path_.header.frame_id;
+		    path_.poses.push_back(pose_stamped_tmp); 
+		}
+	}
+
 	if (!nh_private_.getParam("position_topic", position_topic_))
 		ROS_INFO("position_topic not specified."); 
 
