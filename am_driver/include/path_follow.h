@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
-#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf/LinearMath/Matrix3x3.h>
 
 #define ANGULAR_THRESHOD 0.01
 #define LINEAR_THRESHOD 0.05
@@ -33,6 +33,8 @@ class PathFollow
   std::string path_topic_;
   std::string position_topic_;
 
+  bool initial_pose_received_;
+
   int current_goal_no_;
   int goal_set_size_;
 
@@ -42,6 +44,7 @@ class PathFollow
   double last_goal_x_;
   double last_goal_y_;
 
+  double sample_time_;
   double KP_rotate_;
   double KP_trans_;
   double p_value_;

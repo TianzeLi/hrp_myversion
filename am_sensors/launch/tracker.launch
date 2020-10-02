@@ -4,14 +4,14 @@
         pkg="am_sensors"
         type="tracking_marker_pub"
         output="screen">
-    <param name="trace_amount"  value="2" />
+    <param name="trace_amount"  value="1" />
     <param name="frequency"     value="30" />
 
     <param name="pose_topic1"   value="/odom"/> 
-    <param name="color1"        value="red"/>
+    <param name="color1"        value="cyan"/>
 
-    <param name="pose_topic2"   value="/odometry/filtered" />
-    <param name="color2"        value="green"/>
+    <!-- <param name="pose_topic2"   value="/odometry/filtered" /> -->
+    <!-- <param name="color2"        value="green"/> -->
 
   </node>
 
