@@ -9,13 +9,14 @@
 """
 
 import rospy
+import time
+import numpy as np
 from geometry_msgs.msg import PoseWithCovarianceStamped, Vector3
 from sensor_msgs.msg import NavSatFix 
 from Phidget22.PhidgetException import *
 from Phidget22.Phidget import *
 from Phidget22.Devices.GPS import *
-import time
-import numpy as np
+
 
 # Define the initial position and standard variance of measurement of the GNSS  
 # Unit: meter
@@ -153,7 +154,7 @@ def gnss_pub_node():
 
 	time_sleep = 1.0/pub_frequency
 
-	#Create your Phidget channels
+	#Create Phidget channels
 	gps0 = GPS()
 	#Set addressing parameters to specify which channel to open
 	gps0.setDeviceSerialNumber(device_serial_number)

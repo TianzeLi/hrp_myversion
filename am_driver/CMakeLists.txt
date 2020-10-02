@@ -6,6 +6,7 @@ project(am_driver)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  roscpp
   std_msgs
   geometry_msgs
   sensor_msgs
@@ -96,7 +97,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES am_driver
   CATKIN_DEPENDS std_msgs geometry_msgs sensor_msgs nav_msgs tf message_runtime
 #  DEPENDS system_lib
@@ -109,14 +110,17 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(${catkin_INCLUDE_DIRS})
+include_directories(
+include
+${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a cpp library
 # add_library(am_driver   src/${PROJECT_NAME}/am_driver.cpp)
 
 ## Declare a cpp executable
 # add_executable(am_driver_node src/am_driver_node.cpp src/automower.cpp src/amproto.cpp)
-# add_executable(am_driver_node)
+add_executable(path_follow src/path_follow.cpp)
 # add_dependencies(am_driver_node am_driver_generate_messages_cpp)
 
 
@@ -125,9 +129,9 @@ include_directories(${catkin_INCLUDE_DIRS})
 # add_dependencies(am_driver_node am_driver_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-#target_link_libraries(am_driver_node
-#  ${catkin_LIBRARIES}
-#)
+target_link_libraries(path_follow
+  ${catkin_LIBRARIES}
+)
 
 
 #############
