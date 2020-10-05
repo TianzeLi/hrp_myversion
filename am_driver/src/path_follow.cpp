@@ -132,9 +132,12 @@ void PathFollow::initializeParam()
 
 	if (!nh_private_.getParam("trans_velocity_max", trans_velocity_max_))
 		trans_velocity_max_ = 0.5;
-
+	if (!nh_private_.getParam("trans_velocity_min", trans_velocity_min_))
+		trans_velocity_min_ = 0.0;
 	if (!nh_private_.getParam("angular_velocity_max", angular_velocity_max_))
 		angular_velocity_max_ = 1.0;
+	if (!nh_private_.getParam("angular_velocity_min", angular_velocity_min_))
+		angular_velocity_min_ = 0.0;
 
 	// Set the first point as the current goal.
 	current_goal_no_ = 0;
@@ -236,7 +239,7 @@ void PathFollow::LineFollow(const double& x_goal, const double& y_goal, const do
 		      - (y_current_ - last_goal_y_)*cos(goal_direction)
 			  + p_value_*sin(goal_direction - yaw_current_);
 		angular_velocity_input = KP_rotate_*d_p; 
-		vel_cmd.angular.z = rotationRelay(angular_velocity_input);
+		vel_cmd.angular.z = rotationMaxRelay(angular_velocity_input);
 
 		cmd_vel_pub_.publish(vel_cmd);
 		ros::Duration(sample_time_).sleep();
@@ -253,22 +256,34 @@ double PathFollow::distance(const double& x1, const double& y1,
 
 double PathFollow::rotationRelay(const double& angular_velocity)
 {
-	if(std::abs(angular_velocity) < angular_velocity_max_)
+	if(std::abs(angular_velocity) >  angular_velocity_max_)
+		return angular_velocity_max_*(angular_velocity/std::abs(angular_velocity));
+	else { 
+		if(std::abs(angular_velocity) > angular_velocity_min_)
+			return angular_velocity;
+		else 
+			return angular_velocity_min_*(angular_velocity/std::abs(angular_velocity));
+	}
+}
+
+double PathFollow::rotationMaxRelay(const double& angular_velocity)
+{
+	if(std::abs(angular_velocity) >  angular_velocity_max_)
+		return angular_velocity_max_*(angular_velocity/std::abs(angular_velocity));
+	else
 		return angular_velocity;
-	else if(angular_velocity > angular_velocity_max_)
-		return angular_velocity_max_;
-	else 
-		return -angular_velocity_max_;
 }
 
 double PathFollow::transRelay(const double& trans_velocity)
 {
-	if(std::abs(trans_velocity) < trans_velocity_max_)
-		return trans_velocity;
-	else if(trans_velocity > trans_velocity_max_)
-		return trans_velocity_max_;
-	else 
-		return -trans_velocity_max_;
+	if(std::abs(trans_velocity) > trans_velocity_max_)
+		return trans_velocity_max_*(trans_velocity/std::abs(trans_velocity));
+	else { 
+		if(std::abs(trans_velocity) > trans_velocity_min_)
+			return trans_velocity;
+		else 
+			return trans_velocity_min_*(trans_velocity/std::abs(trans_velocity));
+	}
 }
 
 
