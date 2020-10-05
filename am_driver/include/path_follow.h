@@ -50,13 +50,13 @@ class PathFollow
   double p_value_;
 
   nav_msgs::Path path_;
-
   nav_msgs::Odometry current_position_;
-
   geometry_msgs::Twist cmd_vel_stop_;
 
   double trans_velocity_max_;
+  double trans_velocity_min_;
   double angular_velocity_max_;
+  double angular_velocity_min_;
 
   // 2D position prepared for controller.
   double x_current_, y_current_;
@@ -76,9 +76,8 @@ class PathFollow
 							const double& x2, const double& y2);
 
   double rotationRelay(const double& angular_velocity);
+  double rotationMaxRelay(const double& angular_velocity);
   double transRelay(const double& trans_velocity);
-
-
 
 };
 

@@ -14,16 +14,17 @@
 			  output="screen">
 
 		  <!-- <param name="position_topic" value="/odometry/filtered"/> -->
-		  <param name="position_topic" value="/odom"/>
+		  <!-- <param name="position_topic" value="/odom"/> -->
 
-		  <param name="trans_velocity_max" value="0.7"/>
-		  <param name="angular_velocity_max" value="1.0"/>
+		  <!-- <param name="trans_velocity_max" value="0.7"/> -->
+		  <!-- <param name="trans_velocity_min" value="0.05"/> -->
+		  <!-- <param name="angular_velocity_max" value="1.0"/> -->
+		  <!-- <param name="angular_velocity_min" value="0.05"/> -->
 
-		  <param name="sample_time" value="0.05"/>
-		  <param name="KP_rotate" value="1.0"/>
-		  <param name="KP_trans" value="1.0"/>
-		  <param name="p_value" value="1.0"/>
-
+		  <!-- <param name="sample_time" value="0.05"/> -->
+		  <!-- <param name="KP_rotate" value="1.0"/> -->
+		  <!-- <param name="KP_trans" value="1.0"/> -->
+		  <!-- <param name="p_value" value="1.0"/> -->
 
 		</node>
 	</group>
