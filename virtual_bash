@@ -81,7 +81,10 @@ rosbag record -o outdoor_<what>_test_<date>.bag \
 /tf /tf_static /wheel_encoder\
 /camera/color/image_raw \
 /camera/aligned_depth_to_color/image_raw \
-/camera/color/camera_info
+/camera/color/camera_info \
+/GPSfix /cmd_mode \
+/imu_euler /pose 
+
 
 # Only for rtabmap to process data from D435 
 rosbag record -o D435bag_test.bag \
@@ -93,11 +96,11 @@ rosbag record -o D435bag_test.bag \
 
 
 # Not recording
-/GPSfix /battery_status /cmd_mode /cmd_power /decision_making/am_driver_safe/events 
+/battery_status /cmd_mode /cmd_power /decision_making/am_driver_safe/events 
 /decision_making/monitoring /diagnostics /motor_feedback_diff_drive
-/imu_euler /imu_left/imu/is_calibrated /imu_left/imu_manager/bond /imu_left/rpy
+/imu_left/imu/is_calibrated /imu_left/imu_manager/bond /imu_left/rpy
 /imu_right/imu/is_calibrated /imu_right/imu_manager/bond /imu_right/rpy
-/nano2 /pose /scriptable_monitor/add_script
+/nano2 /scriptable_monitor/add_script
 /scriptable_monitor/remove_script /sensor_status /wheel_power /wheel_current
 
 ##########################
@@ -127,11 +130,15 @@ rosbag record -o test.bag \
 /tf_static /wheel_encoder \
 /camera/color/image_raw \
 /camera/aligned_depth_to_color/image_raw \
-/camera/color/camera_info
+/camera/color/camera_info \
+/GPSfix /cmd_mode \
+/imu_euler /pose 
 
 
+# Plot the bag data. 
 rosrun plotjuggler PlotJuggler  
 
+# Use recorded clock in the bagfile.
 rosparam set use_sim_time true
 rosbag play xxxx.bag --clock
 

@@ -184,9 +184,12 @@ int PathFollow::gotoGoal(const double& x_goal, const double& y_goal)
 	// First rotate.
 	Rotate(goal_direction);
 	ROS_INFO("Rotation done");
+	ros::Duration(2.0).sleep();
 	// Then move forward.
 	LineFollow(x_goal, y_goal, goal_direction);
 	ROS_INFO("Line follow done.");
+	ros::Duration(2.0).sleep();
+
 
 	// If sucssful.
 	return 0;
