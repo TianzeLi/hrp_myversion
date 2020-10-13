@@ -20,9 +20,9 @@ path_planned: [63.0, 0.00,
 position_topic: /odom
 
 trans_velocity_max: 0.6
-trans_velocity_min: 0.05
+trans_velocity_min: 0.1
 angular_velocity_max: 1.0
-angular_velocity_min: 0.03
+angular_velocity_min: 0.1
 
 sample_time: 0.05
 KP_rotate: 1.0
