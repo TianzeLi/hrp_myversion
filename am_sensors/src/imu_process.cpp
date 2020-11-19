@@ -81,7 +81,7 @@ void IMUProcess::initializeParams()
  		orientation_stddev_r_ = 0.001;
 
 
-	ss_tmp << topic_name_ << "/processed_again";
+	ss_tmp << topic_name_ << "/processed";
 	pub_topic_ = ss_tmp.str();
 	orientation_dev_r_ = orientation_stddev_r_*orientation_stddev_r_;
 	orientation_dev_p_ = orientation_stddev_p_*orientation_stddev_p_;
@@ -119,7 +119,7 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 	quat_msg.w=0.707;
 
    	tf2::convert(quat_msg , q_rot); 
-	// Problems lies here?
+	
 	q_enu = q_rot*q_nwu;  // Calculate the new orientation
 	q_enu.normalize();
 	// Stuff the new rotation back into the pose. This requires conversion into a msg type

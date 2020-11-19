@@ -13,8 +13,8 @@
   <arg name="enable_fisheye"      default="false"/>
   <!-- Reference resolution: 480x270 resolution and 30 FPS -->
   <!-- https://dev.intelrealsense.com/docs/using-depth-camera-with-raspberry-pi-3 -->
-  <arg name="depth_width"         default="480"/>
-  <arg name="depth_height"        default="270"/>
+  <arg name="depth_width"         default="1280"/>
+  <arg name="depth_height"        default="720"/>
   <arg name="enable_depth"        default="true"/>
 
   <arg name="infra_width"        default="640"/>
@@ -22,8 +22,8 @@
   <arg name="enable_infra1"       default="false"/>
   <arg name="enable_infra2"       default="false"/>
 
-  <arg name="color_width"         default="640"/>
-  <arg name="color_height"        default="360"/>
+  <arg name="color_width"         default="1280"/>
+  <arg name="color_height"        default="720"/>
   <arg name="enable_color"        default="true"/>
 
   <arg name="fisheye_fps"         default="30"/>
