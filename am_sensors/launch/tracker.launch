@@ -8,10 +8,10 @@
     <param name="frequency"     value="30" />
 
     <param name="pose_topic1"   value="/odom"/> 
-    <param name="color1"        value="cyan"/>
+    <param name="color1"        value="red"/>
 
-    <!-- <param name="pose_topic2"   value="/odometry/filtered" /> -->
-    <!-- <param name="color2"        value="green"/> -->
+    <param name="pose_topic2"   value="/odometry/filtered" />
+    <param name="color2"        value="green"/>
 
   </node>
 

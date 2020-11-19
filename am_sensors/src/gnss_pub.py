@@ -89,8 +89,8 @@ def onPositionChange(self, latitude, longitude, altitude):
 			long_var = (long_var/queue_len - long_average**2)*DECI_DEGREE_TO_METER**2
 			lati_var = (lati_var/queue_len - lati_average**2)*DECI_DEGREE_TO_METER**2
 			
-			rospy.logdebug("Current average longitude: [%f]", long_average )
-			rospy.logdebug("Current average latitude: [%f]", lati_average )
+			rospy.logdebug("Current average longitude: [%.6f]", long_average )
+			rospy.logdebug("Current average latitude: [%.6f]", lati_average )
 			# rospy.logdebug("Current longitude variance: [%f]", long_var )
 			# rospy.logdebug("Current latitude variance: [%f]", lati_var )
 			# rospy.logdebug("Initial longitude stdev: [%f]", np.sqrt(long_var + lati_var)*DECI_DEGREE_TO_METER )
@@ -103,8 +103,8 @@ def onPositionChange(self, latitude, longitude, altitude):
 				INITIAL_LATITUDE = latitude
 
 				rospy.loginfo("GNSS [%s] stdev within control value.", device_serial_number )
-				rospy.loginfo("Initial longitude: [%f]", long_average )
-				rospy.loginfo("Initial latitude: [%f]", lati_average )
+				rospy.loginfo("Initial longitude: [%.6f]", long_average )
+				rospy.loginfo("Initial latitude: [%.6f]", lati_average )
 				rospy.loginfo("Initial longitude stdev: [%f]", LONGITUDE_STDEV )
 				rospy.loginfo("Initial latitude stdev: [%f]", LATITUDE_STDEV )
 			else: 

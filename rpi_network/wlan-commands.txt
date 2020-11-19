@@ -1,0 +1,5 @@
+# to start a hotspot:
+sudo wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant-wlan0.conf -i wlan0
+
+# to connect as a client:
+sudo wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant-client.conf -i wlan0

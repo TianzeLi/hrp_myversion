@@ -1,0 +1,9 @@
+[Match]
+Name=br0
+[Network]
+Address=192.168.7.4/24
+MulticastDNS=yes
+IPMasquerade=yes
+DHCPServer=no
+# [DHCPServer]
+# DNS=84.200.69.80 1.1.1.1

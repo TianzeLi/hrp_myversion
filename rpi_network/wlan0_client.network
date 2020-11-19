@@ -1,0 +1,5 @@
+[Match]
+Name=wlan0
+SSID=Kitkat
+[Network]
+DHCP=yes

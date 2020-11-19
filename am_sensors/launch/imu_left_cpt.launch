@@ -12,12 +12,12 @@
     output="screen">
 
     # supported data rates: 4 8 16 24 32 40 ... 1000 (in ms)
-     <param name="period" value="4"/>
+    <param name="period" value="4"/>
 
     <!-- # optional param serial_number, default is -1 -->
     <param name="serial_number" value="596014"/>
     
-    <param name="frame_id" value="imu01_test"/>
+    <param name="frame_id" value="imu_left_test"/>
 
 
     # compass correction params (see http://www.phidgets.com/docs/1044_User_Guide)

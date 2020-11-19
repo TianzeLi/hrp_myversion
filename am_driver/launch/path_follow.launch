@@ -21,6 +21,8 @@
 		  <!-- <param name="angular_velocity_max" value="1.0"/> -->
 		  <!-- <param name="angular_velocity_min" value="0.05"/> -->
 
+		  <!-- should change both min to 0.1 . -->
+
 		  <!-- <param name="sample_time" value="0.05"/> -->
 		  <!-- <param name="KP_rotate" value="1.0"/> -->
 		  <!-- <param name="KP_trans" value="1.0"/> -->
