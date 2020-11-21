@@ -70,7 +70,7 @@ rtabmap-databaseViewer ~/.ros/rtabmap.db
 roslaunch am_driver path_follow
 
 # Making ros bag
-rosbag record -o outdoor_<what>_test_<date>.bag \
+rosbag record -o data.bag \
 /cmd_vel /current_status \
 /gnss_left/fix /gnss_left/hv /gnss_left/pose    \
 /gnss_right/fix /gnss_right/hv /gnss_right/pose \
@@ -162,10 +162,10 @@ uint16 MODE_SOUND_OFF = 1038
 
 # For Pi 4 simple launch.
 roslaunch realsense2_camera rs_camera.launch filters:=pointcloud \
-	enable_infra1:=false enable_infra2:=false
+	enable_infra1:=false enable_infra2:=false initial_reset:=true
 
-roslaunch realsense2_camera rs_camera.launch align_depth:=true\
-	enable_infra1:=false enable_infra2:=false
+roslaunch realsense2_camera rs_camera.launch align_depth:=true \
+	enable_infra1:=false enable_infra2:=false initial_reset:=true
 
 
 roslaunch rtabmap_ros rtabmap.launch \

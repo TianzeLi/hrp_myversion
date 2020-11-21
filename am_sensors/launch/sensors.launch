@@ -60,8 +60,8 @@
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu01_link"/>
       <param name="pub_test_tf" value="false"/>
-      <param name="xyz" value="0.0 0.16 0.43"/>
-      <param name="rpy" value="3.142 0.0 0.0"/>
+      <param name="xyz" value="0.0 0.16 0.37"/>
+      <param name="rpy" value="3.142 0.0 1.571"/>
       <param name="publish_rpy" value="false"/>
 
       <!-- On operation walkaround: to omit orientation ouput during drastic turn -->
@@ -87,8 +87,8 @@
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu02_link"/>
       <param name="pub_test_tf" value="false"/>
-      <param name="xyz" value="0.0 -0.16 0.43"/>
-      <param name="rpy" value="3.142 0 1.571"/>
+      <param name="xyz" value="0.0 -0.16 0.37"/>
+      <param name="rpy" value="3.142 0.0 1.571"/>
       <param name="publish_rpy" value="false"/>
 
       <param name="do_pub_control" value="true"/>

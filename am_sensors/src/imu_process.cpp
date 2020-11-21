@@ -50,9 +50,9 @@ void IMUProcess::initializeParams()
 		pub_test_tf_ = "false";
 	if(pub_test_tf_){
 		if (!nh_private_.getParam("xyz", xyz))
-			xyz = "0.0 0.16 0.43";
+			xyz = "0.0 0.16 0.37";
 		if (!nh_private_.getParam("rpy", rpy))
-			rpy = "3.142 0.0 0.0";
+			rpy = "3.142 0.0 1.571";
 		std::stringstream xyz_ss(xyz);
 		std::stringstream rpy_ss(rpy);
 		xyz_ss >> x_ >> y_ >> z_;
