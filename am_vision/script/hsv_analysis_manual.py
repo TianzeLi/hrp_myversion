@@ -1,4 +1,11 @@
 #! /usr/bin/python
+
+'''
+ Manual select region interedted and outliers to analyze 
+ distribution in HSV space.
+ 
+'''
+
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
