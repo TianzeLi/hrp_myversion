@@ -1,10 +1,23 @@
 #! /usr/bin/python
 
 '''
- Visual lawn boundary detector.
- Input: the RGB image and optionally the depth image.
- Output: the labelled boundary or the suggested command for drving away from boundary
-         depth image required for the latter output.
+ Non-learning visual lawn boundary detector.
+ Input: RGB image and optionally the depth image.
+ Output: labelled boundary or the suggested drving away direction.
+ Pipeline (mainly): 
+ 	1. Color thresholding.
+ 	2. Morphology mask processing.
+ 	3. Filtering with requirements on contour.
+
+ Note: 
+ 	1. Trade-off between robustness and efficiency.
+ 	2. The overall rigidity depends on all procedures in the pipeline.
+ TODO: 
+ 	1. Automate color sampling.
+ 	2. 
+ 	3. Texture detection.
+ 	4. Integrate with ROS.
+
 '''
 
 import cv2
@@ -36,6 +49,10 @@ cv2.waitKey(0)
 # Convert to the HSV space.
 src_hsv = cv2.cvtColor(src, cv2.COLOR_RGB2HSV)
 
+# *********************************************************
+# The color mask tunning can be automated by auto-sampling.
+# Strategy: set the boundary to let in 95% of inliners. 
+# Potential Automating block 1.
 # Produce the mask.
 green_lower = np.array([0, 5, 50])
 green_upper = np.array([100, 120, 200])
@@ -57,13 +74,16 @@ kernel4 = np.ones((4, 4), np.uint8)
 kernel5 = np.ones((5, 5), np.uint8)
 
 
+# ***************************************************
+# The morphology tunning may not be easily automated.
+# Strategy: find a set of universally optimal parameters.  
 # Morphology part, could tune the parameter "iterations"
 mask_green = cv2.erode(mask_green, kernel4, iterations = 3)
 mask_green = cv2.dilate(mask_green, kernel3, iterations = 4)
 # mask_green = cv2.erode(mask_green, kernel4, iterations = 1)
 # mask_green = cv2.erode(mask_green, kernel2, iterations = 2)
-mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel2)
-mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel2)
+mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel3)
+mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel3)
 
 cv2.imshow("Green Mask After Morphology", mask_green)
 cv2.waitKey(0)
@@ -108,8 +128,8 @@ if len(contours) > 0:
 		area = cv2.contourArea(cnt)
 		length = cv2.arcLength(cnt,True)
 
-		if (area < area_min):
-			continue
+		# if (area < area_min):
+		# 	continue
 
 		if length < length_min:
 			continue
@@ -131,6 +151,8 @@ src_contour_dst = cv2.drawContours(src, lawn_contour, -1, (0,255,255), 5)
 # Draw the contours after the area check.
 cv2.imshow("Lawn Contours", src_contour_dst)
 cv2.waitKey(0)
+
+
 
 # cv2.bitwise_not(src, img_color_filtered, mask_green);
 
