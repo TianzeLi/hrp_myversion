@@ -13,10 +13,15 @@
  	1. Trade-off between robustness and efficiency.
  	2. The overall rigidity depends on all procedures in the pipeline.
  TODO: 
+ 	0. Load each feature detector into a function and form main pipeline. 
  	1. Automate color sampling.
  	2. 
- 	3. Texture detection.
- 	4. Integrate with ROS.
+ 	3. Add texture features.
+ 	4. Add spatial adjacency as features.
+ 	5. Potentially add depth into feature.
+ 	6. Clustering.
+ 	7. Integrate with ROS.
+ 	8. Potentially feed back the warning level and retreating suggestion. 
 
 '''
 
