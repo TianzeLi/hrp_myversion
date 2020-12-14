@@ -14,7 +14,8 @@
  	2. The overall rigidity depends on all procedures in the pipeline.
  TODO: 
  	0. Load each feature detector into a function and form main pipeline. 
- 	1. Automate color sampling.(Still need draw box on img and check hist.)
+ 	1. Automate color sampling.
+ 		(Still need draw box on img and tune parameters.)
  	2. 
  	3. Add texture features.
  	4. Add spatial adjacency as features.
@@ -42,17 +43,18 @@ class BoundaryDetectNode():
 		self.fixed_width = 640
 		self.fixed_height = 480
 
+		self.left_sample_w = 150
 		self.left_sample_x0 = self.fixed_width/4
-		self.left_sample_w = 100
 		self.left_sample_y0 = self.fixed_height - self.fixed_height/4
 		self.left_sample_h = self.fixed_height/4
 
-		self.right_sample_x0 = self.fixed_width*3/4
-		self.right_sample_w = 100
+
+		self.right_sample_w = 150
+		self.right_sample_x0 = self.fixed_width*3/4 - self.right_sample_w
 		self.right_sample_y0 = self.fixed_height - self.fixed_height/4
 		self.right_sample_h = self.fixed_height/4
 
-		self.select_precentage = 0
+		self.select_precentage = 0.90
 
 		# Pipeline starts here.
 		self.src = self.image_load()
@@ -60,8 +62,6 @@ class BoundaryDetectNode():
 				 self.color_sample(self.src)
 		self.green_mask, self.img_threshold = self.color_mask(self.src)
 		self.color_contour(self.green_mask, self.src)
-
-		
 
 
 
@@ -106,13 +106,17 @@ class BoundaryDetectNode():
 		
 		"""
 
-		img_left_sample = src[int(self.left_sample_x0):int(self.left_sample_x0 \
-						+ self.left_sample_w), int(self.left_sample_y0): \
-						int(self.left_sample_y0 + self.left_sample_h)]
+		img_left_sample = src[int(self.left_sample_y0):int(self.left_sample_y0 \
+						+ self.left_sample_h), int(self.left_sample_x0): \
+						int(self.left_sample_x0 + self.left_sample_w)]
 
-		img_right_sample = src[int(self.right_sample_x0):int(self.right_sample_x0 \
-						+ self.right_sample_w), int(self.right_sample_y0): \
-						int(self.right_sample_y0 + self.right_sample_h)]
+		img_right_sample = src[int(self.right_sample_y0):int(self.right_sample_y0 \
+						+ self.right_sample_h), int(self.right_sample_x0): \
+						int(self.right_sample_x0 + self.right_sample_w)]
+
+		cv2.imshow('Left sampled image.', img_left_sample)
+		cv2.imshow('Right sampled image.', img_right_sample)
+		cv2.waitKey(0)
 
 		left_sample_hsv = cv2.cvtColor(img_left_sample, cv2.COLOR_BGR2HSV)
 		right_sample_hsv = cv2.cvtColor(img_right_sample, cv2.COLOR_BGR2HSV)
@@ -154,22 +158,23 @@ class BoundaryDetectNode():
 		# plt.title('Sampled lawn pixels distribution in HSV space')
 		# plt.grid(True)
 
-		# for i, col in enumerate(color_space):
-		# 	tmp_count = 0
-		# 	j = 0
-		# 	right_hist_hsv = cv2.calcHist([right_sample_hsv], [i], None, [256], [0, 256])
+		for i, col in enumerate(color_space):
+			tmp_count = 0
+			j = 0
+			right_hist_hsv = cv2.calcHist([right_sample_hsv], [i], None, [256], [0, 256])
 			
-		# 	while (tmp_count < 0.5*threshold_count):
-		# 		tmp_count += left_hist_hsv[j]
-		# 		j += 1
-		# 	color_lower_bound[i] = j
+			while (tmp_count < 0.5*threshold_count):
+				tmp_count += left_hist_hsv[j]
+				j += 1
+			if (j < color_lower_bound[i]):
+				color_lower_bound[i] = j
 
-		# 	j = 0
-		# 	while (tmp_count < 0.5*threshold_count):
-		# 		tmp_count += right_hist_hsv[255-j]
-		# 		j += 1			
-
-		# 	color_upper_bound[i] = 255 - j 
+			j = 0
+			while (tmp_count < 0.5*threshold_count):
+				tmp_count += right_hist_hsv[255-j]
+				j += 1			
+			if ((255 - j) > color_lower_bound[i]):
+				color_upper_bound[i] = 255 - j 
 
 		return color_lower_bound, color_upper_bound
 
