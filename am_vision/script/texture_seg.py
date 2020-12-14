@@ -5,14 +5,14 @@
  Input: RGB image or IR image.
  Output: labelled boundary.
  Pipeline (mainly):
- 	1. Sample the frequency. 
+ 	1. Sample the frequency. (Not practical) 
  	1. Use Gabor filter.
  	2. Same as in the color_seg.
 
  Note: 
  	1. 
  TODO: 
- 	1. 
+ 	1. Could use variance in pic after Gabor as weight or threshold.
  	2. 
 
 '''
@@ -20,9 +20,10 @@
 import cv2
 import numpy as np
 
+wavelength_min = 2.5
 
 # Load the image.
-src = cv2.imread("../samples/p3_color.png")
+src = cv2.imread("../samples/p1_color.png")
 # Check if the image is properly loaded.
 if not src.data:
     print("Image not loaded correctly.")
@@ -47,7 +48,7 @@ cv2.waitKey(0)
 # psi - phase offset
 # ktype - type and range of values that each pixel in the gabor kernel can hold
 
-g_kernel = cv2.getGaborKernel((15, 15), 7.0, 0, 2.5, 1.0, 0, ktype=cv2.CV_32F)
+g_kernel = cv2.getGaborKernel((15, 15), 7.0, 3.14159/12*6, 2.5, 1.0, 0, ktype=cv2.CV_32F)
 
 filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
 
