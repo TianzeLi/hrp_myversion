@@ -21,8 +21,14 @@ if __name__ == '__main__':
 	# ************************************
 	# Part one: Interested area selecting.
 	# Read image.
-	img = cv2.imread("../samples/p3_color.png")
-	# cv2.imshow("Original Image", img)
+	img = cv2.imread("../samples/p91_color.png")
+	cv2.imshow("Original Image", img)
+
+	# Show green space and gray space for reference.
+	# img_green =  img[:, :, 1]
+	# img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	# cv2.imshow("Region of Interest in green", img_green)	
+	# cv2.imshow("Region of Interest in gray", img_gray)	
 	# cv2.waitKey(0)
 
 	# Select region of interest to sample.
@@ -45,8 +51,10 @@ if __name__ == '__main__':
 	img_out_sample = img[int(roi_out[1]):int(roi_out[1]+roi_out[3]), \
 					int(roi_out[0]):int(roi_out[0]+roi_out[2])]
 
+
+
 	# Display cropped image
-	# cv2.imshow("Region of Interest", img_sample)
+	# cv2.imshow("Region of Interest in green", in_green)	
 	# cv2.waitKey(0)
 
 	
@@ -54,7 +62,7 @@ if __name__ == '__main__':
 	# Part two: color analysis.
 	in_sample_hsv = cv2.cvtColor(img_in_sample, cv2.COLOR_BGR2HSV)
 	out_sample_hsv = cv2.cvtColor(img_out_sample, cv2.COLOR_BGR2HSV)
-	
+
 	# Use red, blue, green for hue, satruation and value.
 	HSV = ('Hue', 'Satruation', 'Value')
 	color_space = ('r', 'b', 'g')
@@ -84,7 +92,7 @@ if __name__ == '__main__':
 	plt.grid(True)
 
 	plt.tight_layout()
-	plt.show()
+	# plt.show()
 
 	
 	# *****************************
@@ -122,7 +130,7 @@ if __name__ == '__main__':
 	plt.title('Inliner magnitude spectrum'), plt.xticks([]), plt.yticks([])
 	plt.subplot(222),plt.imshow(magnitude_spectrum_out, cmap = 'gray')
 	plt.title('Outliner magnitude spectrum'), plt.xticks([]), plt.yticks([])
-	plt.show()
+	# plt.show()
 
 	gray_lower = np.array([200])
 	gray_upper = np.array([500])
@@ -140,5 +148,8 @@ if __name__ == '__main__':
 	plt.subplot(224),plt.imshow(out_gray_threshold, cmap = 'gray')
 	plt.title('Outliner magnitude spectrum within threshold'), plt.xticks([]), plt.yticks([])
 	plt.show()
+	# plt.close('all')
 
 	cv2.waitKey(0)
+	# cv2.destroyAllWindows()
+

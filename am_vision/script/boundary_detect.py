@@ -56,12 +56,47 @@ class BoundaryDetectNode():
 
 		self.select_precentage = 0.90
 
+		self.num_feature = 0
+		self._use_color_feature = True
+		self._use_texture_feature = False
+		self._use_depth_feature = False
+
+		# self.feature_mat = np.array()
+		self._feature_mat_empty = True
+
+
 		# Pipeline starts here.
 		self.src = self.image_load()
 		self.color_lower_bound, self.color_upper_bound = \
 				 self.color_sample(self.src)
 		self.green_mask, self.img_threshold = self.color_mask(self.src)
-		self.color_contour(self.green_mask, self.src)
+		
+		if (self._use_color_feature):
+			self.color_contour(self.green_mask, self.src.copy())
+			num_color_feature = 3
+			self.num_feature += num_color_feature
+			if (self._feature_mat_empty):
+				self.feature_mat = self.src.reshape((-1, num_color_feature))
+			else:
+				self.feature_mat = self.feature_append(self.green_mask, num_color_feature)
+
+		
+		if (self._use_texture_feature):
+			self.texture_feature, self._num_texture_feature = \
+								self.texture_seg(self.src)
+			self.num_feature += self._num_texture_feature
+			self.feature_mat = self.feature_append(self.texture_feature, self._num_texture_feature)
+
+		if (self._use_depth_feature):
+			self.depth_img = self.image_load(depth_pic_loc)
+			num_depth_feature = 1	
+			if (self._feature_mat_empty):
+				self.feature_mat = self.depth_img.reshape((-1, num_depth_feature))
+			else:
+				self.feature_mat = self.feature_append(self.depth_img, num_depth_feature)
+
+
+		self.kmeans_seg(self.feature_mat)
 
 
 
@@ -177,6 +212,7 @@ class BoundaryDetectNode():
 				color_upper_bound[i] = 255 - j 
 
 		return color_lower_bound, color_upper_bound
+
 
 	def color_mask(self, src):
 		""" Make the green mask.
@@ -321,6 +357,39 @@ class BoundaryDetectNode():
 		# # Visualize the final image
 		# cv2.imshow("Final Result", dst);
 		# cv2.waitKey(0);
+	def feature_append(self, in_mat, num_feature):
+		""" Appending new features in preparation for clustering.
+		"""
+
+		# _, _, num_feature = in_mat.shape
+		feature_mat_new = in_mat.reshape((-1, num_feature))
+		self.feature_mat.push_back(feature_mat_new) 
+
+
+
+	def kmeans_seg(self, feature_mat):
+		""" Use Kmeans to cluster on the given features.
+		"""
+
+		# Reshape the image into M*N
+		# M-number of pixels; N-number of features.
+		# num_feature = 3
+		Z = feature_mat
+		Z = np.float32(Z)
+
+		# Define criteria, number of clusters(K) and apply kmeans()
+		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, \
+					10, 1.0)
+		K = 2
+		ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, \
+									cv2.KMEANS_RANDOM_CENTERS)
+		
+		# Now convert back into uint8, and make original image
+		center = np.uint8(center)
+		res = center[label.flatten()]
+		res2 = res.reshape((self.src.shape))
+		cv2.imshow('Kmeans Result', res2)
+		cv2.waitKey(0)
 
 
 
