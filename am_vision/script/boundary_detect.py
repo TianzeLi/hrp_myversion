@@ -28,6 +28,7 @@
 
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class BoundaryDetectNode():
@@ -59,26 +60,31 @@ class BoundaryDetectNode():
 		self.num_feature = 0
 		self._use_color_feature = True
 		self._use_texture_feature = False
-		self._use_depth_feature = False
+		self._use_depth_feature = True
 
 		# self.feature_mat = np.array()
 		self._feature_mat_empty = True
 
+		# Manually load images.
+		src_loc = "../samples/p3_color.png"
+		src_depth_loc = "../samples/p3_depth.png"
 
 		# Pipeline starts here.
-		self.src = self.image_load()
+		self.src = self.image_load(src_loc)
 		self.color_lower_bound, self.color_upper_bound = \
 				 self.color_sample(self.src)
 		self.green_mask, self.img_threshold = self.color_mask(self.src)
 		
 		if (self._use_color_feature):
 			self.color_contour(self.green_mask, self.src.copy())
-			num_color_feature = 3
+			num_color_feature = 1
 			self.num_feature += num_color_feature
 			if (self._feature_mat_empty):
-				self.feature_mat = self.src.reshape((-1, num_color_feature))
+				self.feature_mat = self.green_mask.reshape((-1, num_color_feature))
+				self._feature_mat_empty = False
 			else:
-				self.feature_mat = self.feature_append(self.green_mask, num_color_feature)
+				self.feature_append(self.green_mask, num_color_feature)
+				print(self.feature_mat.shape)
 
 		
 		if (self._use_texture_feature):
@@ -88,32 +94,39 @@ class BoundaryDetectNode():
 			self.feature_mat = self.feature_append(self.texture_feature, self._num_texture_feature)
 
 		if (self._use_depth_feature):
-			self.depth_img = self.image_load(depth_pic_loc)
-			num_depth_feature = 1	
+			self.depth_img = self.image_load(src_depth_loc)
+			self.depth_img = cv2.cvtColor(self.depth_img, cv2.COLOR_BGR2GRAY)
+			num_depth_feature = 1
+			self.num_feature += num_depth_feature
+
 			if (self._feature_mat_empty):
 				self.feature_mat = self.depth_img.reshape((-1, num_depth_feature))
+				self._feature_mat_empty = False			
 			else:
-				self.feature_mat = self.feature_append(self.depth_img, num_depth_feature)
+				self.feature_append(self.depth_img, num_depth_feature)
+				print(self.feature_mat.shape)
 
 
 		self.kmeans_seg(self.feature_mat)
 
 
 
-	def image_load(self):
+	def image_load(self, loc):
 		""" Load the Image and reshape to the uniform size. 
 
 		"""
 
 		# Load the image.
-		src = cv2.imread("../samples/p3_color.png")
+		src = cv2.imread(loc)
 		# Check if the image is properly loaded.
 		if not src.data:
 		    print("Image not loaded correctly.")
 		
 		src = cv2.resize(src, (self.fixed_width, self.fixed_height))
+
 		# Show formated size source image
-		cv2.imshow('Source Image', src)
+		img_name = 'Source Image: ' + loc
+		cv2.imshow(img_name, src)
 		cv2.waitKey(0)
 		return src
 
@@ -357,13 +370,42 @@ class BoundaryDetectNode():
 		# # Visualize the final image
 		# cv2.imshow("Final Result", dst);
 		# cv2.waitKey(0);
+
+	def texture_seg(self):
+		""" Genetate texture feature diagrams. 
+		"""
+
+		# cv2.getGaborKernel(ksize, sigma, theta, lambda, gamma, psi, ktype)
+		# For example, 
+		# 	g_kernel = cv2.getGaborKernel(\
+		# 			   (21, 21), 8.0, np.pi/4, 10.0, 0.5, 0, ktype=cv2.CV_32F)
+		# ksize - size of gabor filter (n, n)
+		# sigma - standard deviation of the gaussian function
+		# theta - orientation of the normal to the parallel stripes
+		# 		  for lawn, should be 0.0 rad.
+		# lambda - wavelength of the sinusoidal factor
+		# gamma - spatial aspect ratio
+		# psi - phase offset
+		# ktype - type and range of values that each pixel in the gabor kernel can hold
+
+		g_kernel = cv2.getGaborKernel((15, 15), 7.0, 3.14159/12*0, 2.5, 1.0, 0, ktype=cv2.CV_32F)
+
+		filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
+
+		
+
 	def feature_append(self, in_mat, num_feature):
-		""" Appending new features in preparation for clustering.
+		""" Append new features in preparation for clustering.
 		"""
 
 		# _, _, num_feature = in_mat.shape
 		feature_mat_new = in_mat.reshape((-1, num_feature))
-		self.feature_mat.push_back(feature_mat_new) 
+		# print(feature_mat_new.shape)
+		# print(self.feature_mat.shape)
+		self.feature_mat = np.append(self.feature_mat, feature_mat_new, axis = 1) 
+		# print(self.feature_mat.shape)
+		# self.feature_mat = np.vstack((self.feature_mat, feature_mat_new))
+
 
 
 
@@ -374,22 +416,28 @@ class BoundaryDetectNode():
 		# Reshape the image into M*N
 		# M-number of pixels; N-number of features.
 		# num_feature = 3
-		Z = feature_mat
+		Z = self.feature_mat
+		# print(self.feature_mat.shape)
 		Z = np.float32(Z)
 
 		# Define criteria, number of clusters(K) and apply kmeans()
-		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, \
-					10, 1.0)
-		K = 2
-		ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, \
-									cv2.KMEANS_RANDOM_CENTERS)
+		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+		K = 3
+		ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 		
 		# Now convert back into uint8, and make original image
 		center = np.uint8(center)
 		res = center[label.flatten()]
-		res2 = res.reshape((self.src.shape))
-		cv2.imshow('Kmeans Result', res2)
-		cv2.waitKey(0)
+		print(label.shape)
+		print("Total number of features: %d" % self.num_feature)
+		# print(self.green_mask.shape)
+		res2 = label.reshape((self.fixed_height, self.fixed_width))
+		# print(res2.shape)
+		plt.imshow(res2, interpolation='nearest')
+		# plt.plot(res2)
+		plt.show()
+		# cv2.imshow('Kmeans Result', res2)
+		# cv2.waitKey(0)
 
 
 
