@@ -23,8 +23,8 @@ import numpy as np
 wavelength_min = 2.5
 
 # Load the image.
-src = cv2.imread("../samples/p91_color.png")
-src = cv2.resize(src, (self.fixed_width, self.fixed_height))
+src = cv2.imread("../samples/p3_color.png")
+src = cv2.resize(src, (640, 480))
 
 # Check if the image is properly loaded.
 if not src.data:
@@ -50,12 +50,15 @@ cv2.waitKey(0)
 # psi - phase offset
 # ktype - type and range of values that each pixel in the gabor kernel can hold
 
-g_kernel = cv2.getGaborKernel((15, 15), 7.0, 3.14159/12*0, 2.5, 1.0, 0, ktype=cv2.CV_32F)
+g_kernel = cv2.getGaborKernel((15, 15), 7.0, 3.14159/12*0, 5, 1.0, 0, ktype=cv2.CV_32F)
 
 filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
 
 cv2.imshow('Filtered Image', filtered_img)
 cv2.waitKey(0)
+
+print("The mean variance of the feature img is %d" % np.var(filtered_img))
+
 
 h, w = g_kernel.shape[:2]
 g_kernel = cv2.resize(g_kernel, (3*w, 3*h), interpolation=cv2.INTER_CUBIC)

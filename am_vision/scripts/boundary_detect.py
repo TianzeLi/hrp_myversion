@@ -40,6 +40,7 @@ class BoundaryDetectNode():
 		# ROS parameters.
 
 
+
 		# Standalone parameters.
 		self.fixed_width = 640
 		self.fixed_height = 480
@@ -55,12 +56,14 @@ class BoundaryDetectNode():
 		self.right_sample_y0 = self.fixed_height - self.fixed_height/4
 		self.right_sample_h = self.fixed_height/4
 
-		self.select_precentage = 0.90
+		self.select_precentage = 0.80
 
 		self.num_feature = 0
 		self._use_color_feature = True
+		self._use_loc_feature = False
 		self._use_texture_feature = False
-		self._use_depth_feature = True
+		self._use_depth_feature = False
+
 
 		# self.feature_mat = np.array()
 		self._feature_mat_empty = True
@@ -71,8 +74,9 @@ class BoundaryDetectNode():
 
 		# Pipeline starts here.
 		self.src = self.image_load(src_loc)
-		self.color_lower_bound, self.color_upper_bound = \
-				 self.color_sample(self.src)
+		self.src_gray = cv2.cvtColor(self.src, cv2.COLOR_BGR2GRAY)
+
+		self.color_lower_bound, self.color_upper_bound = self.color_sample(self.src)
 		self.green_mask, self.img_threshold = self.color_mask(self.src)
 		
 		if (self._use_color_feature):
@@ -85,13 +89,36 @@ class BoundaryDetectNode():
 			else:
 				self.feature_append(self.green_mask, num_color_feature)
 				print(self.feature_mat.shape)
+			
+			if (self._use_loc_feature):
+				loc_img_x = np.zeros(self.src_gray)
+				loc_img_y = np.zeros(self.src_gray)
+				for i in range(self.fixed_width):
+					loc_img_x[i, :] = i
+
+				for i in range(self.fixed_height):
+					loc_img_y[:, i] = i
+
+				self.feature_append(loc_img_x, 1)
+				self.feature_append(loc_img_y, 1)
+
+
 
 		
 		if (self._use_texture_feature):
-			self.texture_feature, self._num_texture_feature = \
-								self.texture_seg(self.src)
-			self.num_feature += self._num_texture_feature
-			self.feature_mat = self.feature_append(self.texture_feature, self._num_texture_feature)
+			if (self._feature_mat_empty):
+				self._num_texture_feature = self.texture_seg(self.src_gray)
+				if (self._num_texture_feature > 0):
+					self._feature_mat_empty = False
+					self.num_feature += self._num_texture_feature
+				else:
+					print("No capable features in the texture segmentation.")
+
+			else:
+				self._num_texture_feature = self.texture_seg(self.src)
+				self.num_feature += self._num_texture_feature
+
+			# self.feature_mat = self.feature_append(self.texture_feature, self._num_texture_feature)
 
 		if (self._use_depth_feature):
 			self.depth_img = self.image_load(src_depth_loc)
@@ -371,9 +398,12 @@ class BoundaryDetectNode():
 		# cv2.imshow("Final Result", dst);
 		# cv2.waitKey(0);
 
-	def texture_seg(self):
+	def texture_seg(self, src_gray):
 		""" Genetate texture feature diagrams. 
 		"""
+
+		num_texture_feature = 0
+
 
 		# cv2.getGaborKernel(ksize, sigma, theta, lambda, gamma, psi, ktype)
 		# For example, 
@@ -387,10 +417,78 @@ class BoundaryDetectNode():
 		# gamma - spatial aspect ratio
 		# psi - phase offset
 		# ktype - type and range of values that each pixel in the gabor kernel can hold
+		# g_kernel = cv2.getGaborKernel((15, 15), 7.0, 3.14159/12*0, 2.5, 1.0, 0, ktype=cv2.CV_32F)
+		ksize = 15
+		sigma = 7.0
+		theta_max = np.pi
+		theta_seq = np.pi/12
+		wavelength_max = ksize/2
+		wavelength_min = 2.5
+		wavelength_num = 5
+		wavelength_seq = (wavelength_max - wavelength_min) / wavelength_num
+		gamma = 1.0
+		psi = 0.0
 
-		g_kernel = cv2.getGaborKernel((15, 15), 7.0, 3.14159/12*0, 2.5, 1.0, 0, ktype=cv2.CV_32F)
+		for theta in range(0, theta_max, theta_seq):
+			for wavelength in range(wavelength_min, wavelength_max, wavelength_seq):
+				g_kernel = cv2.getGaborKernel((ksize, ksize) sigma, theta, wavelength, gamma, psi, ktype=cv2.CV_32F)
 
-		filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
+				filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
+
+				if (texture_feature_valid(filtered_img) == 0):
+					self.feature_mat = self.feature_append(filtered_img, 1)
+					num_texture_feature += 1
+
+		return num_texture_feature
+
+
+	def texture_feature_valid(self, array):
+		""" Check if the texture segmentation instance is valid in the 
+			sense that:
+				1. The variance of the feature image is high.
+				2. The variance of the feature in left sample is low.
+				3. The variance of the feature in right sample is low.
+			Input: 
+				The feature image after the gabor filter.
+			Output: 
+				True of False
+
+			Note: 
+				The variance is the average of the squared deviations
+				from the mean, i.e., var = mean(abs(x - x.mean())**2).
+		"""
+
+		invalid_whole = 1
+		invalid_left = 1
+		invalid_right = 1
+
+		array_left_sample = src[int(self.left_sample_y0):int(self.left_sample_y0 \
+						+ self.left_sample_h), int(self.left_sample_x0): \
+						int(self.left_sample_x0 + self.left_sample_w)]
+
+		array_right_sample = src[int(self.right_sample_y0):int(self.right_sample_y0 \
+						+ self.right_sample_h), int(self.right_sample_x0): \
+						int(self.right_sample_x0 + self.right_sample_w)]
+
+		texture_var_threshold_high = 
+		texture_var_threshold_low = 
+
+		print(np.var(array))
+		print(np.var(array_left_sample))
+		print(np.var(array_right_sample))
+
+		if (np.var(array) > texture_var_threshold_high):
+			invalid_whole = 0
+		
+		if (np.var(array_left_sample) < texture_var_threshold_low):
+			invalid_left = 0
+		
+		if (np.var(array_right_sample) < texture_var_threshold_low):
+			invalid_right = 0
+		
+
+		return invalid_whole + invalid_left + invalid_right
+
 
 		
 
@@ -398,12 +496,8 @@ class BoundaryDetectNode():
 		""" Append new features in preparation for clustering.
 		"""
 
-		# _, _, num_feature = in_mat.shape
 		feature_mat_new = in_mat.reshape((-1, num_feature))
-		# print(feature_mat_new.shape)
-		# print(self.feature_mat.shape)
 		self.feature_mat = np.append(self.feature_mat, feature_mat_new, axis = 1) 
-		# print(self.feature_mat.shape)
 		# self.feature_mat = np.vstack((self.feature_mat, feature_mat_new))
 
 
@@ -422,7 +516,7 @@ class BoundaryDetectNode():
 
 		# Define criteria, number of clusters(K) and apply kmeans()
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-		K = 3
+		K = 2
 		ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 		
 		# Now convert back into uint8, and make original image
