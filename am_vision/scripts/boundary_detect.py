@@ -1,34 +1,53 @@
 #! /usr/bin/python
 
-'''
- Non-learning visual lawn boundary detector.
- Input: RGB image and optionally the depth image.
- Output: labelled boundary or the suggested drving away direction.
+"""
+ Lawn boundary detector based on explicit image processing methods.
+ Input: 
+ 	RGB image and optionally the depth image.
+ Output: 
+ 	Labelled boundary and optionally the suggested drving away direction.
+ 
  Pipeline (mainly): 
- 	1. Color thresholding.
- 	2. Morphology mask processing.
- 	3. Filtering with requirements on contour.
+ 	1. Color thresholding
+ 		1.1 Morphology mask processing.
+ 		1.2 Filtering with requirements on contour.
+ 	2. Texture feature detecting.
+ 		2.1 Filter with multi gabor filters.
+ 		2.2 Only accept feature image with proper variance.
+ 	3. Depth feature
+ 		3.1 Directly make use of the depth image. 
+ 	4. Clustering using Kmeans.
 
  Note: 
  	1. Trade-off between robustness and efficiency.
  	2. The overall rigidity depends on all procedures in the pipeline.
  TODO: 
- 	0. Load each feature detector into a function and form main pipeline. 
  	1. Automate color sampling.
  		(Still need draw box on img and tune parameters.)
- 	2. 
+ 	2. Consider if to set range limit for depth images.
  	3. Add texture features.
  	4. Add spatial adjacency as features.
- 	5. Potentially add depth into feature.
- 	6. Clustering.
- 	7. Integrate with ROS.
- 	8. Potentially feed back the warning level and retreating suggestion. 
+ 		(Still need to fix the strength of this feature. Now too strong.)
+ 	5. Clustering.
+ 		(Still need to check the parameters.)
+ 	6. Integrate with ROS.
+ 	7. Optionally feed back the warning level and retreating suggestion. 
 
-'''
+"""
 
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+def prRed(prt): print("\033[91m {}\033[00m" .format(prt))
+def prGreen(prt): print("\033[92m {}\033[00m" .format(prt))
+def prYellow(prt): print("\033[93m {}\033[00m" .format(prt))
+def prLightPurple(prt): print("\033[94m {}\033[00m" .format(prt))
+def prPurple(prt): print("\033[95m {}\033[00m" .format(prt))
+def prCyan(prt): print("\033[96m {}\033[00m" .format(prt))
+def prLightGray(prt): print("\033[97m {}\033[00m" .format(prt))
+def prBlack(prt): print("\033[98m {}\033[00m" .format(prt))
 
 
 class BoundaryDetectNode():
@@ -41,45 +60,55 @@ class BoundaryDetectNode():
 
 
 
-		# Standalone parameters.
+		# Standalone init parameters
+
+		# Unify the size of the image and the depth image.
 		self.fixed_width = 640
 		self.fixed_height = 480
 
+		# Define the sampling area on the left.
 		self.left_sample_w = 150
 		self.left_sample_x0 = self.fixed_width/4
 		self.left_sample_y0 = self.fixed_height - self.fixed_height/4
 		self.left_sample_h = self.fixed_height/4
 
-
+		# Define the sampling area on the right.
 		self.right_sample_w = 150
 		self.right_sample_x0 = self.fixed_width*3/4 - self.right_sample_w
 		self.right_sample_y0 = self.fixed_height - self.fixed_height/4
 		self.right_sample_h = self.fixed_height/4
 
+		# Define the precentage of accepting points for color seg.
 		self.select_precentage = 0.80
 
+		# Select the features for clustering.
 		self.num_feature = 0
 		self._use_color_feature = True
 		self._use_loc_feature = False
-		self._use_texture_feature = False
-		self._use_depth_feature = False
+		self._use_texture_feature = True
+		self._use_depth_feature = True
 
-
-		# self.feature_mat = np.array()
-		self._feature_mat_empty = True
-
-		# Manually load images.
+		# Specify the location of the images to load.
 		src_loc = "../samples/p3_color.png"
 		src_depth_loc = "../samples/p3_depth.png"
+
+		# Kmeans parameters
+		self.K = 3
+
+		# Markers
+		self._feature_mat_empty = True
+
 
 		# Pipeline starts here.
 		self.src = self.image_load(src_loc)
 		self.src_gray = cv2.cvtColor(self.src, cv2.COLOR_BGR2GRAY)
 
-		self.color_lower_bound, self.color_upper_bound = self.color_sample(self.src)
-		self.green_mask, self.img_threshold = self.color_mask(self.src)
+		
 		
 		if (self._use_color_feature):
+			color_bound_low, color_bound_up = self.color_sample(self.src, self.select_precentage)
+			self.green_mask, self.img_threshold = self.color_mask(\
+													self.src, color_bound_low, color_bound_up)
 			self.color_contour(self.green_mask, self.src.copy())
 			num_color_feature = 1
 			self.num_feature += num_color_feature
@@ -87,22 +116,23 @@ class BoundaryDetectNode():
 				self.feature_mat = self.green_mask.reshape((-1, num_color_feature))
 				self._feature_mat_empty = False
 			else:
-				self.feature_append(self.green_mask, num_color_feature)
+				self.feature_append(self.feature_mat, self.green_mask, num_color_feature)
 				print(self.feature_mat.shape)
 			
 			if (self._use_loc_feature):
-				loc_img_x = np.zeros(self.src_gray)
-				loc_img_y = np.zeros(self.src_gray)
+				loc_img_x = np.zeros(self.src_gray.shape)
+				loc_img_y = np.zeros(self.src_gray.shape)
+
+				print(self.src_gray.shape)
+
 				for i in range(self.fixed_width):
-					loc_img_x[i, :] = i
+					loc_img_x[:, i-1] = i - 1
 
 				for i in range(self.fixed_height):
-					loc_img_y[:, i] = i
+					loc_img_y[i-1, :] = i - 1
 
-				self.feature_append(loc_img_x, 1)
-				self.feature_append(loc_img_y, 1)
-
-
+				self.feature_append(self.feature_mat, loc_img_x, 1)
+				self.feature_append(self.feature_mat, loc_img_y, 1)
 
 		
 		if (self._use_texture_feature):
@@ -130,68 +160,92 @@ class BoundaryDetectNode():
 				self.feature_mat = self.depth_img.reshape((-1, num_depth_feature))
 				self._feature_mat_empty = False			
 			else:
-				self.feature_append(self.depth_img, num_depth_feature)
+				self.feature_append(self.feature_mat, self.depth_img, num_depth_feature)
 				print(self.feature_mat.shape)
 
 
-		self.kmeans_seg(self.feature_mat)
+		self.kmeans_seg(self.feature_mat, self.K)
 
 
 
 	def image_load(self, loc):
 		""" Load the Image and reshape to the uniform size. 
+			
+			Input: 
+				The image locations. 
+			Output:
+				The image shaped into the unified size.
 
 		"""
 
-		# Load the image.
 		src = cv2.imread(loc)
-		# Check if the image is properly loaded.
 		if not src.data:
 		    print("Image not loaded correctly.")
 		
 		src = cv2.resize(src, (self.fixed_width, self.fixed_height))
 
-		# Show formated size source image
 		img_name = 'Source Image: ' + loc
 		cv2.imshow(img_name, src)
 		cv2.waitKey(0)
-		return src
 
-		# # Display the edges detected by Canny operator.
-		# edges = cv2.Canny(src,100,200)
-		# cv2.imshow('Canny Edge on Source Image', edges)
-		# cv2.waitKey(0)
+		return src
 
 
 	def image_blur(self, src):
-		""" Blur the image
+		""" Blur the image.
+
+			Input: 
+				The source image.
+			Output: 
+				The blurred image.
 
 		"""
 		src_blur = cv2.blur(src,(6,6))
 		# src_blur = cv2.GaussianBlur(src,(5,5),0)
 		# src_blur = cv2.bilateralFilter(src,9,75,75)
 		src = src_blur
+
 		cv2.imshow('Source Image Blurred', src_blur)
 		cv2.waitKey(0)
 
+		return src
 
-	def color_sample(self, src):
-		""" Sample the color histgram from the area that supposed to be 
-			part of the lawn. 
-		
+	def left_crop(self, img):
+		""" Extract the image in the selected region on the left side.
+
 		"""
 
-		img_left_sample = src[int(self.left_sample_y0):int(self.left_sample_y0 \
+		return img[int(self.left_sample_y0):int(self.left_sample_y0 \
 						+ self.left_sample_h), int(self.left_sample_x0): \
 						int(self.left_sample_x0 + self.left_sample_w)]
 
-		img_right_sample = src[int(self.right_sample_y0):int(self.right_sample_y0 \
+	def right_crop(self, img):
+		""" Extract the image in the selected region on the left side.
+		
+		"""
+
+		return img[int(self.right_sample_y0):int(self.right_sample_y0 \
 						+ self.right_sample_h), int(self.right_sample_x0): \
 						int(self.right_sample_x0 + self.right_sample_w)]
 
-		cv2.imshow('Left sampled image.', img_left_sample)
-		cv2.imshow('Right sampled image.', img_right_sample)
-		cv2.waitKey(0)
+	def color_sample(self, src, accept_ratio):
+		""" Sample the color histgram from the area that supposed to be 
+			part of the lawn. 
+
+			Input:
+				src - The sampled image.
+				accept_ratio - the ratio to accept.
+			Output:
+				The bound value in the HSV space.
+		
+		"""
+
+		img_left_sample = self.left_crop(src)
+		img_right_sample = self.right_crop(src)
+
+		# cv2.imshow('Left sampled image.', img_left_sample)
+		# cv2.imshow('Right sampled image.', img_right_sample)
+		# cv2.waitKey(0)
 
 		left_sample_hsv = cv2.cvtColor(img_left_sample, cv2.COLOR_BGR2HSV)
 		right_sample_hsv = cv2.cvtColor(img_right_sample, cv2.COLOR_BGR2HSV)
@@ -203,11 +257,9 @@ class BoundaryDetectNode():
 		#  Create array to store the bounds.
 		color_lower_bound = np.array([0, 0, 0])
 		color_upper_bound = np.array([255, 255, 255])
-		threshold_count = (1 - self.select_precentage) * self.left_sample_w \
+		threshold_count = (1 - accept_ratio) * self.left_sample_w \
 							* self.left_sample_h
 
-		# plt.figure(fig_num)
-		# fig_num += 1
 		for i, col in enumerate(color_space):
 			tmp_count = 0
 			j = 0
@@ -225,6 +277,8 @@ class BoundaryDetectNode():
 
 			color_upper_bound[i] = 255 - j 
 
+		# plt.figure(fig_num)
+		# fig_num += 1
 		# 	plt.plot(hist_hsv, color = col, label = HSV[i])
 		# 	plt.xlim([0,256])
 		# plt.legend()
@@ -254,24 +308,24 @@ class BoundaryDetectNode():
 		return color_lower_bound, color_upper_bound
 
 
-	def color_mask(self, src):
-		""" Make the green mask.
+	def color_mask(self, src, green_lower, green_upper):
+		""" Filter the image with green mask and then morphology operations.
+			
+			Input: 
+				src - source image
+				green_lower - the lower bound for lawn color 
+				green_upper - the upper bound for lawn color
+			Output:
+				The labelled image for accepted regions.
 
 		"""
 
 		# Convert to the HSV space.
 		src_hsv = cv2.cvtColor(src, cv2.COLOR_RGB2HSV)
 
-		# *********************************************************
-		# The color mask tunning can be automated by auto-sampling.
-		# Strategy: set the boundary to let in 95% of inliners. 
-		# Potential Automating block 1.
-		# Produce the mask.
-
+		# # Manually set bounds.
 		# green_lower = np.array([0, 5, 50])
 		# green_upper = np.array([100, 120, 200])
-		green_lower = self.color_lower_bound
-		green_upper = self.color_upper_bound
 
 		mask_green = cv2.inRange(src_hsv, green_lower, green_upper) 
 		cv2.imshow("Green Mask Before Morphology", mask_green)
@@ -290,10 +344,9 @@ class BoundaryDetectNode():
 		kernel5 = np.ones((5, 5), np.uint8)
 
 
-		# ***************************************************
 		# The morphology tunning may not be easily automated.
 		# Strategy: find a set of universally optimal parameters.  
-		# Morphology part, could tune the parameter "iterations"
+		# Could tune the parameter "iterations"
 		mask_green = cv2.erode(mask_green, kernel4, iterations = 3)
 		mask_green = cv2.dilate(mask_green, kernel3, iterations = 4)
 		# mask_green = cv2.erode(mask_green, kernel4, iterations = 1)
@@ -313,10 +366,16 @@ class BoundaryDetectNode():
 
 
 	def color_contour(self, mask_green, src):
-		""" Draw contours out of the mask and source image.
+		""" Draw contours defined by the mask on the source image.
+			Also remove the not desirable areas by examining their contours.
+
+			Input: 
+				1. The color mask obtained from the former step.
+				2. The image to apply the mask.
 		
 		"""
 
+		# For the edge detecotr cv2.Canny, there are: 
 		# Two threshold values, minVal and maxVal. 
 		# Any edges with intensity gradient more than maxVal are sure to be edges 
 		# and those below minVal are sure to be non-edges, so discarded. 
@@ -387,11 +446,9 @@ class BoundaryDetectNode():
 		cv2.imshow("Lawn Contours", src_contour_dst)
 		cv2.waitKey(0)
 
-
-
+		# Display the filtered out areas.
 		# cv2.bitwise_not(src, img_color_filtered, mask_green);
-
-		# cv2.imshow("Filtered by color threshold", img_color_filtered);
+		# cv2.imshow("Removed by color threshold", img_color_filtered);
 		# cv2.waitKey(0);
 
 		# # Visualize the final image
@@ -399,11 +456,15 @@ class BoundaryDetectNode():
 		# cv2.waitKey(0);
 
 	def texture_seg(self, src_gray):
-		""" Genetate texture feature diagrams. 
+		""" Genetate texture feature images. 
+
+			Input:
+				The gray scaled image.
+
 		"""
 
+		# Store the number of features contained.
 		num_texture_feature = 0
-
 
 		# cv2.getGaborKernel(ksize, sigma, theta, lambda, gamma, psi, ktype)
 		# For example, 
@@ -425,18 +486,32 @@ class BoundaryDetectNode():
 		wavelength_max = ksize/2
 		wavelength_min = 2.5
 		wavelength_num = 5
-		wavelength_seq = (wavelength_max - wavelength_min) / wavelength_num
+		wavelength_seq = (wavelength_max - wavelength_min)/wavelength_num
 		gamma = 1.0
 		psi = 0.0
 
-		for theta in range(0, theta_max, theta_seq):
-			for wavelength in range(wavelength_min, wavelength_max, wavelength_seq):
-				g_kernel = cv2.getGaborKernel((ksize, ksize) sigma, theta, wavelength, gamma, psi, ktype=cv2.CV_32F)
-
+		# Iterate over both wavelength and theta.
+		for j in range(int(np.floor(theta_max/theta_seq)+1)):
+			theta = j*theta_seq
+			for k in range(wavelength_num):
+				wavelength = wavelength_min + k*wavelength_seq
+				g_kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, wavelength, gamma, psi, ktype=cv2.CV_32F)
 				filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
+				filtered_img = cv2.cvtColor(filtered_img, cv2.COLOR_BGR2GRAY)
+				
+				cv2.imshow('Filtered Image', filtered_img)
+				cv2.waitKey(0)
+				
+				print('Theta = {}, wavelength = {}.'.format(theta, wavelength))
 
-				if (texture_feature_valid(filtered_img) == 0):
-					self.feature_mat = self.feature_append(filtered_img, 1)
+				if (self.texture_feature_valid(filtered_img) == 0):
+					if (self._feature_mat_empty):
+						self.feature_mat = filtered_img.reshape((-1, 1))
+						self._feature_mat_empty = False
+						num_texture_feature = 1
+					else:
+						self.feature_append(self.feature_mat, filtered_img, 1)
+						print('\tThe feature matrix now has the shape {}.'.format(self.feature_mat.shape))
 					num_texture_feature += 1
 
 		return num_texture_feature
@@ -462,61 +537,72 @@ class BoundaryDetectNode():
 		invalid_left = 1
 		invalid_right = 1
 
-		array_left_sample = src[int(self.left_sample_y0):int(self.left_sample_y0 \
-						+ self.left_sample_h), int(self.left_sample_x0): \
-						int(self.left_sample_x0 + self.left_sample_w)]
+		array_left_sample = self.left_crop(array)
 
-		array_right_sample = src[int(self.right_sample_y0):int(self.right_sample_y0 \
-						+ self.right_sample_h), int(self.right_sample_x0): \
-						int(self.right_sample_x0 + self.right_sample_w)]
+		array_right_sample = self.right_crop(array)
 
-		texture_var_threshold_high = 
-		texture_var_threshold_low = 
+		texture_stdvar_threshold_high = 50
+		texture_stdvar_threshold_low = 10
 
-		print(np.var(array))
-		print(np.var(array_left_sample))
-		print(np.var(array_right_sample))
+		print('\tThe overall std variance = {}'.format(np.std(array)))
+		print('\tThe left std variance = {}'.format(np.std(array_left_sample)))
+		print('\tThe right std variance = {}'.format(np.std(array_right_sample)))
 
-		if (np.var(array) > texture_var_threshold_high):
+		if (np.std(array) > texture_stdvar_threshold_high):
 			invalid_whole = 0
 		
-		if (np.var(array_left_sample) < texture_var_threshold_low):
+		if (np.std(array_left_sample) < texture_stdvar_threshold_low):
 			invalid_left = 0
 		
-		if (np.var(array_right_sample) < texture_var_threshold_low):
+		if (np.std(array_right_sample) < texture_stdvar_threshold_low):
 			invalid_right = 0
 		
+		if (invalid_whole + invalid_left + invalid_right):
+			prYellow('\tThis parameter set does not pass the threshold.')
+		else:
+			prCyan('\tThis parameter set passes the threshold.')
+
 
 		return invalid_whole + invalid_left + invalid_right
 
 
-		
 
-	def feature_append(self, in_mat, num_feature):
+	def feature_append(self, feature_mat, in_mat, num_feature):
 		""" Append new features in preparation for clustering.
+			Input:
+				1. The new matrix carring the feature.
+				2. Number of features beared in the coming matrix. 
+
+			Note:
+				The coming image is reshaped into an array. 
 		"""
 
 		feature_mat_new = in_mat.reshape((-1, num_feature))
-		self.feature_mat = np.append(self.feature_mat, feature_mat_new, axis = 1) 
+		print(feature_mat)
+		print(feature_mat_new)
+		print('\tThe new feature matrix now has the shape {}.'.format(feature_mat_new.shape))
+		print('\tThe feature matrix now has the shape {}.'.format(feature_mat.shape))
+		self.feature_mat = np.append(feature_mat, feature_mat_new, axis = 1) 
 		# self.feature_mat = np.vstack((self.feature_mat, feature_mat_new))
 
 
 
 
-	def kmeans_seg(self, feature_mat):
+
+
+	def kmeans_seg(self, feature_mat, K):
 		""" Use Kmeans to cluster on the given features.
+
+
 		"""
 
 		# Reshape the image into M*N
 		# M-number of pixels; N-number of features.
-		# num_feature = 3
 		Z = self.feature_mat
-		# print(self.feature_mat.shape)
 		Z = np.float32(Z)
 
 		# Define criteria, number of clusters(K) and apply kmeans()
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-		K = 2
 		ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 		
 		# Now convert back into uint8, and make original image
