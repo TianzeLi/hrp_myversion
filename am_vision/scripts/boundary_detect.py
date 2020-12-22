@@ -39,6 +39,18 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
+import logging
+
+# create logger with 'application'
+logger = logging.getLogger('spam_application')
+logger.setLevel(logging.DEBUG)
+# Examples
+# logging.debug('This is a debug message')
+# logging.info('This is an info message')
+# logging.warning('This is a warning message')
+# logging.error('This is an error message')
+# logging.critical('This is a critical message')
+
 
 def prRed(prt): print("\033[91m {}\033[00m" .format(prt))
 def prGreen(prt): print("\033[92m {}\033[00m" .format(prt))
@@ -59,8 +71,23 @@ class BoundaryDetectNode():
 		# ROS parameters.
 
 
-
 		# Standalone init parameters
+
+		# Specify the location of the images to load.
+		src_loc = "../samples/p3_color.png"
+		src_depth_loc = "../samples/p3_depth.png"
+
+		# Select the features for clustering.
+		self._use_color_feature = True
+		self._use_loc_feature = True
+		self._use_texture_feature = True
+		self._use_depth_feature = True
+
+		# Kmeans parameters
+		self.K = 6
+				
+		# Define the precentage of accepting points for color seg.
+		self.select_precentage = 0.90
 
 		# Unify the size of the image and the depth image.
 		self.fixed_width = 640
@@ -78,25 +105,15 @@ class BoundaryDetectNode():
 		self.right_sample_y0 = self.fixed_height - self.fixed_height/4
 		self.right_sample_h = self.fixed_height/4
 
-		# Define the precentage of accepting points for color seg.
-		self.select_precentage = 0.80
-
-		# Select the features for clustering.
-		self.num_feature = 0
-		self._use_color_feature = True
-		self._use_loc_feature = False
-		self._use_texture_feature = True
-		self._use_depth_feature = True
-
-		# Specify the location of the images to load.
-		src_loc = "../samples/p3_color.png"
-		src_depth_loc = "../samples/p3_depth.png"
-
-		# Kmeans parameters
-		self.K = 3
+		# Define the range for normalizing, i.e. the weights in kmeans
+		self.feature_range_color = 15
+		self.feature_range_loc = 25
+		self.feature_range_texture = 5
+		self.feature_range_depth = 30
 
 		# Markers
 		self._feature_mat_empty = True
+		self.num_feature = 0
 
 
 		# Pipeline starts here.
@@ -107,30 +124,31 @@ class BoundaryDetectNode():
 		
 		if (self._use_color_feature):
 			color_bound_low, color_bound_up = self.color_sample(self.src, self.select_precentage)
-			self.green_mask, self.img_threshold = self.color_mask(\
-													self.src, color_bound_low, color_bound_up)
+			self.green_mask, self.img_threshold = self.color_mask(self.src, color_bound_low, color_bound_up)
 			self.color_contour(self.green_mask, self.src.copy())
 			num_color_feature = 1
 			self.num_feature += num_color_feature
 			if (self._feature_mat_empty):
 				self.feature_mat = self.green_mask.reshape((-1, num_color_feature))
+				self.feature_mat = self.feature_normalize(self.feature_mat, self.feature_range_color)
 				self._feature_mat_empty = False
 			else:
+				self.green_mask = self.feature_normalize(self.green_mask, self.feature_range_color)
 				self.feature_append(self.feature_mat, self.green_mask, num_color_feature)
-				print(self.feature_mat.shape)
+				logging.debug('The color feature matrix has the shape {}'.format(self.feature_mat.shape))
 			
 			if (self._use_loc_feature):
 				loc_img_x = np.zeros(self.src_gray.shape)
 				loc_img_y = np.zeros(self.src_gray.shape)
-
-				print(self.src_gray.shape)
-
+				
 				for i in range(self.fixed_width):
 					loc_img_x[:, i-1] = i - 1
 
 				for i in range(self.fixed_height):
 					loc_img_y[i-1, :] = i - 1
 
+				loc_img_x = self.feature_normalize(loc_img_x, self.feature_range_loc)
+				loc_img_y = self.feature_normalize(loc_img_y, self.feature_range_loc)
 				self.feature_append(self.feature_mat, loc_img_x, 1)
 				self.feature_append(self.feature_mat, loc_img_y, 1)
 
@@ -142,10 +160,10 @@ class BoundaryDetectNode():
 					self._feature_mat_empty = False
 					self.num_feature += self._num_texture_feature
 				else:
-					print("No capable features in the texture segmentation.")
+					plogging.warning("No capable features in the texture segmentation.")
 
 			else:
-				self._num_texture_feature = self.texture_seg(self.src)
+				self._num_texture_feature = self.texture_seg(self.src_gray)
 				self.num_feature += self._num_texture_feature
 
 			# self.feature_mat = self.feature_append(self.texture_feature, self._num_texture_feature)
@@ -158,10 +176,12 @@ class BoundaryDetectNode():
 
 			if (self._feature_mat_empty):
 				self.feature_mat = self.depth_img.reshape((-1, num_depth_feature))
+				self.feature_mat = self.feature_normalize(self.feature_mat, self.feature_range_depth)
 				self._feature_mat_empty = False			
 			else:
+				self.depth_img = self.feature_normalize(self.depth_img, self.feature_range_depth)
 				self.feature_append(self.feature_mat, self.depth_img, num_depth_feature)
-				print(self.feature_mat.shape)
+				logging.debug(self.feature_mat.shape)
 
 
 		self.kmeans_seg(self.feature_mat, self.K)
@@ -180,7 +200,7 @@ class BoundaryDetectNode():
 
 		src = cv2.imread(loc)
 		if not src.data:
-		    print("Image not loaded correctly.")
+		    logging.error("Image not loaded correctly.")
 		
 		src = cv2.resize(src, (self.fixed_width, self.fixed_height))
 
@@ -210,6 +230,7 @@ class BoundaryDetectNode():
 
 		return src
 
+
 	def left_crop(self, img):
 		""" Extract the image in the selected region on the left side.
 
@@ -227,6 +248,7 @@ class BoundaryDetectNode():
 		return img[int(self.right_sample_y0):int(self.right_sample_y0 \
 						+ self.right_sample_h), int(self.right_sample_x0): \
 						int(self.right_sample_x0 + self.right_sample_w)]
+
 
 	def color_sample(self, src, accept_ratio):
 		""" Sample the color histgram from the area that supposed to be 
@@ -497,22 +519,30 @@ class BoundaryDetectNode():
 				wavelength = wavelength_min + k*wavelength_seq
 				g_kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, wavelength, gamma, psi, ktype=cv2.CV_32F)
 				filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
-				filtered_img = cv2.cvtColor(filtered_img, cv2.COLOR_BGR2GRAY)
-				
-				cv2.imshow('Filtered Image', filtered_img)
-				cv2.waitKey(0)
-				
+
+				# gray_bound_low, gray_bound_up = self.color_sample(filtered_img, self.select_precentage)
+				# gray_mask, self.gray_threshold = self.color_mask(self.src, gray_bound_low, gray_bound_up)
+
+
+				# filtered_img = cv2.cvtColor(filtered_img, cv2.COLOR_BGR2GRAY)
+
 				print('Theta = {}, wavelength = {}.'.format(theta, wavelength))
 
 				if (self.texture_feature_valid(filtered_img) == 0):
 					if (self._feature_mat_empty):
+						filtered_img = self.feature_normalize(filtered_img, self.feature_range_texture)
 						self.feature_mat = filtered_img.reshape((-1, 1))
 						self._feature_mat_empty = False
 						num_texture_feature = 1
 					else:
+						filtered_img = self.feature_normalize(filtered_img, self.feature_range_texture)
 						self.feature_append(self.feature_mat, filtered_img, 1)
 						print('\tThe feature matrix now has the shape {}.'.format(self.feature_mat.shape))
 					num_texture_feature += 1
+
+				cv2.imshow('Filtered Image', filtered_img)
+				# cv2.imshow('Filtered Image Thresholded', gray_mask)
+				cv2.waitKey(0)
 
 		return num_texture_feature
 
@@ -585,14 +615,21 @@ class BoundaryDetectNode():
 		self.feature_mat = np.append(feature_mat, feature_mat_new, axis = 1) 
 		# self.feature_mat = np.vstack((self.feature_mat, feature_mat_new))
 
+	def feature_normalize(self, feature_array, feature_range):
+		""" Normalize the feature_array.
+			Encapsulize here for convenience.
+		"""
 
-
-
+		feature_array = cv2.normalize(feature_array, None, alpha=0, beta=feature_range, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+		return feature_array
 
 
 	def kmeans_seg(self, feature_mat, K):
 		""" Use Kmeans to cluster on the given features.
 
+			Input: 
+				feature_mat - the image with available features.
+				K - the number of the clusters.
 
 		"""
 
@@ -603,7 +640,7 @@ class BoundaryDetectNode():
 
 		# Define criteria, number of clusters(K) and apply kmeans()
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-		ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+		ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_PP_CENTERS)
 		
 		# Now convert back into uint8, and make original image
 		center = np.uint8(center)
