@@ -34,8 +34,8 @@ import matplotlib.pyplot as plt
 import logging
 
 # Create logger with 'log'
-logger = logging.getLogger('BoundaryDetectNode')
-logger.setLevel(logging.INFO)
+logger = logging.getLogger('BoundaryDetect')
+logger.setLevel(logging.DEBUG)
 # Examples
 # logger.debug('This is a debug message')
 # logger.info('This is an info message')
@@ -68,20 +68,20 @@ class BoundaryDetectNode():
 		# Standalone init parameters
 
 		# Specify the location of the images to load.
-		src_loc = "../samples/p3_color.png"
-		src_depth_loc = "../samples/p3_depth.png"
+		src_path = "../samples/p2_color.png"
+		src_depth_path = "../samples/p2_depth.png"
 
 		# Select the features for clustering.
 		self.use_color_feature = True
 		self.use_loc_feature = True
-		self.use_texture_feature = True
+		self.use_texture_feature = False
 		self.use_depth_feature = True
 
 		# Kmeans parameters
 		self.K = 2
 				
 		# Define the precentage of accepting points for color seg.
-		self.select_precentage = 0.90
+		self.select_precentage = 0.75
 
 		# Unify the size of the image and the depth image.
 		self.fixed_width = 640
@@ -101,7 +101,7 @@ class BoundaryDetectNode():
 
 		# Define the range for normalizing, i.e. the weights in kmeans.
 		self.feature_range_color = 15
-		self.feature_range_loc = 15
+		self.feature_range_loc = 10
 		self.feature_range_texture = 5
 		self.feature_range_depth = 20
 
@@ -111,22 +111,23 @@ class BoundaryDetectNode():
 
 
 		# Pipeline starts here.
-		self.src = self.image_load(src_loc)
+		self.src = self.image_load(src_path)
 		self.src_gray = cv2.cvtColor(self.src, cv2.COLOR_BGR2GRAY)
 		
 		if (self.use_color_feature):
 			img_sample = cv2.rectangle(self.src.copy(), (self.left_sample_x0, self.left_sample_y0), \
 										(self.left_sample_x0 + self.left_sample_w,\
-										self.left_sample_y0 + self.left_sample_h), (255, 255, 0), 3)
+										self.left_sample_y0 + self.left_sample_h), (0, 255, 255), 3)
 			img_sample = cv2.rectangle(img_sample, (self.right_sample_x0, self.right_sample_y0), \
 										(self.right_sample_x0 + self.right_sample_w,\
-										self.right_sample_y0 + self.right_sample_h), (255, 255, 0), 3)
+										self.right_sample_y0 + self.right_sample_h), (0, 255, 255), 3)
 			cv2.imshow('Source image with color sampling', img_sample)
 			cv2.waitKey(0)
 
 			color_bound_low, color_bound_up = self.color_sample(self.src, self.select_precentage)
 			self.green_mask, self.img_threshold = self.color_mask(self.src, color_bound_low, color_bound_up)
-			self.color_contour(self.green_mask, self.src.copy())
+			# self.find_contour(self.green_mask, self.src.copy())
+
 			num_color_feature = 1
 			self.num_feature += num_color_feature
 			if (self.feature_mat_empty):
@@ -152,6 +153,7 @@ class BoundaryDetectNode():
 				loc_img_y = self.feature_normalize(loc_img_y, self.feature_range_loc)
 				self.feature_append(self.feature_mat, loc_img_x, 1)
 				self.feature_append(self.feature_mat, loc_img_y, 1)
+				self.num_feature += 2
 
 		
 		if (self.use_texture_feature):
@@ -170,7 +172,7 @@ class BoundaryDetectNode():
 			# self.feature_mat = self.feature_append(self.texture_feature, self.num_texture_feature)
 
 		if (self.use_depth_feature):
-			self.depth_img = self.image_load(src_depth_loc)
+			self.depth_img = self.image_load(src_depth_path)
 			self.depth_img = cv2.cvtColor(self.depth_img, cv2.COLOR_BGR2GRAY)
 			num_depth_feature = 1
 			self.num_feature += num_depth_feature
@@ -185,8 +187,10 @@ class BoundaryDetectNode():
 				logging.debug(self.feature_mat.shape)
 
 
-		self.kmeans_seg(self.feature_mat, self.K)
-
+		self.feature_cluster = self.kmeans_seg(self.feature_mat, self.K)
+		self.feature_cluster = cv2.normalize(self.feature_cluster, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+		self.feature_cluster = self.feature_cluster.astype(np.uint8)
+		self.find_contour(self.feature_cluster, self.src.copy())	
 
 
 	def image_load(self, loc):
@@ -359,12 +363,17 @@ class BoundaryDetectNode():
 		# The morphology tunning may not be easily automated.
 		# Strategy: find a set of universally optimal parameters.  
 		# Could tune the parameter "iterations"
-		mask_green = cv2.erode(mask_green, kernel4, iterations = 3)
-		mask_green = cv2.dilate(mask_green, kernel3, iterations = 4)
+		mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel5)
+		# mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel3)
+
+		mask_green = cv2.erode(mask_green, kernel3, iterations = 3)
+		mask_green = cv2.dilate(mask_green, kernel3, iterations = 3)
+		mask_green = cv2.erode(mask_green, kernel3, iterations = 3)
+
 		# mask_green = cv2.erode(mask_green, kernel4, iterations = 1)
 		# mask_green = cv2.erode(mask_green, kernel2, iterations = 2)
-		mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel3)
-		mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel3)
+		# mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_OPEN, kernel4)
+		# mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel4)
 
 		cv2.imshow("Green Mask After Morphology", mask_green)
 		cv2.waitKey(0)
@@ -377,7 +386,7 @@ class BoundaryDetectNode():
 		return mask_green, img_color_threshold
 
 
-	def color_contour(self, mask_green, src):
+	def find_contour(self, mask, src):
 		""" Draw contours defined by the mask on the source image.
 			Also remove the not desirable areas by examining their contours.
 
@@ -406,8 +415,21 @@ class BoundaryDetectNode():
 		kernel4 = np.ones((4, 4), np.uint8)
 		kernel5 = np.ones((5, 5), np.uint8)
 
-		edges = cv2.Canny(mask_green, 100, 200, L2gradient=True)
-		edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel4)
+
+		# The morphology tunning may not be easily automated.
+		# Strategy: find a set of universally optimal parameters.  
+		# Could tune the parameter "iterations"
+		mask = cv2.dilate(mask, kernel4, iterations = 3)
+		mask = cv2.erode(mask, kernel4, iterations = 4)
+		# mask = cv2.erode(mask, kernel4, iterations = 1)
+		# mask = cv2.erode(mask, kernel2, iterations = 2)
+		mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel5)
+		# mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel4)
+
+
+		edges = cv2.Canny(mask, 100, 200, L2gradient=True)
+		edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel5)
+
 		_, contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		# contours = cv2.findContours(mask_total.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
@@ -466,6 +488,7 @@ class BoundaryDetectNode():
 		# # Visualize the final image
 		# cv2.imshow("Final Result", dst);
 		# cv2.waitKey(0);
+		return src_contour_dst
 
 	def texture_seg(self, src_gray):
 		""" Genetate texture feature images. 
@@ -632,7 +655,7 @@ class BoundaryDetectNode():
 		# Now convert back into uint8, and make original image
 		center = np.uint8(center)
 		res = center[label.flatten()]
-		logger.debug(label.shape)
+		logger.debug(Z.shape)
 		logger.info("Total number of features: %d" % self.num_feature)
 		res2 = label.reshape((self.fixed_height, self.fixed_width))
 		plt.imshow(res2, interpolation='nearest')
@@ -640,6 +663,8 @@ class BoundaryDetectNode():
 		plt.show()
 		# cv2.imshow('Kmeans Result', res2)
 		# cv2.waitKey(0)
+
+		return res2
 
 
 
