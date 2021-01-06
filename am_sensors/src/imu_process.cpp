@@ -42,7 +42,7 @@ void IMUProcess::initializeParams()
 
 	if (!nh_private_.getParam("topic_name", topic_name_))
 		topic_name_ = "imu/data";
-	if (!nh_private_.getParam("fixed_frame", fixed_frame_))
+	if (!nh_private_.getParam("frame_name", fixed_frame_))
 		fixed_frame_ = "map";
 	if (!nh_private_.getParam("publish_rpy", publish_rpy_))
 		publish_rpy_ = false;
@@ -81,7 +81,7 @@ void IMUProcess::initializeParams()
  		orientation_stddev_r_ = 0.001;
 
 
-	ss_tmp << topic_name_ << "/processed";
+	ss_tmp << topic_name_ << "/enu";
 	pub_topic_ = ss_tmp.str();
 	orientation_dev_r_ = orientation_stddev_r_*orientation_stddev_r_;
 	orientation_dev_p_ = orientation_stddev_p_*orientation_stddev_p_;

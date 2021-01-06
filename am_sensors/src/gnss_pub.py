@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """
-
 	Get the latitude and longitude from the GNSS and publish: 
 	1. latitude, longitude and altitude in sensor_msgs/NavSatFix
 	2. relative postion to the initial point in ENU 
@@ -100,7 +99,7 @@ def onPositionChange(self, latitude, longitude, altitude):
 				LONGITUDE_STDEV = np.sqrt(long_var)
 				LATITUDE_STDEV = np.sqrt(lati_var)
 				INITIAL_LONGITUDE = long_average
-				INITIAL_LATITUDE = latitude
+				INITIAL_LATITUDE = lati_average
 
 				rospy.loginfo("GNSS [%s] stdev within control value.", device_serial_number )
 				rospy.loginfo("Initial longitude: [%.6f]", long_average )
