@@ -58,7 +58,7 @@
           pkg="am_sensors"
           type="imu_process">
       <param name="topic_name" value="imu/data"/>
-      <param name="frame_name" value="imu01_link"/>
+      <param name="frame_name" value="map"/>
       <param name="pub_test_tf" value="false"/>
       <param name="xyz" value="0.0 0.16 0.37"/>
       <param name="rpy" value="3.142 0.0 1.571"/>
@@ -85,7 +85,7 @@
           pkg="am_sensors"
           type="imu_process">
       <param name="topic_name" value="imu/data"/>
-      <param name="frame_name" value="imu02_link"/>
+      <param name="frame_name" value="map"/>
       <param name="pub_test_tf" value="false"/>
       <param name="xyz" value="0.0 -0.16 0.37"/>
       <param name="rpy" value="3.142 0.0 1.571"/>

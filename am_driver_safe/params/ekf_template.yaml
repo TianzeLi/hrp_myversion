@@ -136,7 +136,7 @@ odom0_relative: false
 # odom1_twist_rejection_threshold: 0.2
 # odom1_nodelay: false
 
-imu0: imu_left/imu/data/enu
+imu0: imu_left/imu/data
 imu0_config: [false, false, false,
               true,  true,  false,
               false, false, false,
@@ -145,16 +145,16 @@ imu0_config: [false, false, false,
 imu0_nodelay: false
 imu0_differential: false
 imu0_relative: false
-imu0_queue_size: 10
-imu0_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
-imu0_twist_rejection_threshold: 1.5                
+imu0_queue_size: 5
+# imu0_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
+# imu0_twist_rejection_threshold: 1.5                
 # imu0_linear_acceleration_rejection_threshold: 2.0  
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
 # imu0_remove_gravitational_acceleration: true
 
-imu1: imu_right/imu/data/enu
+imu1: imu_right/imu/data
 imu1_config: [false, false, false,
               true,  true,  false,
               false, false, false,
@@ -163,9 +163,9 @@ imu1_config: [false, false, false,
 imu1_nodelay: false
 imu1_differential: false
 imu1_relative: false
-imu1_queue_size: 10
-imu1_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
-imu1_twist_rejection_threshold: 1.5                
+imu1_queue_size: 5
+# imu1_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
+# imu1_twist_rejection_threshold: 1.5                
 # imu1_linear_acceleration_rejection_threshold: 2.0  
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
@@ -173,17 +173,17 @@ imu1_twist_rejection_threshold: 1.5
 # imu1_remove_gravitational_acceleration: falsed
 
 # Here can take in GNSS measurements.
-pose0: gnss_left/pose
-pose0_config: [true,  true,  false,
-               false, false, false,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-pose0_differential: false
-pose0_relative: false
-pose0_queue_size: 1
-pose0_rejection_threshold: 5  # Note the difference in parameter name
-pose0_nodelay: false
+# pose0: gnss_left/pose
+# pose0_config: [true,  true,  false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# pose0_differential: false
+# pose0_relative: false
+# pose0_queue_size: 1
+# pose0_rejection_threshold: 5  # Note the difference in parameter name
+# pose0_nodelay: false
 
 
 # Here can take in GNSS velocity measurement.
@@ -197,17 +197,17 @@ pose0_nodelay: false
 # twist0_rejection_threshold: 2
 # twist0_nodelay: false
 
-pose1: gnss_right/pose
-pose1_config: [true,  true,  false,
-               false, false, false,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-pose1_differential: false
-pose1_relative: false
-pose1_queue_size: 1
-pose1_rejection_threshold: 5  # Note the difference in parameter name
-pose1_nodelay: false
+# pose1: gnss_right/pose
+# pose1_config: [true,  true,  false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# pose1_differential: false
+# pose1_relative: false
+# pose1_queue_size: 1
+# pose1_rejection_threshold: 5  # Note the difference in parameter name
+# pose1_nodelay: false
 
 
 # Here can take in GNSS velocity measurement.
@@ -313,5 +313,5 @@ initial_state: [0.0,  0.0,  0.0,
 # Setting this parameter to true will enable the filter, upon reception of lagged data, to revert to the last state prior 
 # to the lagged measurement, then process all measurements until the current time. 
 smooth_lagged_data: false
-dynamic_process_noise_covariance: true
+dynamic_process_noise_covariance: false
 reset_on_time_jump: false

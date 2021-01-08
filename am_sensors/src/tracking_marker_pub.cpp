@@ -7,7 +7,8 @@
  * geometry_msgs/PoseWithCovarianceStamped
  * 
  * TODO: 
- *     	1. Add covariance ellipse. 
+ *     	0. Add frame attribute to transform data in /odom to /map
+ 		1. Add covariance ellipse. 
  *		2. Extend into generic topic subscriber.
  */
 
