@@ -20,13 +20,21 @@ The localization function is considered an active approach to limit the robot wi
 
 
 ## Installation
+Necessary packages for the sensors in Gazebo: 
+`ros-kinetic-hector-gazebo-pluginss` and `ros-kinetic-geographic-msgs`
 
 
 ## Launch
 
-### In physical world 
+### On physical hardware 
 
-### Simulation
+### In simulation
+Althought not heavily used in this projected, the simulation in Gazebo provides models of the robot and sensors. Two lawn settings are also available in `simulation/am_gazebo/worlds`. In order to launch: 
+```
+roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
+
+```
+The robot in simulation also receives control input via the topic `/cmd/vel`, so `hrp_teleop.py` can be severing here.
 
 
 ## Documentation
