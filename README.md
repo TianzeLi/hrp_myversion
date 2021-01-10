@@ -51,7 +51,7 @@ Launch files   | Functions
 `roslaunch am_driver path_follow`				| Run the path follower
 
 Examplary results:
-![](doc/media/boundary_detect.png)
+![Boundary Detection](doc/media/boundary_detect.png)
 
 ### In simulation
 Althought not heavily used in this projected, the simulation in Gazebo provides models of the robot and sensors. Two lawn settings are also available in `simulation/am_gazebo/worlds`. In order to launch: 
