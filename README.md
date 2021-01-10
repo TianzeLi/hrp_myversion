@@ -21,14 +21,32 @@ The localization function is considered an active approach to limit the robot wi
 The hardware setup in this project can be abstracted in the diagram below:
 ![](doc/media/HardwareSetup.svg)
 
+The software is designed under Ubuntu 16.04 and ROS Kinetic. The software architecture is below:  
+
+
+
 ## Installation
 Necessary packages for the sensors in Gazebo: 
 `ros-kinetic-hector-gazebo-pluginss` and `ros-kinetic-geographic-msgs`
 
 
 ## Launch
+In order for testing, we seperate the functions into different launch files, which can be combined in one overall launch if desired.
 
-### On physical hardware 
+### On physical hardware
+
+Launch files   | Functions
+-------------- | -------
+`roslaunch am_driver_safe automower_hrp.launch`	| Launch the robot
+`roslaunch am_sensors sensors.launch`          	| Launch the added sensors
+`rosrun am_driver hrp_teleop.py`            	| Control via keyboard
+`roslaunch am_driver_safe ekf_template.launch`  | Launch localization
+`./am_vision/scripts/boundary_detect.py`        | Run the boundary detect node (may be wrapped in ROS later)
+`roslaunch am_sensors rtabmap.launch`           | Launch visual-SLAM
+`roslaunch am_driver path_follow`				| Run the path follower
+
+Examplary results:
+![](doc/media/boundary_detect.png)
 
 ### In simulation
 Althought not heavily used in this projected, the simulation in Gazebo provides models of the robot and sensors. Two lawn settings are also available in `simulation/am_gazebo/worlds`. In order to launch: 
@@ -36,6 +54,8 @@ Althought not heavily used in this projected, the simulation in Gazebo provides 
 roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
 ```
 The robot in simulation also receives control input via the topic `/cmd/vel`, so `hrp_teleop.py` can be severing here.
+
+
 
 
 ## Documentation
