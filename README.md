@@ -32,13 +32,12 @@ Necessary packages for the sensors in Gazebo:
 Althought not heavily used in this projected, the simulation in Gazebo provides models of the robot and sensors. Two lawn settings are also available in `simulation/am_gazebo/worlds`. In order to launch: 
 ```
 roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
-
 ```
 The robot in simulation also receives control input via the topic `/cmd/vel`, so `hrp_teleop.py` can be severing here.
 
 
 ## Documentation
-The documentation and miscellanea are available at the project's ![Wiki page](https://github.com/TianzeLi/hrp_myversion/wiki).
+The documentation and miscellanea are available at the project's ![Wiki pages](https://github.com/TianzeLi/hrp_myversion/wiki).
 
 
 ## License

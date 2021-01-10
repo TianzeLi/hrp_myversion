@@ -23,6 +23,10 @@
     <param name="data_type4"    value="geometry_msgs/PoseWithCovarianceStamped"/> 
     <param name="color4"        value="orange"/>
 
+    <!-- <param name="pose_topic5"   value="/rtabmap/odom"/> -->
+    <!-- <param name="data_type5"    value="nav_msgs/Odometry"/>  -->
+    <!-- <param name="color5"        value="cyan"/> -->
+
 
   </node>
 
