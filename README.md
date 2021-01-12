@@ -20,11 +20,15 @@ This project is designed for Huqvarna automower 450x as a trial to replace the u
 
 The localization function is considered an active approach to limit the robot within its operation area. It applies Kalman filters to fuse the sensors' outputs and can integrate with the estimated pose from the visual SLAM node. Visual boundary detector to the contrary is considered to be a more passive method to bound the area. It is based on image segmentation via explicit image processing pipelines, that is, no heavy learning method is applied, for convience and computational effiency. 
 
+The software is designed under Ubuntu 16.04 and ROS Kinetic. The software architecture is shown below in a conceptual but not strict state machine(not implemented in this project):
+
+![](doc/media/states.svg)
+
+
 The hardware setup in this project can be abstracted in the diagram below:
+
 ![](doc/media/HardwareSetup.svg)
 
-The software is designed under Ubuntu 16.04 and ROS Kinetic. The software architecture is shown below in a conceptual but not strict state machine(not implemented in this project):  
-![](doc/media/states.svg)
 
 
 
