@@ -1,6 +1,6 @@
 Boundary Guard for Field Robot 
 ======
-**(Finishing soon but still under construction.)**
+**_(Finishing soon but still under construction.)_**
 
 ## Contents
 
@@ -23,12 +23,14 @@ The localization function is considered an active approach to limit the robot wi
 The hardware setup in this project can be abstracted in the diagram below:
 ![](doc/media/HardwareSetup.svg)
 
-The software is designed under Ubuntu 16.04 and ROS Kinetic. The software architecture is below:  
+The software is designed under Ubuntu 16.04 and ROS Kinetic. The software architecture is shown below in a conceptual but not strict state machine(not implemented in this project):  
+![](doc/media/states.svg)
 
 
 
 ## Installation
 <a name="Installation"></a>
+
 
 Necessary packages for the sensors in Gazebo: 
 `ros-kinetic-hector-gazebo-pluginss` and `ros-kinetic-geographic-msgs`
@@ -51,7 +53,7 @@ Launch files   | Functions
 `roslaunch am_sensors rtabmap.launch`           | Launch visual-SLAM
 `roslaunch am_driver path_follow`				| Run the path follower
 
-Examplary results:
+Examplary results (you should take it with a pinch of salt):
 ![](doc/media/boundary_detect.png)
 
 ### In simulation
