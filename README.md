@@ -1,6 +1,6 @@
 Boundary Guard for Field Robot 
 ======
-**(Finishing soon but still under construction.)**
+**_(Finishing soon but still under construction.)_**
 
 ## Contents
 
@@ -51,7 +51,7 @@ Launch files   | Functions
 `roslaunch am_sensors rtabmap.launch`           | Launch visual-SLAM
 `roslaunch am_driver path_follow`				| Run the path follower
 
-Examplary results:
+Examplary results (you should take it with a pinch of salt):
 ![](doc/media/boundary_detect.png)
 
 ### In simulation
