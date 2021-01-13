@@ -35,9 +35,7 @@ The hardware setup in this project can be abstracted in the diagram below:
 ## Installation
 <a name="Installation"></a>
 
-
-Necessary packages for the sensors in Gazebo: 
-`ros-kinetic-hector-gazebo-pluginss` and `ros-kinetic-geographic-msgs`
+Due to the multiple hectorgeneous sensors we choose, and the customized changes in depent packages, the installation steps is prolonged and rather shown in a seperate [installation page](https://github.com/TianzeLi/hrp_myversion/wiki/Installation) in the repository wiki. 
 
 
 ## Launch
