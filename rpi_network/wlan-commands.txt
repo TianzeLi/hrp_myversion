@@ -1,5 +1,0 @@
-# to start a hotspot:
-sudo systemctl start wpa_supplicant@wlan0.service
-
-# to connect as a client:
-sudo systemctl start wpa_supplicant@client.service

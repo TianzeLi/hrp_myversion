@@ -5,7 +5,7 @@ Boundary Guard for Field Robot
 ## Contents
 
 - [Overview](#Overview)
-- [Installation](#Installation)
+- [Dependency and installation](#Installation)
 - [Launch](#Launch)
 - [Documentation](#Documentation)
 - [License](#License)
@@ -32,7 +32,7 @@ The hardware setup in this project can be abstracted in the diagram below:
 
 
 
-## Installation
+## Dependency and installation
 <a name="Installation"></a>
 
 Due to the multiple hectorgeneous sensors we choose, and the customized changes in depent packages, the installation steps is prolonged and rather shown in a seperate [installation page](https://github.com/TianzeLi/hrp_myversion/wiki/Installation) in the repository wiki. 
