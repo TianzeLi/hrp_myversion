@@ -1,15 +1,16 @@
 # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin
 # computation until it receives at least one message from one of the inputs. It will then run continuously at the
 # frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
-frequency: 30
+frequency: 20
 
 # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
 # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
 # filter will generate new output. Defaults to 1 / frequency if not specified.
-sensor_timeout: 2
+sensor_timeout: 0.05
 
 # ekf_localization_node and ukf_localization_node both use a 3D omnidirectional motion model. If this parameter is
-# set to true, no 3D information will be used in your state estimate. Use this if you are operating in a planar
+# set to true, no 3D information will be used in your state estimate. It will fuse 0 values for all 3D variables 
+# (Z, roll, pitch, and their respective velocities and accelerations).  Use this if you are operating in a planar
 # environment and want to ignore the effect of small variations in the ground plane that might otherwise be detected
 # by, for example, an IMU. Defaults to false if unspecified.
 two_d_mode: true
@@ -90,7 +91,7 @@ odom0_config: [false,  false,  false,
 
 # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
 # the size of the subscription queue so that more measurements are fused.
-odom0_queue_size: 1
+odom0_queue_size: 20
 
 # [ADVANCED] Large messages in ROS can exhibit strange behavior when they arrive at a high frequency. This is a result
 # of Nagle's algorithm. This option tells the ROS subscriber to use the tcpNoDelay option, which disables Nagle's
@@ -136,15 +137,15 @@ odom0_relative: false
 # odom1_twist_rejection_threshold: 0.2
 # odom1_nodelay: false
 
-imu0: imu_left/imu/data/processed
+imu0: imu_left/imu/data/enu
 imu0_config: [false, false, false,
-              true,  true,  false,
+              true,  true,  true,
               false, false, false,
               true,  true,  true,
               false,  false,  false]
 imu0_nodelay: false
 imu0_differential: false
-imu0_relative: true
+imu0_relative: false
 imu0_queue_size: 5
 # imu0_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
 # imu0_twist_rejection_threshold: 1.5                
@@ -154,15 +155,15 @@ imu0_queue_size: 5
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
 # imu0_remove_gravitational_acceleration: true
 
-imu1: imu_right/imu/data/processed
+imu1: imu_right/imu/data/enu
 imu1_config: [false, false, false,
-              true,  true,  false,
+              true,  true,  true,
               false, false, false,
               true,  true,  true,
               false,  false,  false]
 imu1_nodelay: false
 imu1_differential: false
-imu1_relative: true
+imu1_relative: false
 imu1_queue_size: 5
 # imu1_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
 # imu1_twist_rejection_threshold: 1.5                
@@ -173,29 +174,29 @@ imu1_queue_size: 5
 # imu1_remove_gravitational_acceleration: falsed
 
 # Here can take in GNSS measurements.
-pose0: gnss_left/pose
-pose0_config: [true,  true,  false,
-               false, false, false,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-pose0_differential: false
-pose0_relative: false
-pose0_queue_size: 1
-pose0_rejection_threshold: 5  # Note the difference in parameter name
-pose0_nodelay: false
+# pose0: gnss_left/pose
+# pose0_config: [true,  true,  false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# pose0_differential: false
+# pose0_relative: false
+# pose0_queue_size: 10
+# pose0_rejection_threshold: 5  # Note the difference in parameter name
+# pose0_nodelay: false
 
-pose1: gnss_right/pose
-pose1_config: [true,  true,  false,
-               false, false, false,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-pose1_differential: false
-pose1_relative: false
-pose1_queue_size: 1
-pose1_rejection_threshold: 5  # Note the difference in parameter name
-pose1_nodelay: false
+# pose1: gnss_right/pose
+# pose1_config: [true,  true,  false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# pose1_differential: false
+# pose1_relative: false
+# pose1_queue_size: 10
+# pose1_rejection_threshold: 5  # Note the difference in parameter name
+# pose1_nodelay: false
 
 
 
@@ -265,21 +266,21 @@ control_config: [true, false, false, false, false, true]
 # to be larger, which will cause the filter to trust the incoming measurement more during correction. The values are
 # ordered as x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. Defaults to the matrix below if
 # unspecified.
-process_noise_covariance: [0.005, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0.005, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0.006, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0.05, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0.05, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0.06, 0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0.0025, 0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0.0020, 0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0.0010, 0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02, 0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.01]
+process_noise_covariance: [0.0005, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0.0005, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0.0006, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0.005, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0.005, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0.006, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0.00025, 0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0.00020, 0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0.00010, 0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0.001, 0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.001, 0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.002, 0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.001, 0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.001, 0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.001]
 
 # [ADVANCED] This represents the initial value for the state estimate error covariance matrix. Setting a diagonal
 # value (variance) to a large value will result in rapid convergence for initial measurements of the variable in
@@ -315,5 +316,14 @@ initial_state: [0.0,  0.0,  0.0,
 # Setting this parameter to true will enable the filter, upon reception of lagged data, to revert to the last state prior 
 # to the lagged measurement, then process all measurements until the current time. 
 smooth_lagged_data: true
-dynamic_process_noise_covariance: false
-reset_on_time_jump: false
+#If smooth_lagged_data is set to true, this parameter specifies the number of seconds for which the filter will retain its 
+#state and measurement history. This value should be at least as large as the time delta between your lagged measurements and the current time.
+history_length: 5.0
+
+#If true, will dynamically scale the process_noise_covariance based on the robot’s velocity. This is useful, 
+# e.g., when you want your robot’s estimate error covariance to stop growing when the robot is stationary. Defaults to false.
+dynamic_process_noise_covariance: true
+
+# If set to true and ros::Time::isSimTime() is true, the filter will reset to its uninitialized state when a jump back in time is detected on a topic. 
+# This is useful when working with bag data, in that the bag can be restarted without restarting the node.
+reset_on_time_jump: true

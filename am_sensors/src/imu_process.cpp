@@ -1,3 +1,9 @@
+/* 	
+ * IMU original data processor 
+ * to publish the IMU data in correct frame and with more accuarte covariance.s 
+ *
+ */
+
 #include <std_msgs/String.h>
 #include <sstream>
 
