@@ -74,7 +74,7 @@ void IMUProcess::initializeParams()
 	if (do_pub_control_)
 	{
 		if (!nh_private_.getParam("angular_velocity_threshod", angular_velocity_threshod_))
-			angular_velocity_threshod_ = 0.1;
+			angular_velocity_threshod_ = 1.5;
 		if (!nh_private_.getParam("trans_velocity_threshod", trans_velocity_threshod_))
 			angular_velocity_threshod_ = 1.0;
 	}

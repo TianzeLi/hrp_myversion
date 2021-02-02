@@ -30,8 +30,9 @@
 
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 import logging
+import matplotlib.pyplot as plt
+from matplotlib.colors import NoNorm
 
 # Create logger with 'log'
 logger = logging.getLogger('BoundaryDetect')
@@ -72,10 +73,10 @@ class BoundaryDetectNode():
 		src_depth_path = "../samples/p2_depth.png"
 
 		# Select the features for clustering.
-		self.use_color_feature = True
-		self.use_loc_feature = True
-		self.use_texture_feature = False
-		self.use_depth_feature = True
+		self.use_color_feature = False
+		self.use_loc_feature = False
+		self.use_texture_feature = True
+		self.use_depth_feature = False
 
 		# Kmeans parameters
 		self.K = 2
@@ -108,6 +109,11 @@ class BoundaryDetectNode():
 		# Markers
 		self.feature_mat_empty = True
 		self.num_feature = 0
+
+		# Visualizing options
+		self.show_gabor_filters = True
+		# To count the plt numbers.
+		self.fig_num = 1
 
 
 		# Pipeline starts here.
@@ -163,7 +169,7 @@ class BoundaryDetectNode():
 					self.feature_mat_empty = False
 					self.num_feature += self.num_texture_feature
 				else:
-					plogging.warning("No capable features in the texture segmentation.")
+					logging.warning("No capable features in the texture segmentation.")
 
 			else:
 				self.num_texture_feature = self.texture_seg(self.src_gray)
@@ -515,27 +521,38 @@ class BoundaryDetectNode():
 		# ktype - type and range of values that each pixel in the gabor kernel can hold
 		# g_kernel = cv2.getGaborKernel((15, 15), 7.0, 3.14159/12*0, 2.5, 1.0, 0, ktype=cv2.CV_32F)
 		ksize = 15
-		sigma = 7.0
+		sigma = 4.0
 		theta_max = np.pi
-		theta_seq = np.pi/12
+		theta_seq = np.pi/6
+		theta_num = int(np.floor(theta_max/theta_seq)+1)
 		wavelength_max = ksize/2
 		wavelength_min = 2.5
-		wavelength_num = 5
+		wavelength_num = 6
 		wavelength_seq = (wavelength_max - wavelength_min)/wavelength_num
 		gamma = 1.0
 		psi = 0.0
 
+		# Stored for plotting the gaber filters in the spatial domain.
+		gabor_kernels = []
+		theta_arr = []
+		wavelength_arr = []
+
 		# Iterate over both wavelength and theta.
-		for j in range(int(np.floor(theta_max/theta_seq)+1)):
+		for j in range(theta_num):
 			theta = j*theta_seq
+			theta_arr.append( np.degrees(theta) )
 			for k in range(wavelength_num):
 				wavelength = wavelength_min + k*wavelength_seq
+				if (j == 0):
+					wavelength_arr.append(wavelength)				
 				g_kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, wavelength, gamma, psi, ktype=cv2.CV_32F)
 				filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
+				
+				# Stored for plotting the gaber filters in the spatial domain.
+				gabor_kernels.append(g_kernel)
 
 				# gray_bound_low, gray_bound_up = self.color_sample(filtered_img, self.select_precentage)
 				# gray_mask, self.gray_threshold = self.color_mask(self.src, gray_bound_low, gray_bound_up)
-
 
 				# filtered_img = cv2.cvtColor(filtered_img, cv2.COLOR_BGR2GRAY)
 
@@ -553,9 +570,47 @@ class BoundaryDetectNode():
 						logger.debug('\tThe feature matrix now has the shape {}.'.format(self.feature_mat.shape))
 					num_texture_feature += 1
 
-				cv2.imshow('Filtered Image', filtered_img)
+				# cv2.imshow('Filtered Image', filtered_img)
 				# cv2.imshow('Filtered Image Thresholded', gray_mask)
-				cv2.waitKey(0)
+				# cv2.waitKey(0)
+
+		# To plot the Gabor filters.
+		if(self.show_gabor_filters):
+			# plt.figure(self.fig_num)
+			# self.fig_num += 1
+			i = 0
+
+			# fig, axs = plt.subplots(ncols=wavelength_num, nrows=theta_num, gridspec_kw={'hspace': 0.0, 'wspace': 0.0})
+			fig, axs = plt.subplots( nrows=theta_num, ncols=wavelength_num, figsize=(6, 6) )
+			plt.setp(axs.flat, xticks=[], yticks=[])
+
+			print(theta_arr)
+			print(wavelength_arr)
+			# plt.setp(axes.flat, xticks=[], yticks=[])
+			for ax in axs.flat:
+				k = gabor_kernels[i]
+				h, w = k.shape[:2]
+				k = cv2.resize(k, (3*w, 3*h), interpolation=cv2.INTER_CUBIC)
+				# ax.axis('off')
+				ax.imshow(k, cmap='gray', norm=NoNorm())
+				i += 1
+
+			for ax, wl in zip(axs[-1], wavelength_arr):
+			    ax.set_xlabel('{0}'.format(wl))
+			for ax, angle in zip(axs[:, 0], theta_arr):
+			    ax.set_ylabel( '{0}'.format(angle) )
+
+			# for ax, ve in zip(axes[0], [0.1, 1, 10]):
+			#     ax.set_title('{0}'.format(ve), size=18)
+			# for ax, mode in zip(axes[:, 0], ['Hillshade', 'hsv', 'overlay', 'soft']):
+			#     ax.set_ylabel(mode, size=18)
+			plt.suptitle('Gabor filters in the spatial domain') # or plt.suptitle('Main title')
+			
+			fig.text(0.5, 0.04, 'Wavelength (pixel)', ha='center')
+			fig.text(0.04, 0.5, 'Angle (degree)', va='center', rotation='vertical')
+			# fig.tight_layout()
+
+			plt.show()
 
 		return num_texture_feature
 
