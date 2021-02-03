@@ -73,10 +73,10 @@ class BoundaryDetectNode():
 		src_depth_path = "../samples/p2_depth.png"
 
 		# Select the features for clustering.
-		self.use_color_feature = False
-		self.use_loc_feature = False
+		self.use_color_feature = True
+		self.use_loc_feature = True
 		self.use_texture_feature = True
-		self.use_depth_feature = False
+		self.use_depth_feature = True
 
 		# Kmeans parameters
 		self.K = 2
@@ -101,9 +101,9 @@ class BoundaryDetectNode():
 		self.right_sample_h = self.fixed_height/6
 
 		# Define the range for normalizing, i.e. the weights in kmeans.
-		self.feature_range_color = 15
-		self.feature_range_loc = 10
-		self.feature_range_texture = 5
+		self.feature_range_color = 10
+		self.feature_range_loc = 17
+		self.feature_range_texture = 9
 		self.feature_range_depth = 20
 
 		# Markers
@@ -111,7 +111,7 @@ class BoundaryDetectNode():
 		self.num_feature = 0
 
 		# Visualizing options
-		self.show_gabor_filters = True
+		self.show_gabor_filters = False
 		# To count the plt numbers.
 		self.fig_num = 1
 
@@ -373,8 +373,9 @@ class BoundaryDetectNode():
 		# mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel3)
 
 		mask_green = cv2.erode(mask_green, kernel3, iterations = 3)
-		mask_green = cv2.dilate(mask_green, kernel3, iterations = 3)
-		mask_green = cv2.erode(mask_green, kernel3, iterations = 3)
+		mask_green = cv2.dilate(mask_green, kernel3, iterations = 2)
+		mask_green = cv2.erode(mask_green, kernel3, iterations = 2)
+		mask_green = cv2.dilate(mask_green, kernel3, iterations = 2)
 
 		# mask_green = cv2.erode(mask_green, kernel4, iterations = 1)
 		# mask_green = cv2.erode(mask_green, kernel2, iterations = 2)
@@ -434,7 +435,14 @@ class BoundaryDetectNode():
 
 
 		edges = cv2.Canny(mask, 100, 200, L2gradient=True)
+		edges = cv2.dilate(edges, kernel3, iterations = 1)
+		edges = cv2.erode(edges, kernel2, iterations = 2)
+
 		edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel5)
+
+		# edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel5)
+		# edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel5)
+
 
 		_, contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		# contours = cv2.findContours(mask_total.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2]
