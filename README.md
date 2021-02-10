@@ -1,6 +1,7 @@
 Boundary Guard for Field Robot 
 ======
 **_(Finishing soon but still under construction.)_**
+![](doc/media/projectTheme.svg)
 
 ## Contents
 

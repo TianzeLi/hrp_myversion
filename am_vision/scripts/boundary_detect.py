@@ -76,7 +76,7 @@ class BoundaryDetectNode():
 		self.use_color_feature = True
 		self.use_loc_feature = True
 		self.use_texture_feature = True
-		self.use_depth_feature = True
+		self.use_depth_feature = False
 
 		# Kmeans parameters
 		self.K = 2
