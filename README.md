@@ -19,9 +19,9 @@ Boundary Guard for Field Robot
 
 This project is designed for Huqvarna automower 450x as a trial to replace the underlaid wire boundary. The repository is based on ![Husqvarna Research Platform](https://github.com/HusqvarnaResearch/hrp), however has added a localization module and a visual boundary detector, upon additional two IMU, two GNSS and one Intel Realsense D435 depth camera. 
 
-The localization function is considered an active approach to limit the robot within its operation area. It applies Kalman filters to fuse the sensors' outputs and can integrate with the estimated pose from the visual SLAM node. Visual boundary detector to the contrary is considered to be a more passive method to bound the area. It is based on image segmentation via explicit image processing pipelines, that is, no heavy learning method is applied, for convience and computational effiency. 
+The localization function is considered an active approach that applies Kalman filters to fuse the sensors' outputs and can integrate with the estimated pose from the visual SLAM node. Visual boundary detector then is a more passive method based on image segmentation via explicit image processing pipelines, that is, no heavy learning method is applied, for convience and computational effiency. 
 
-The software is designed under Ubuntu 16.04 and ROS Kinetic. The software architecture is shown below in a conceptual but not strict state machine(not implemented in this project):
+The software is designed under Ubuntu 16.04 and ROS Kinetic. The architecture can be seen below in a conceptual but not strict state machine(not implemented in this project):
 
 ![](doc/media/states.svg)
 
