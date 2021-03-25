@@ -7,7 +7,7 @@
  Output: 
  	Labelled boundary and optionally the suggested drving away direction.
  
- Pipeline (mainly): 
+ Pipeline: 
  	1. Color thresholding
  		1.1 Morphology mask processing.
  		1.2 Filtering with requirements on contour.
@@ -25,6 +25,8 @@
  	2. Consider if to set range limit for depth images.
  	6. Integrate with ROS.
  	7. Optionally feed back the warning level and retreating suggestion. 
+ 	8. Add superpixel generating. (See DigitalImageProcessing P775)
+ 	9. Maybe try GraphCut clustering algorithm.
 
 """
 
@@ -106,6 +108,9 @@ class BoundaryDetectNode():
 		self.feature_range_texture = 9
 		self.feature_range_depth = 20
 
+		# Color parameter
+		self.blur_before_sampling = True
+
 		# Markers
 		self.feature_mat_empty = True
 		self.num_feature = 0
@@ -121,7 +126,13 @@ class BoundaryDetectNode():
 		self.src_gray = cv2.cvtColor(self.src, cv2.COLOR_BGR2GRAY)
 		
 		if (self.use_color_feature):
-			img_sample = cv2.rectangle(self.src.copy(), (self.left_sample_x0, self.left_sample_y0), \
+
+			if(self.blur_before_sampling):
+				src_color = cv2.GaussianBlur(self.src.copy(),(5,5),0)
+			else:
+				src_color = self.src.copy()
+
+			img_sample = cv2.rectangle(src_color, (self.left_sample_x0, self.left_sample_y0), \
 										(self.left_sample_x0 + self.left_sample_w,\
 										self.left_sample_y0 + self.left_sample_h), (0, 255, 255), 3)
 			img_sample = cv2.rectangle(img_sample, (self.right_sample_x0, self.right_sample_y0), \
@@ -131,7 +142,7 @@ class BoundaryDetectNode():
 			cv2.waitKey(0)
 
 			color_bound_low, color_bound_up = self.color_sample(self.src, self.select_precentage)
-			self.green_mask, self.img_threshold = self.color_mask(self.src, color_bound_low, color_bound_up)
+			self.green_mask, self.img_threshold = self.color_mask(src_color, color_bound_low, color_bound_up)
 			# self.find_contour(self.green_mask, self.src.copy())
 
 			num_color_feature = 1

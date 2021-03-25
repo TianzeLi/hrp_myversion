@@ -25,7 +25,7 @@
   <arg name="localization"            default="false"/>
   
   <!-- sim time for convenience, if playing a rosbag -->
-  <arg name="use_sim_time"            default="false"/>
+  <arg name="use_sim_time"            default="true"/>
   <param if="$(arg use_sim_time)" name="use_sim_time" value="true"/>
   
   <!-- Corresponding config files -->
@@ -53,9 +53,9 @@
   <arg unless="$(arg stereo)" name="approx_sync"  default="true"/>         
    
   <!-- RGB-D related topics -->
-  <arg name="rgb_topic"               default="/camera/rgb/image_rect_color" />
-  <arg name="depth_topic"             default="/camera/depth_registered/image_raw" />
-  <arg name="camera_info_topic"       default="/camera/rgb/camera_info" />
+  <arg name="rgb_topic"               default="/camera/color/image_raw" />
+  <arg name="depth_topic"             default="/camera/aligned_depth_to_color/image_raw" />
+  <arg name="camera_info_topic"       default="/camera/color/camera_info" />
   <arg name="depth_camera_info_topic" default="$(arg camera_info_topic)" />
   
   <!-- stereo related topics -->
