@@ -27,6 +27,8 @@
  	7. Optionally feed back the warning level and retreating suggestion. 
  	8. Add superpixel generating. (See DigitalImageProcessing P775)
  	9. Maybe try GraphCut clustering algorithm.
+ 	10. Use histogram equalization or other image enhancement
+ 	    methods when the lighting condition is extreme.
 
 """
 
