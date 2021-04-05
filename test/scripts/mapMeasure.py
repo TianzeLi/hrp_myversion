@@ -29,6 +29,13 @@
 
 """
 
+COLORS = [
+# 17 undertones https://lospec.com/palette-list/17undertones
+'#000000', '#141923', '#414168', '#3a7fa7', '#35e3e3', '#8fd970', '#5ebb49',
+'#458352', '#dcd37b', '#fffee5', '#ffd035', '#cc9245', '#a15c3e', '#a42f3b',
+'#f45b7a', '#c24998', '#81588d', '#bcb0c2', '#ffffff',
+]
+
 
 import sys
 from math import sqrt
@@ -46,6 +53,17 @@ import cv2
 sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') 
 
 
+
+
+class QPaletteButton(QtWidgets.QPushButton):
+
+    def __init__(self, color):
+        super().__init__()
+        self.setFixedSize(QtCore.QSize(24,24))
+        self.color = color
+        self.setStyleSheet("background-color: %s;" % color)
+
+
 class App(QWidget):
     def __init__(self):
         super().__init__()
@@ -54,64 +72,62 @@ class App(QWidget):
         self.pixel2meter = 1.0
         self.points_tmp = []
         self.points_of_interest = []
-
         self.original_x = 0.0
         self.original_y = 0.0
-
         self.point_width = 12
+
+        self.pen = QtGui.QPen()
+        self.pen.setWidth(self.point_width)
 
 
         self.setWindowTitle("Point coordinates select and locate")
         # The label that holds the image
         self.image_label = QLabel(self)
         # The text label holds the instruction below the image
-        self.textLabel = QLabel('First set metric then click \
-            to select the interested points.')
+        self.textLabel = QLabel('First set metric then click to select the interested points.')
         # The table to contain the coordinates
         self.table = QTableWidget(self)
         self.table.setColumnCount(5)    
         #set table header
         self.table.setHorizontalHeaderLabels(\
-            ['id','pixel u','pixel v','spatial x','spatial y'])
+            ['pixel u','pixel v','spatial x','spatial y','note'])
 
 
         # Load the test image
         src_path = "../data/mapImg/lawnGmap.png"
         cv_img = cv2.imread(src_path)
         # convert the image to Qt format
-        qt_img_raw = self.convert_cv_qt(cv_img)
+        self.qt_img_raw, self.w_img, self.h_img = self.convert_cv_qt(cv_img)
         # display it
-        self.image_label.setPixmap(qt_img_raw)
+        self.image_label.setPixmap(self.qt_img_raw)
 
-        # Set the painter
-        self.painter = QPainter(self.image_label.pixmap())
-        pen = QtGui.QPen()
-        pen.setWidth(self.point_width)
-        # pen.setColor(QtGui.QColor('red'))
-        self.painter.setPen(pen)
 
         # The buttons
         button_metric = QtWidgets.QPushButton(self)
         button_metric.clicked.connect(self.metric_update)
         button_metric.setText("Set metric")
-        button_metric.resize(160, 50)
-        button_metric.move(40, 40)
+        # button_metric.resize(460, 50)
+        # button_metric.move(40, 40)
 
         button_zero = QtWidgets.QPushButton(self)
         button_zero.clicked.connect(self.set_original)
         button_zero.setText("Set original point")
-        button_zero.resize(160, 50)
-        button_metric.move(40, 80)
+        # button_zero.resize(160, 50)
+        # button_metric.move(40, 80)
 
         button_PoI = QtWidgets.QPushButton(self)
         button_PoI.clicked.connect(self.PoI_select)
         button_PoI.setText("Set interested points")
-        button_PoI.resize(160, 50)
-        button_PoI.move(40, 120)
+        # button_PoI.resize(160, 50)
+        # button_PoI.move(40, 120)
+
+        palette = QtWidgets.QHBoxLayout()
+        self.add_palette_buttons(palette)
 
         # A vertical box layout that contains image and instrutions.
         vbox1 = QVBoxLayout()
         vbox1.addWidget(self.image_label)
+        vbox1.addLayout(palette)
         vbox1.addWidget(self.textLabel)
         # A vertical box layout that contains buttons.
         vbox2 = QVBoxLayout()
@@ -123,12 +139,17 @@ class App(QWidget):
         hbox = QHBoxLayout()
         hbox.addLayout(vbox1)
         hbox.addLayout(vbox2)
-        hbox.addStretch(1)
+        # hbox.addStretch(1)
 
         self.setLayout(hbox)
+        # self.setGeometry(300, 300, self.w_img+600, self.h_img+40)
         self.show()
 
-
+    def add_palette_buttons(self, layout):
+        for c in COLORS:
+            b = QPaletteButton(c)
+            b.pressed.connect(lambda c=c: self.pen.setColor(QColor(c)))
+            layout.addWidget(b)
     
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
@@ -137,7 +158,7 @@ class App(QWidget):
         bytes_per_line = ch * w
         convert_to_Qt_format = QtGui.QImage(rgb_image.data, \
             w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
-        return QPixmap.fromImage(convert_to_Qt_format)
+        return QPixmap.fromImage(convert_to_Qt_format), w, h
 
     def metric_update(self):
         """Set up or update the metric"""
@@ -168,13 +189,17 @@ class App(QWidget):
         self.update()
 
     def paintPoint(self):
+        painter = QPainter(self.image_label.pixmap())
+        # pen.setColor(QtGui.QColor('red'))
+        painter.setPen(self.pen)
         offset = self.point_width
         if self.points_tmp:
             point = self.points_tmp[-1]
-            self.painter.drawPoint(point.x() - offset, point.y() - offset)
+            painter.drawPoint(point.x() - offset, point.y() - offset)
             print(point.x(), point.y())
             # TODO: compute the spatial coordinates here.
             self.addTableRow([point.x(), point.y(), 0, 0])
+        painter.end()
 
     def addTableRow(self, row_data):
         row = self.table.rowCount()
