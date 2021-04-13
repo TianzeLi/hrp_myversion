@@ -30,6 +30,7 @@
  	10. Use histogram equalization or other image enhancement
  	    methods when the lighting condition is extreme.
  	11. Add connectivity to the sample as a criention.
+ 	12. Pre-process into super-pixels.
 
 """
 

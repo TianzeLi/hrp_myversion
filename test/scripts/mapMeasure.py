@@ -5,7 +5,7 @@
  coordinates of the interested points with mouse clicks. 
 
  Input: 
-    The map image. 
+    The map image. From Google map fpr example.
  Output: 
     The coordinates of the interested points.
  
@@ -16,7 +16,6 @@
     4. Choose the interested points and computes the coordinates in meter. 
        By default, East-North-Up frame is applied. 
 
-
  Note:
     1. The opencv and python installation are not settled.
     2. Opencv is imported for potential processing.
@@ -26,6 +25,7 @@
        (Might be unnecessary, as I will upgrade my ubuntu soon.)
     2. Add a image select and load GUI.
     3. Generate a metric at the lower-right corner.
+    4. Maybe also connect with the path-follower to generate the input.
 
 """
 
@@ -54,7 +54,6 @@ sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages')
 
 
 
-
 class QPaletteButton(QtWidgets.QPushButton):
 
     def __init__(self, color):
@@ -65,6 +64,7 @@ class QPaletteButton(QtWidgets.QPushButton):
 
 
 class App(QWidget):
+    
     def __init__(self):
         super().__init__()
 
@@ -87,10 +87,12 @@ class App(QWidget):
         self.textLabel = QLabel('First set metric then click to select the interested points.')
         # The table to contain the coordinates
         self.table = QTableWidget(self)
-        self.table.setColumnCount(5)    
-        #set table header
+        self.table.setColumnCount(6)    
         self.table.setHorizontalHeaderLabels(\
-            ['pixel u','pixel v','spatial x','spatial y','note'])
+            ['No.','pixel u','pixel v','spatial x','spatial y','note'])
+        self.table.setColumnWidth(0, 7);
+        self.table.setFixedWidth(self.get_table_width());
+        self.table.verticalHeader().setVisible(False)
 
 
         # Load the test image
@@ -106,20 +108,14 @@ class App(QWidget):
         button_metric = QtWidgets.QPushButton(self)
         button_metric.clicked.connect(self.metric_update)
         button_metric.setText("Set metric")
-        # button_metric.resize(460, 50)
-        # button_metric.move(40, 40)
 
         button_zero = QtWidgets.QPushButton(self)
         button_zero.clicked.connect(self.set_original)
         button_zero.setText("Set original point")
-        # button_zero.resize(160, 50)
-        # button_metric.move(40, 80)
 
         button_PoI = QtWidgets.QPushButton(self)
         button_PoI.clicked.connect(self.PoI_select)
         button_PoI.setText("Set interested points")
-        # button_PoI.resize(160, 50)
-        # button_PoI.move(40, 120)
 
         palette = QtWidgets.QHBoxLayout()
         self.add_palette_buttons(palette)
@@ -131,19 +127,29 @@ class App(QWidget):
         vbox1.addWidget(self.textLabel)
         # A vertical box layout that contains buttons.
         vbox2 = QVBoxLayout()
+        vbox2.addWidget(self.table)
         vbox2.addWidget(button_metric)
         vbox2.addWidget(button_zero)
         vbox2.addWidget(button_PoI)
-        vbox2.addWidget(self.table)
+
         # A overall horizonal box
         hbox = QHBoxLayout()
         hbox.addLayout(vbox1)
         hbox.addLayout(vbox2)
-        # hbox.addStretch(1)
 
         self.setLayout(hbox)
         # self.setGeometry(300, 300, self.w_img+600, self.h_img+40)
         self.show()
+
+    def get_table_width(self):
+        w = self.table.verticalHeader().width()+2
+        for i in range(self.table.columnCount()):
+            w += self.table.columnWidth(i)
+        return w
+
+    def table_resize(self):
+        header = self.table.horizontalHeader()       
+        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Stretch)
 
     def add_palette_buttons(self, layout):
         for c in COLORS:
@@ -197,9 +203,18 @@ class App(QWidget):
             point = self.points_tmp[-1]
             painter.drawPoint(point.x() - offset, point.y() - offset)
             print(point.x(), point.y())
+
+            font = QtGui.QFont()
+            font.setFamily('Times')
+            font.setBold(True)
+            font.setPointSize(8)
+            painter.setFont(font)
+            painter.drawText(point.x()-2, point.y()-2, str(len(self.points_tmp)))
+
             # TODO: compute the spatial coordinates here.
-            self.addTableRow([point.x(), point.y(), 0, 0])
+            self.addTableRow([len(self.points_tmp),point.x(), point.y(), 0, 0])
         painter.end()
+        self.table_resize()
 
     def addTableRow(self, row_data):
         row = self.table.rowCount()
@@ -208,6 +223,8 @@ class App(QWidget):
         for item in row_data:
             cell = QTableWidgetItem(str(item))
             self.table.setItem(row, col, cell)
+            item = self.table.item(row, col)
+            item.setTextAlignment(QtCore.Qt.AlignCenter)
             col += 1
 
     def distanceCompute(self, px1, py1, px2, py2):
