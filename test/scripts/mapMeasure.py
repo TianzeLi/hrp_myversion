@@ -24,7 +24,7 @@
     1. Optionally settle the opencv and python installation. 
        (Might be unnecessary, as I will upgrade my ubuntu soon.)
     2. Add a image select and load.
-    3. Generate a metric at the lower-right corner.
+    3. Generate a metric at the lower-right corner?
     4. Maybe also connect with the path-follower to generate the input.
     5. Store the metric and origin point from last use.
 
@@ -74,16 +74,19 @@ class App(QWidget):
         self.points_of_interest = []
         self.original_x = 0.0
         self.original_y = 0.0
-        self.point_width = 12
+        self.circle_thickness = 4
+        self.diameter = 12
+        self.offset = 11
 
         # Painter parameters
         self.pen = QtGui.QPen()
-        self.pen.setWidth(self.point_width)
+        # self.pen.setColor(QColor('#ffd035'))
+        self.pen.setWidth(self.circle_thickness)
         # Text font
-        font = QtGui.QFont()
-        font.setFamily('Times')
-        font.setBold(True)
-        font.setPointSize(8)
+        self.label_font = QtGui.QFont()
+        self.label_font.setFamily('Times')
+        self.label_font.setBold(True)
+        self.label_font.setPointSize(8)
 
         # Load the test image
         src_path = "../data/mapImg/lawnGmap.png"
@@ -95,6 +98,7 @@ class App(QWidget):
         self.setWindowTitle("Point coordinates select and locate")
         # The label that holds the image
         self.image_label = QLabel(self)
+        self.image_label.setCursor(Qt.CrossCursor)
         # The text label holds the instruction below the image
         self.textLabel = QLabel('First set metric then click to select the interested points.')
         self.statusLabel = QLabel('Metric and origin not set.')
@@ -110,6 +114,7 @@ class App(QWidget):
         button_metric = QtWidgets.QPushButton(self)
         button_metric.clicked.connect(self.metric_update)
         button_metric.setText("Set metric")
+        button_metric.resize(150, 50)
 
         button_zero = QtWidgets.QPushButton(self)
         button_zero.clicked.connect(self.set_original)
@@ -147,8 +152,6 @@ class App(QWidget):
 
         self.setLayout(hbox)
         self.image_label.setPixmap(self.qt_img_raw)
-        self.painter = QPainter(self.image_label.pixmap())
-        self.painter.setFont(font)
         self.show()
 
         # States: 0 - metric or original point not set
@@ -188,7 +191,7 @@ class App(QWidget):
         """Set up or update the metric"""
         self.status = 1
         self.count_tmp = 0
-        self.textLabel.setText("Set the metric")
+        self.textLabel.setText("Setting the metric")
 
     def metric_compute(self, px1, py1, px2, py2):
         # print("In metric compute now")
@@ -198,36 +201,38 @@ class App(QWidget):
         dis_x = px2 - px1
         dis_y = py2 - py1
         pixel_length = sqrt(dis_x**2 + dis_y**2)
-        self.pixel2meter = float("%.2f" % (spatial_length/pixel_length))
-        self.statusLabel.setText("Metric set. Each pixel is " + \
-            str(self.pixel2meter) + "m in length.")
+        self.pixel2meter = spatial_length/pixel_length
+        self.statusLabel.setText("Each pixel is {0:.3f}m in length.".format(self.pixel2meter))
         self.points_tmp.pop(-1)
         self.points_tmp.pop(-1)
         self.status = 0
 
+    def reset_map_img(self):
+        painter = QPainter(self.image_label.pixmap())
+        painter.drawPixmap(0, 0, self.w_img, self.h_img,self.qt_img_raw)
+        painter.end()
 
     def set_original(self):
         """Select the origin on the map image"""
         self.status = 2
         self.textLabel.setText("Click to set the original point")
-        # self.painter.eraseRect(0, 0, self.w_img, self.h_img)
-        self.painter.drawPixmap(0, 0, self.w_img, self.h_img,self.qt_img_raw)
         self.update()
 
     def PoI_select(self):
         """Select the interested point"""
         self.points_tmp.clear()
         self.status = 3
-        self.textLabel.setText("Select interested points")
+        self.textLabel.setText("Click to add as the interested point")
 
     def points_clear(self):
-        self.painter.drawPixmap(0, 0, self.w_img, self.h_img,self.qt_img_raw)
+        """Reset the map image and clear the labeled points"""
+        self.reset_map_img()
         self.points_tmp.clear()
-        self.statusLabel.setText("Drawn points cleared.")
+        self.textLabel.setText("Drawn points cleared.")
         self.update()
 
-
     def mousePressEvent(self, e):
+        """Monitor the mouse press on the image"""
         super().mousePressEvent(e)
         self.points_tmp.append(e.pos())
         self.paintPoint()
@@ -235,17 +240,18 @@ class App(QWidget):
 
     def paintPoint(self):
         """Paint labels on tha map"""
-        # print("Painted one")        
-        self.painter.setPen(self.pen)
-        offset = self.point_width
+        painter = QPainter(self.image_label.pixmap())
+        painter.setFont(self.label_font)        
+        painter.setPen(self.pen)
+        offset = self.offset + 0.5*self.diameter
+        self.update()
         if self.status != 0:
             if self.points_tmp:
                 point = self.points_tmp[-1]
-                self.painter.drawPoint(point.x() - offset, point.y() - offset)
+                painter.drawEllipse(point.x() - offset, \
+                    point.y() - offset, self.diameter, self.diameter)
                 print(point.x(), point.y())
-                self.painter.drawText(point.x()-2, point.y()-2, str(len(self.points_tmp)))
 
-                # TODO: compute the spatial coordinates here.
             if self.status == 1:
                 self.count_tmp += 1
                 if self.count_tmp == 2:
@@ -256,15 +262,15 @@ class App(QWidget):
             if self.status == 2:
                 self.original_x = point.x()
                 self.original_y = point.y()
-                self.statusLabel.setText("Metric and origin set. Each pixel is " + \
-                    str(self.pixel2meter) + "m in length.")
-                self.painter.drawEllipse(point.x()-14, point.y()-14, 7, 7);
             
             if self.status == 3:
                 dis, dis_x, dis_y = self.compute_coordinate(point.x(), point.y())
-                self.addTableRow([len(self.points_tmp),point.x(), point.y(), dis_x, dis_y])
+                self.addTableRow([len(self.points_tmp),point.x(), point.y(), format(dis_x, '.1f'), format(dis_y, '.1f')])
+                painter.drawText(point.x(), point.y(), str(len(self.points_tmp)))
                 self.table_resize()
-        # painter.end()
+        else:
+            self.points_tmp.pop()
+        painter.end()
 
 
     def addTableRow(self, row_data):
