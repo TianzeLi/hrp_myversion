@@ -43,8 +43,9 @@ from math import sqrt
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QVBoxLayout, 
-    QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QInputDialog)
-from PyQt5.QtGui import QPixmap, QImage, QColor, QPainter
+    QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QInputDialog, 
+    QAction, qApp, QMenuBar, QToolBar)
+from PyQt5.QtGui import QPixmap, QImage, QColor, QPainter, QIcon
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt,QObject, QPoint
 
 # in order to import cv2 under python3
@@ -63,8 +64,34 @@ class QPaletteButton(QtWidgets.QPushButton):
         self.color = color
         self.setStyleSheet("background-color: %s;" % color)
 
+class MainWindow(QMainWindow):
 
-class App(QWidget):
+    def __init__(self, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
+
+        self.setWindowTitle("My Awesome App")
+
+        # Menubar
+        self.menubar = QMenuBar(self)
+        fileMenu = self.menubar.addMenu("File")
+        # fileMenu.addAction("New")
+        # fileMenu.addAction("Open")
+        # fileMenu.addAction("Save")
+        exitAct = QAction(QIcon('exit.png'), '&Exit', self)
+        exitAct.setShortcut('Ctrl+Q')
+        exitAct.setStatusTip('Exit application')
+        exitAct.triggered.connect(qApp.quit)
+        fileMenu.addAction(exitAct)
+        self.menubar.show()
+
+        toolbar = QToolBar("My main toolbar")
+        self.addToolBar(toolbar)
+
+        certral_widget = MainWidget()
+        self.setCentralWidget(certral_widget)
+
+
+class MainWidget(QWidget):
     
     def __init__(self):
         super().__init__()
@@ -133,9 +160,11 @@ class App(QWidget):
 
         # A vertical box layout that contains image and instrutions.
         vbox1 = QVBoxLayout()
+        # vbox1.addWidget(self.menubar)
         vbox1.addWidget(self.image_label)
         vbox1.addLayout(palette)
         vbox1.addWidget(self.statusLabel)
+        # vbox1.addWidget(menubar)
         # A vertical box layout that contains buttons.
         vbox2 = QVBoxLayout()
         vbox2.addWidget(self.table)
@@ -296,5 +325,6 @@ class App(QWidget):
 
 if __name__=="__main__":
     app = QApplication(sys.argv)
-    a = App()
+    window = MainWindow()
+    window.show()
     sys.exit(app.exec_())
