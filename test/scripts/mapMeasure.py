@@ -21,12 +21,10 @@
     2. Opencv is imported for potential processing.
 
  TODO: 
-    1. Optionally settle the opencv and python installation. 
-       (Might be unnecessary, as I will upgrade my ubuntu soon.)
-    2. Add a image select and load.
-    3. Generate a metric at the lower-right corner?
-    4. Maybe also connect with the path-follower to generate the input.
-    5. Store the metric and origin point from last use.
+    1. Generate a metric at the lower-right corner?
+    2. Maybe also connect with the path-follower to generate the input.
+    3. Store the metric and origin point from last use.
+    4. Resize the window to fit the new image when the former is replaced.
 
 """
 
@@ -44,15 +42,9 @@ from math import sqrt
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QVBoxLayout, 
     QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QInputDialog, 
-    QAction, qApp, QMenuBar, QToolBar)
+    QAction, qApp, QMenuBar, QToolBar, QFileDialog)
 from PyQt5.QtGui import QPixmap, QImage, QColor, QPainter, QIcon
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt,QObject, QPoint
-
-# in order to import cv2 under python3
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') 
-import cv2
-# append back in order to import rospy
-sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') 
 
 
 
@@ -64,31 +56,41 @@ class QPaletteButton(QtWidgets.QPushButton):
         self.color = color
         self.setStyleSheet("background-color: %s;" % color)
 
+
 class MainWindow(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.setWindowTitle("My Awesome App")
+        self.setWindowTitle("Map labelling tool")
+        self.certral_widget = MainWidget()
 
         # Menubar
         self.menubar = QMenuBar(self)
-        fileMenu = self.menubar.addMenu("File")
-        # fileMenu.addAction("New")
-        # fileMenu.addAction("Open")
-        # fileMenu.addAction("Save")
+
         exitAct = QAction(QIcon('exit.png'), '&Exit', self)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.setStatusTip('Exit application')
         exitAct.triggered.connect(qApp.quit)
+
+        openAct = QAction('Change image', self)
+        openAct.triggered.connect(self.certral_widget.changeImage)
+
+        saveAct = QAction('Save image', self)
+        saveAct.triggered.connect(self.certral_widget.saveImage)
+
+        fileMenu = self.menubar.addMenu("File")
+        fileMenu.addAction(openAct)
+        fileMenu.addAction(saveAct)
         fileMenu.addAction(exitAct)
-        self.menubar.show()
 
-        toolbar = QToolBar("My main toolbar")
-        self.addToolBar(toolbar)
+        # Toolbar
+        # toolbar = QToolBar("My main toolbar")
+        # self.addToolBar(toolbar)
 
-        certral_widget = MainWidget()
-        self.setCentralWidget(certral_widget)
+        self.setCentralWidget(self.certral_widget)
+
+        # self.resize(MainWindow.minimumSizeHint())
 
 
 class MainWidget(QWidget):
@@ -116,10 +118,10 @@ class MainWidget(QWidget):
         self.label_font.setPointSize(8)
 
         # Load the test image
-        src_path = "../data/mapImg/lawnGmap.png"
-        cv_img = cv2.imread(src_path)
-        # convert the image to Qt format
-        self.qt_img_raw, self.w_img, self.h_img = self.convert_cv_qt(cv_img)
+        self.src_path = "../data/mapImg/lawnGmap.png"
+        self.qt_img_raw = QPixmap(self.src_path)
+        self.w_img = self.qt_img_raw.width()
+        self.h_img = self.qt_img_raw.height()
 
         # Window layout
         self.setWindowTitle("Point coordinates select and locate")
@@ -141,7 +143,6 @@ class MainWidget(QWidget):
         button_metric = QtWidgets.QPushButton(self)
         button_metric.clicked.connect(self.metric_update)
         button_metric.setText("Set metric")
-        button_metric.resize(150, 50)
 
         button_zero = QtWidgets.QPushButton(self)
         button_zero.clicked.connect(self.set_original)
@@ -173,12 +174,10 @@ class MainWidget(QWidget):
         vbox2.addWidget(button_PoI)
         vbox2.addWidget(button_points_clear)
         vbox2.addWidget(self.textLabel)
-
         # A overall horizonal box
         hbox = QHBoxLayout()
         hbox.addLayout(vbox1)
         hbox.addLayout(vbox2)
-
         self.setLayout(hbox)
         self.image_label.setPixmap(self.qt_img_raw)
         self.show()
@@ -206,15 +205,6 @@ class MainWidget(QWidget):
             b = QPaletteButton(c)
             b.pressed.connect(lambda c=c: self.pen.setColor(QColor(c)))
             layout.addWidget(b)
-    
-    def convert_cv_qt(self, cv_img):
-        """Convert from an opencv image to QPixmap"""
-        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-        h, w, ch = rgb_image.shape
-        bytes_per_line = ch * w
-        convert_to_Qt_format = QtGui.QImage(rgb_image.data, \
-            w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
-        return QPixmap.fromImage(convert_to_Qt_format), w, h
 
     def metric_update(self):
         """Set up or update the metric"""
@@ -280,18 +270,15 @@ class MainWidget(QWidget):
                 painter.drawEllipse(point.x() - offset, \
                     point.y() - offset, self.diameter, self.diameter)
                 print(point.x(), point.y())
-
             if self.status == 1:
                 self.count_tmp += 1
                 if self.count_tmp == 2:
                     start = self.points_tmp[-2]
                     end = self.points_tmp[-1]
                     self.metric_compute(start.x(), start.y(), end.x(), end.y())
-            
             if self.status == 2:
                 self.original_x = point.x()
                 self.original_y = point.y()
-            
             if self.status == 3:
                 dis, dis_x, dis_y = self.compute_coordinate(point.x(), point.y())
                 self.addTableRow([len(self.points_tmp),point.x(), point.y(), format(dis_x, '.1f'), format(dis_y, '.1f')])
@@ -320,6 +307,35 @@ class MainWidget(QWidget):
         dis_y = self.pixel2meter*(-py + self.original_y)
         dis = sqrt(dis_x**2 + dis_y**2)
         return dis, dis_x, dis_y
+
+    def changeImage(self):
+        """Change the image"""
+        filename, _ = QFileDialog.getOpenFileName()
+        if len(filename):
+            self.src_path  = filename
+            print("The image at is loaded from ", self.src_path)
+            self.qt_img_raw = QPixmap(self.src_path)
+            self.w_img = self.qt_img_raw.width()
+            self.h_img = self.qt_img_raw.height()
+            self.image_label.setPixmap(self.qt_img_raw)
+            self.resize(self.minimumSizeHint())
+
+            # self.reset_map_img()
+        else:
+            print("Cancelled image loading.")
+            return 0
+
+    def saveImage(self):
+        """Save the image"""
+        filename, _ = QFileDialog.getSaveFileName(self, "Save Image", "saved_map.png",
+                         "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
+        if len(filename):
+            print("The map will be saved at ", filename)
+            self.image_label.pixmap().save(filename)
+        else:
+            print("Cancelled image saving.")
+            return 0
+
 
 
 
