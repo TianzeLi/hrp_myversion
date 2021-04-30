@@ -17,8 +17,7 @@
        By default, East-North-Up frame is applied. 
 
  Note:
-    1. The opencv and python installation are not settled.
-    2. Opencv is imported for potential processing.
+    1. Opencv could be imported for potential processing.
 
  TODO: 
     1. Generate a metric at the lower-right corner?
@@ -38,6 +37,7 @@ COLORS = [
 
 import sys
 from math import sqrt
+import pickle
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import (QWidget, QApplication, QLabel, QVBoxLayout, 
@@ -72,25 +72,28 @@ class MainWindow(QMainWindow):
         exitAct.setShortcut('Ctrl+Q')
         exitAct.setStatusTip('Exit application')
         exitAct.triggered.connect(qApp.quit)
-
         openAct = QAction('Change image', self)
         openAct.triggered.connect(self.certral_widget.changeImage)
-
         saveAct = QAction('Save image', self)
         saveAct.triggered.connect(self.certral_widget.saveImage)
-
         fileMenu = self.menubar.addMenu("File")
         fileMenu.addAction(openAct)
         fileMenu.addAction(saveAct)
         fileMenu.addAction(exitAct)
+
+        paraStoreAct = QAction('Store params', self)
+        paraStoreAct.triggered.connect(self.certral_widget.paraStore)
+        paraReadAct = QAction('Read params', self)
+        paraReadAct.triggered.connect(self.certral_widget.paraRead)
+        paraMenu = self.menubar.addMenu("Param")
+        paraMenu.addAction(paraStoreAct)
+        paraMenu.addAction(paraReadAct)
 
         # Toolbar
         # toolbar = QToolBar("My main toolbar")
         # self.addToolBar(toolbar)
 
         self.setCentralWidget(self.certral_widget)
-
-        # self.resize(MainWindow.minimumSizeHint())
 
 
 class MainWidget(QWidget):
@@ -336,6 +339,36 @@ class MainWidget(QWidget):
             print("Cancelled image saving.")
             return 0
 
+    def paraStore(self):
+        """Store the parameter stored in a former use"""
+        self.update()
+        paralist = {
+            'pixel2meter' : str(self.pixel2meter),
+            'original_x' : str(self.original_x),
+            'original_y' : str(self.original_y)
+        }
+        print(paralist)
+
+        file_path = "../param/parameters.data"
+        f = open(file_path, 'wb')
+        pickle.dump(paralist, f)
+        f.close()
+        print("Current parameters stored in ", file_path)
+
+
+    def paraRead(self):
+        """Load the parameter stored in a former use"""
+        file_path = "../param/parameters.data"
+        f = open(file_path, 'rb')
+        paralist = pickle.load(f)
+        print(paralist)
+        f.close()
+
+        self.pixel2meter = float(paralist['pixel2meter'])
+        self.original_x = float(paralist['original_x'])
+        self.original_y = float(paralist['original_y'])
+        self.status = 3
+        print("Current parameters read from ", file_path)
 
 
 
