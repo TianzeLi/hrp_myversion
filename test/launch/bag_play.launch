@@ -1,0 +1,15 @@
+<launch>
+	<arg name="path" default=" $(env HOME)/bags/lawn/" />
+	<arg name="file_1" default="lawn_three_laps_20201122.bag" />
+	<!-- For additional bag file to play concurrently. -->
+	<!-- <arg name="file_2" default="mfile_2" /> -->
+
+	<arg name="rate" default="1.0" />
+
+
+	<node pkg="rosbag" type="play" name="bag_play" output="screen" args=" -r $(arg rate) --clock $(arg path)$(arg file_1)"/>
+
+	<node type="rviz" name="rviz" pkg="rviz" />
+
+</launch>
+

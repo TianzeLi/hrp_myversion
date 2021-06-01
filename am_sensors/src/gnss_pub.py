@@ -5,6 +5,10 @@
 	2. relative postion to the initial point in ENU 
 	   in geometry_msgs/PoseWithCovarianceStamped.
 
+	Note that now I do not have the access to the device and the program
+	directly manipulates the GNSS API, I cannot test after modifying, so I 
+	will leave it in its rugged shape:)
+
 """
 
 import rospy

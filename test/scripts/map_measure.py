@@ -109,7 +109,7 @@ class MainWidget(QWidget):
         self.original_y = 0.0
         self.circle_thickness = 4
         self.diameter = 12
-        self.offset = 11
+        self.offset = 9
 
         # Initialize the state: 0 - metric or original point not set
         self.status = 0
@@ -119,11 +119,12 @@ class MainWidget(QWidget):
         self.pen = QtGui.QPen()
         self.pen.setColor(QColor('#ffd035'))
         self.pen.setWidth(self.circle_thickness)
+        self.brush = QtGui.QBrush(Qt.white, Qt.SolidPattern)
         # Text font
         self.label_font = QtGui.QFont()
         self.label_font.setFamily('Times')
         self.label_font.setBold(True)
-        self.label_font.setPointSize(8)
+        self.label_font.setPointSize(12)
         # Load the test image
         self.src_path = "../data/mapImg/lawnGmap.png"
         self.qt_img_raw = QPixmap(self.src_path)
@@ -141,8 +142,8 @@ class MainWidget(QWidget):
         # The table to contain the coordinates
         self.table = QTableWidget(self)
         self.table.setColumnCount(6)    
-        self.table.setHorizontalHeaderLabels((
-            ['No.','pixel u','pixel v','spatial x','spatial y','note']))
+        self.table.setHorizontalHeaderLabels(
+            ['No.', 'pixel u', 'pixel v', 'spatial x', 'spatial y', 'note'])
         self.table.setColumnWidth(0, 7);
         self.table.setFixedWidth(self.get_table_width());
         self.table.verticalHeader().setVisible(False)
@@ -190,7 +191,7 @@ class MainWidget(QWidget):
 
     def get_table_width(self):
         """Return the proper width to display the full table."""
-        w = self.table.verticalHeader().width()+2
+        w = self.table.verticalHeader().width() + 2
         for i in range(self.table.columnCount()):
             w += self.table.columnWidth(i)
         return w
@@ -230,7 +231,7 @@ class MainWidget(QWidget):
     def reset_map_img(self):
         """Restore the map image to initial."""
         painter = QPainter(self.image_label.pixmap())
-        painter.drawPixmap(0, 0, self.w_img, self.h_img,self.qt_img_raw)
+        painter.drawPixmap(0, 0, self.w_img, self.h_img, self.qt_img_raw)
         painter.end()
 
     def set_original(self):
@@ -264,6 +265,7 @@ class MainWidget(QWidget):
         painter = QPainter(self.image_label.pixmap())
         painter.setFont(self.label_font)        
         painter.setPen(self.pen)
+        painter.setBrush(self.brush)
         offset = self.offset + 0.5*self.diameter
         self.update()
         if self.status != 0:
@@ -289,9 +291,9 @@ class MainWidget(QWidget):
                 dis, dis_x, dis_y = self.compute_coordinate(point.x(), 
                                                             point.y())
                 self.addTableRow(
-                    [len(self.points_tmp),point.x(), point.y(),
+                    [len(self.points_tmp), point.x(), point.y(),
                     format(dis_x, '.1f'), format(dis_y, '.1f')])
-                painter.drawText(point.x(), point.y(), 
+                painter.drawText(point.x() + 2, point.y() + 4, 
                                 str(len(self.points_tmp)))
                 self.table_resize()
         else:
@@ -312,8 +314,8 @@ class MainWidget(QWidget):
 
     def compute_coordinate(self, px, py):
         """Compute the x, y and direct distance."""
-        dis_x = self.pixel2meter*(px - self.original_x)
-        dis_y = self.pixel2meter*(-py + self.original_y)
+        dis_x = self.pixel2meter * (px-self.original_x)
+        dis_y = self.pixel2meter * (-py+self.original_y)
         dis = sqrt(dis_x**2 + dis_y**2)
         return dis, dis_x, dis_y
 
@@ -348,9 +350,9 @@ class MainWidget(QWidget):
         """Store the parameter stored in a former use."""
         self.update()
         paralist = {
-            'pixel2meter' : str(self.pixel2meter),
-            'original_x' : str(self.original_x),
-            'original_y' : str(self.original_y)
+            'pixel2meter' : self.pixel2meter,
+            'original_x' : self.original_x,
+            'original_y' : self.original_y
         }
         print(paralist)
 
@@ -367,11 +369,13 @@ class MainWidget(QWidget):
             paralist = pickle.load(f)
         print(paralist)
 
-        self.pixel2meter = float(paralist['pixel2meter'])
-        self.original_x = float(paralist['original_x'])
-        self.original_y = float(paralist['original_y'])
+        self.pixel2meter = paralist['pixel2meter']
+        self.original_x = paralist['original_x']
+        self.original_y = paralist['original_y']
         self.status = 3
         print("Current parameters read from ", file_path)
+        self.statusLabel.setText(
+            "Each pixel is {0:.3f}m in length.".format(self.pixel2meter))
 
 
 if __name__=="__main__":

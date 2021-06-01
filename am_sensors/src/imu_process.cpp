@@ -41,6 +41,9 @@ void IMUProcess::initializeParams()
 	double x, y, z;
 	double roll, pitch, yaw;
 
+	double angular_velocity_threshold_;
+	double trans_velocity_threshold_;
+
 	imu_shall_pub_ = true;
 	uncertainty_coef_r_ = 1.0;
 	uncertainty_coef_p_ = 1.0;
@@ -53,7 +56,7 @@ void IMUProcess::initializeParams()
 	if (!nh_private_.getParam("publish_rpy", publish_rpy_))
 		publish_rpy_ = false;
 	if (!nh_private_.getParam("pub_test_tf", pub_test_tf_))
-		pub_test_tf_ = "false";
+		pub_test_tf_ = false;
 	if(pub_test_tf_){
 		if (!nh_private_.getParam("xyz", xyz))
 			xyz = "0.0 0.16 0.37";
@@ -71,13 +74,10 @@ void IMUProcess::initializeParams()
  		do_covariance_adaption_ = false;
 	if (!nh_private_.getParam("do_pub_control", do_pub_control_))
 		do_pub_control_ = false;
-	if (do_pub_control_)
-	{
-		if (!nh_private_.getParam("angular_velocity_threshod", angular_velocity_threshod_))
-			angular_velocity_threshod_ = 1.5;
-		if (!nh_private_.getParam("trans_velocity_threshod", trans_velocity_threshod_))
-			angular_velocity_threshod_ = 1.0;
-	}
+	if (!nh_private_.getParam("angular_velocity_threshold", angular_velocity_threshold_))
+		angular_velocity_threshold_ = 1.5;
+	if (!nh_private_.getParam("trans_velocity_threshold", trans_velocity_threshold_))
+		trans_velocity_threshold_ = 1.0;
 
  	if (!nh_private_.getParam("orientation_stddev_r", orientation_stddev_r_))
  		orientation_stddev_r_ = 0.001;
@@ -151,14 +151,15 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 void IMUProcess::CmdVelCallback(const geometry_msgs::Twist msg)
 {
 	double vt, vr;
-
+	// double vr_max = angular_velocity_threshold_;
+	// double vt_max = trans_velocity_threshold_;
 	// Convert to the absolute value here.
 	vt = std::abs(msg.linear.x);
 	vr = std::abs(msg.angular.z);
 
 	if (do_pub_control_)
 	{
-		if (vt > trans_velocity_threshod_ || vr > angular_velocity_threshod_)
+		if (vt > 1.0 || vr > 1.5)
 			imu_shall_pub_ = false;
 		else 
 			imu_shall_pub_ = true;

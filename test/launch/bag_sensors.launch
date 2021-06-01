@@ -29,21 +29,20 @@
       <param name="warming_time"   value="50"/> 
       <param name="pub_frequency"  value="10"/>
       <param name="control_stdev"  value="10" />      
-
     </node>
   </group>
+
 
   <group if="$(arg useRightGNSS)" 
     ns="gnss_right">
     <node name="gnss_right_pub"
           pkg="am_sensors"
           type="gnss_pub.py">
-    <param name="device_serial_number" value="285332" />
-    <!-- Unit: in second or meter -->
-    <param name="warming_time"   value="50"/> 
-    <param name="pub_frequency"  value="10"/>
-    <param name="control_stdev"  value="10" /> 
-
+      <param name="device_serial_number" value="285332" />
+      <!-- Unit: in second or meter -->
+      <param name="warming_time"   value="50"/> 
+      <param name="pub_frequency"  value="10"/>
+      <param name="control_stdev"  value="10" /> 
     </node>
   </group>
 
@@ -72,7 +71,23 @@
       <param name="orientation_stddev_r" value="0.005"/>
       <param name="orientation_stddev_p" value="0.005"/>
       <param name="orientation_stddev_y" value="0.010"/>
+    </node>
 
+    <node pkg="imu_complementary_filter" type="complementary_filter_node"
+      name="complementary_filter_gain_node_left" output="screen">
+      <param name="do_bias_estimation" value="false"/>
+      <param name="do_adaptive_gain" value="true"/>
+      <param name="use_mag" value="false"/>
+      <param name="gain_acc" value="0.01"/>
+      <param name="gain_mag" value="0.001"/>
+      <param name="fixed_frame" value="map"/>
+      <param name="publish_tf"  value="false"/>
+      <param name="orientation_stddev" value="0.001"/>
+      <!-- Customized part, low-pass filters for acc and mag added -->
+      <param name="do_acc_lowpass" value="true"/>
+      <param name="do_mag_lowpass" value="true"/>
+      <param name="alpha_acc" value="0.75"/>
+      <param name="alpha_mag" value="0.75"/>
     </node>
   </group>
 
@@ -98,7 +113,24 @@
       <param name="orientation_stddev_r" value="0.005"/>
       <param name="orientation_stddev_p" value="0.005"/>
       <param name="orientation_stddev_y" value="0.010"/>
+    </node>
 
+    <node pkg="imu_complementary_filter" type="complementary_filter_node"
+      name="complementary_filter_gain_node_right" output="screen">
+      <param name="do_bias_estimation" value="false"/>
+      <param name="do_adaptive_gain" value="true"/>
+      <param name="use_mag" value="false"/>
+      <param name="gain_acc" value="0.01"/>
+      <param name="gain_mag" value="0.001"/>
+      <param name="fixed_frame" value="map"/>
+      <param name="publish_tf"  value="false"/>
+      <param name="orientation_stddev" value="0.001"/>
+
+      <!-- Customized part, low-pass filters for acc and mag added -->
+      <param name="do_acc_lowpass" value="true"/>
+      <param name="do_mag_lowpass" value="true"/>
+      <param name="alpha_acc" value="0.75"/>
+      <param name="alpha_mag" value="0.75"/>
     </node>
   </group>
 
