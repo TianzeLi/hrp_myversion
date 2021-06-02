@@ -1,4 +1,11 @@
 <launch>
+	<arg name="processSensors" default="False" />
+	<arg name="fuseSensors" default="False" />
+	<arg name="openRviz" default="False" />
+	<arg name="publishTrackerInRviz" default="False" />
+	<arg name="usePlotjuggler" default="False" />
+
+
 	<arg name="path" default=" $(env HOME)/bags/lawn/" />
 	<arg name="file_1" default="lawn_three_laps_20201122.bag" />
 	<!-- For additional bag file to play concurrently. -->
@@ -8,8 +15,48 @@
 
 
 	<node pkg="rosbag" type="play" name="bag_play" output="screen" args=" -r $(arg rate) --clock $(arg path)$(arg file_1)"/>
+  	
+  	<group if="$(arg openRviz)" ns="rviz">
+		<node type="rviz" name="rviz" pkg="rviz" />
+	</group>
+  
+  	<group if="$(arg processSensors)" ns="sensorProcess">
 
-	<node type="rviz" name="rviz" pkg="rviz" />
+	</group>
+
+	<group if="$(arg fuseSensors)" ns="sensorFuse">
+
+	</group>
+
+	<group if="$(arg usePlotjuggler)" ns="plotjuggler">
+		<node pkg="plotjuggler" type="PlotJuggler" name="plot_Juggler" args="" />
+	</group>
+
+
+  	<group if="$(arg publishTrackerInRviz)" ns="tracker">
+		<node name="trace_pub"
+		        pkg="am_sensors"
+		        type="tracking_marker_pub"
+		        output="screen">
+		    <param name="trace_amount"  value="4" />
+		    <param name="frequency"     value="25" />
+		    <param name="pose_topic1"   value="/odom"/>
+		    <param name="data_type1"    value="nav_msgs/Odometry"/> 
+		    <param name="color1"        value="red"/>
+		    <param name="pose_topic2"   value="/odometry/filtered" />
+		    <param name="data_type2"    value="nav_msgs/Odometry"/> 
+		    <param name="color2"        value="green"/>
+		    <param name="pose_topic3"   value="/gnss_left/pose" />
+		    <param name="data_type3"    value="geometry_msgs/PoseWithCovarianceStamped"/> 
+		    <param name="color3"        value="yellow"/>
+		    <param name="pose_topic4"   value="/gnss_right/pose" />
+		    <param name="data_type4"    value="geometry_msgs/PoseWithCovarianceStamped"/> 
+		    <param name="color4"        value="orange"/>
+		    <!-- <param name="pose_topic5"   value="/rtabmap/odom"/> -->
+		    <!-- <param name="data_type5"    value="nav_msgs/Odometry"/>  -->
+		    <!-- <param name="color5"        value="cyan"/> -->
+		  </node>
+	</group>
 
 </launch>
 

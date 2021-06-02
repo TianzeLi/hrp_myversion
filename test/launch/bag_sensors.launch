@@ -51,8 +51,6 @@
   <group if="$(arg useLeftIMU)"
     ns="imu_left">
 
-    <include file="$(find am_sensors)/launch/imu_left_cpt.launch" />
-
     <node name="imu_process"
           pkg="am_sensors"
           type="imu_process">
@@ -93,8 +91,6 @@
 
   <group if="$(arg useRightIMU)"
     ns="imu_right">
-
-    <include file="$(find am_sensors)/launch/imu_right_cpt.launch" />
 
     <node name="imu_process"
           pkg="am_sensors"
