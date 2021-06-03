@@ -51,18 +51,18 @@
   <group if="$(arg useLeftIMU)"
     ns="imu_left">
 
-    <node name="imu_process"
+    <node name="imu_process_left"
           pkg="am_sensors"
           type="imu_process">
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu01_link"/>
       <param name="pub_test_tf" value="false"/>
+      <param name="publish_enu_tf"  value="true"/>
       <param name="xyz" value="0.0 0.16 0.37"/>
-      <param name="rpy" value="3.142 0.0 1.571"/>
+      <param name="rpy" value="3.1415926 0.0 1.5707963"/>
       <param name="publish_rpy" value="false"/>
-
       <!-- On operation walkaround: to omit orientation ouput during drastic turn -->
-      <param name="do_pub_control" value="true"/>
+      <param name="do_pub_control" value="false"/>
       <param name="trans_velocity_threshold" value="1.0"/>
       <param name="angular_velocity_threshold" value="1.5"/>
       <param name="do_covariance_adaption" value="true"/>
@@ -75,11 +75,11 @@
       name="complementary_filter_gain_node_left" output="screen">
       <param name="do_bias_estimation" value="false"/>
       <param name="do_adaptive_gain" value="true"/>
-      <param name="use_mag" value="false"/>
+      <param name="use_mag" value="true"/>
       <param name="gain_acc" value="0.01"/>
       <param name="gain_mag" value="0.001"/>
       <param name="fixed_frame" value="map"/>
-      <param name="publish_tf"  value="false"/>
+      <param name="publish_tf"  value="false"/>     
       <param name="orientation_stddev" value="0.001"/>
       <!-- Customized part, low-pass filters for acc and mag added -->
       <param name="do_acc_lowpass" value="true"/>
@@ -92,17 +92,18 @@
   <group if="$(arg useRightIMU)"
     ns="imu_right">
 
-    <node name="imu_process"
+    <node name="imu_process_right"
           pkg="am_sensors"
           type="imu_process">
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu02_link"/>
       <param name="pub_test_tf" value="false"/>
+      <param name="publish_enu_tf"  value="true"/>
       <param name="xyz" value="0.0 -0.16 0.37"/>
-      <param name="rpy" value="3.142 0.0 1.571"/>
+      <param name="rpy" value="3.1415926 0.0 1.5707963"/>
       <param name="publish_rpy" value="false"/>
 
-      <param name="do_pub_control" value="true"/>
+      <param name="do_pub_control" value="false"/>
       <param name="trans_velocity_threshold" value="1.0"/>
       <param name="angular_velocity_threshold" value="1.5"/>
       <param name="do_covariance_adaption" value="true"/>
@@ -115,9 +116,9 @@
       name="complementary_filter_gain_node_right" output="screen">
       <param name="do_bias_estimation" value="false"/>
       <param name="do_adaptive_gain" value="true"/>
-      <param name="use_mag" value="false"/>
+      <param name="use_mag" value="true"/>
       <param name="gain_acc" value="0.01"/>
-      <param name="gain_mag" value="0.001"/>
+      <param name="gain_mag" value="0.0005"/>
       <param name="fixed_frame" value="map"/>
       <param name="publish_tf"  value="false"/>
       <param name="orientation_stddev" value="0.001"/>

@@ -1,7 +1,7 @@
 <launch>
-	<arg name="processSensors" default="False" />
+	<arg name="processSensors" default="True" />
 	<arg name="fuseSensors" default="False" />
-	<arg name="openRviz" default="False" />
+	<arg name="openRviz" default="True" />
 	<arg name="publishTrackerInRviz" default="False" />
 	<arg name="usePlotjuggler" default="False" />
 
@@ -11,22 +11,24 @@
 	<!-- For additional bag file to play concurrently. -->
 	<!-- <arg name="file_2" default="mfile_2" /> -->
 
-	<arg name="rate" default="1.0" />
+	<arg name="rate" default="3.0" />
 
 
-	<node pkg="rosbag" type="play" name="bag_play" output="screen" args=" -r $(arg rate) --clock $(arg path)$(arg file_1)"/>
+	<node pkg="rosbag" type="play" name="bag_play" output="screen" args=" -r $(arg rate) --clock $(arg path)$(arg file_1) /imu_left/imu/data:=/imu_left/imu/data_old /imu_right/imu/data:=/imu_right/imu/data_old"/>
   	
   	<group if="$(arg openRviz)" ns="rviz">
 		<node type="rviz" name="rviz" pkg="rviz" />
 	</group>
   
-  	<group if="$(arg processSensors)" ns="sensorProcess">
-
+  	<group if="$(arg processSensors)">
+	    <include file="$(find am_test)/launch/bag_sensors.launch" />
 	</group>
+
 
 	<group if="$(arg fuseSensors)" ns="sensorFuse">
-
+	  	<include file="$(find am_test)/launch/bag_ekf.launch" />
 	</group>
+
 
 	<group if="$(arg usePlotjuggler)" ns="plotjuggler">
 		<node pkg="plotjuggler" type="PlotJuggler" name="plot_Juggler" args="" />

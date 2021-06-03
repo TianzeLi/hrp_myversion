@@ -1,13 +1,19 @@
 /* 	
- * IMU original data processor 
- * to publish the IMU data in correct frame and with more accuarte covariance.s 
+ * IMU original data processor.
+ * The CPT filter by default publish in NWU, so here we rotate it into 
+ * ENU and attach a proper covariance matrix. 
+ *
+ * For the convenience of testing and tuning, the node can optionally 
+ * publihsh the tf frame named "imu_<left/right>_enu" linked to /map
+ * to visualize the pose of the IMU. It depends on the relatively 
+ * pose of IMU and the base_link.
  *
  */
 
 #include <std_msgs/String.h>
 #include <sstream>
-
 #include "imu_process.h"
+
 
 namespace am_sensors_imu{
 
@@ -38,11 +44,6 @@ void IMUProcess::initializeParams()
 	std::string xyz;
     std::string rpy;
     std::stringstream ss_tmp;
-	double x, y, z;
-	double roll, pitch, yaw;
-
-	double angular_velocity_threshold_;
-	double trans_velocity_threshold_;
 
 	imu_shall_pub_ = true;
 	uncertainty_coef_r_ = 1.0;
@@ -56,18 +57,22 @@ void IMUProcess::initializeParams()
 	if (!nh_private_.getParam("publish_rpy", publish_rpy_))
 		publish_rpy_ = false;
 	if (!nh_private_.getParam("pub_test_tf", pub_test_tf_))
-		pub_test_tf_ = false;
-	if(pub_test_tf_){
-		if (!nh_private_.getParam("xyz", xyz))
-			xyz = "0.0 0.16 0.37";
-		if (!nh_private_.getParam("rpy", rpy))
-			rpy = "3.142 0.0 1.571";
+		pub_test_tf_ = false;	
+	if (!nh_private_.getParam("publish_enu_tf", publish_enu_tf_))
+		publish_enu_tf_ = false;
+	if (!nh_private_.getParam("xyz", xyz))
+		xyz = "0.0 0.16 0.37";
+	if (!nh_private_.getParam("rpy", rpy))
+		rpy = "3.142 0.0 1.571";
 		std::stringstream xyz_ss(xyz);
 		std::stringstream rpy_ss(rpy);
 		xyz_ss >> x_ >> y_ >> z_;
+		ROS_INFO("y: [%f]", y_);
 		rpy_ss >> roll_ >> pitch_ >> yaw_;
-		pub_tf(x, y, z, roll, pitch, yaw, fixed_frame_);
-		ROS_INFO_STREAM("Publishing testing TF now.");
+
+	if(pub_test_tf_){
+		pub_tf(x_, y_, z_, roll_, pitch_, yaw_, fixed_frame_);
+		ROS_INFO("Publishing testing TF now.");
 	}
 
 	if (!nh_private_.getParam("do_covariance_adaption", do_covariance_adaption_))
@@ -78,14 +83,12 @@ void IMUProcess::initializeParams()
 		angular_velocity_threshold_ = 1.5;
 	if (!nh_private_.getParam("trans_velocity_threshold", trans_velocity_threshold_))
 		trans_velocity_threshold_ = 1.0;
-
  	if (!nh_private_.getParam("orientation_stddev_r", orientation_stddev_r_))
  		orientation_stddev_r_ = 0.001;
  	if (!nh_private_.getParam("orientation_stddev_p", orientation_stddev_p_))
  		orientation_stddev_r_ = 0.001;
  	if (!nh_private_.getParam("orientation_stddev_y", orientation_stddev_y_))
  		orientation_stddev_r_ = 0.001;
-
 
 	ss_tmp << topic_name_ << "/enu";
 	pub_topic_ = ss_tmp.str();
@@ -98,6 +101,7 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 {	
 	sensor_msgs::Imu imu_tmp = msg;
 	tf2::Quaternion q_nwu, q_rot, q_enu;
+	std::string test_frame_id = "imu_left_enu";
 
 	imu_tmp.header.frame_id = fixed_frame_;
 
@@ -115,20 +119,16 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 		imu_tmp.orientation_covariance[8] = orientation_dev_y_;
 	}
 
-	// Is this part needed??
-	// Converting from NWU to ENU.
+	// Converting the orientation of IMU from NWU to ENU.
 	tf2::convert(imu_tmp.orientation, q_nwu);
 	geometry_msgs::Quaternion quat_msg;
 	quat_msg.x=0.0;
 	quat_msg.y=0.0;
 	quat_msg.z=0.707;
 	quat_msg.w=0.707;
-
-   	tf2::convert(quat_msg , q_rot); 
-	
-	q_enu = q_rot*q_nwu;  // Calculate the new orientation
+   	tf2::convert(quat_msg , q_rot); 	
+	q_enu = q_rot*q_nwu;
 	q_enu.normalize();
-	// Stuff the new rotation back into the pose. This requires conversion into a msg type
 	tf2::convert(q_enu, imu_tmp.orientation);
 
 	if(imu_shall_pub_)
@@ -146,6 +146,48 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 		m.getRPY(rpy.x, rpy.y, rpy.z);
 		imu_pub_rpy_.publish(rpy);
 	}
+
+	if (publish_enu_tf_)
+	{	
+		tf2_ros::Buffer tfBuffer;
+		static tf2_ros::TransformBroadcaster br;
+		geometry_msgs::TransformStamped transform_stamped;
+		geometry_msgs::TransformStamped transform_stamped_b2i;
+		
+		geometry_msgs::Vector3 vec_b2i, vec_now;
+	    tf2::Quaternion q_b2i, q_base_link_enu;
+		vec_b2i.x = x_;
+		vec_b2i.y = y_;
+		vec_b2i.z = z_;
+		q_b2i.setRPY(roll_, pitch_, yaw_);
+
+		// Transfrom that rotates from base_link to imu_link.
+		transform_stamped_b2i.header.stamp = ros::Time::now();
+		transform_stamped_b2i.header.frame_id = "base_link";
+		transform_stamped_b2i.child_frame_id = "imu_link";
+		transform_stamped_b2i.transform.rotation.x = q_b2i.x();
+		transform_stamped_b2i.transform.rotation.y = q_b2i.y();
+		transform_stamped_b2i.transform.rotation.z = q_b2i.z();
+		transform_stamped_b2i.transform.rotation.w = q_b2i.w();
+
+		// Transform that rotates the imu to its current enu pose.
+		if (y_ < 0.0)  
+			test_frame_id = "imu_right_enu";
+		transform_stamped.header.stamp = msg.header.stamp;
+    	transform_stamped.header.frame_id = "map";
+  	   	transform_stamped.child_frame_id = test_frame_id;
+		transform_stamped.transform.rotation.x = q_enu.x();
+		transform_stamped.transform.rotation.y = q_enu.y();
+		transform_stamped.transform.rotation.z = q_enu.z();
+		transform_stamped.transform.rotation.w = q_enu.w();
+
+		tf2::doTransform(vec_b2i, vec_now, transform_stamped_b2i);
+		tf2::doTransform(vec_now, vec_now, transform_stamped);
+		transform_stamped.transform.translation.x = vec_now.x;
+		transform_stamped.transform.translation.y = vec_now.y;
+		transform_stamped.transform.translation.z = vec_now.z;
+		br.sendTransform(transform_stamped);
+	}
 }
 
 void IMUProcess::CmdVelCallback(const geometry_msgs::Twist msg)
@@ -159,7 +201,7 @@ void IMUProcess::CmdVelCallback(const geometry_msgs::Twist msg)
 
 	if (do_pub_control_)
 	{
-		if (vt > 1.0 || vr > 1.5)
+		if (vt > trans_velocity_threshold_ || vr > angular_velocity_threshold_)
 			imu_shall_pub_ = false;
 		else 
 			imu_shall_pub_ = true;
@@ -179,10 +221,9 @@ void IMUProcess::CmdVelCallback(const geometry_msgs::Twist msg)
 void IMUProcess::pub_tf(double x, double y, double z, double r, double p, double yaw, const std::string frame_name)
 {	
 	ros::Rate rate(10.0);
-
 	static tf::TransformBroadcaster br;
 	tf::Transform transform;
-	transform.setOrigin( tf::Vector3(x, y, z) ); // might need to inverse the transform
+	transform.setOrigin( tf::Vector3(x_, y_, z_) ); // might need to inverse the transform
 	tf::Quaternion q;
 	q.setRPY(r, p, yaw); // might need to inverse the transform
 	transform.setRotation(q);
