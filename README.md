@@ -57,9 +57,13 @@ Launch files   | Functions
 `roslaunch am_driver path_follow`				| Run the path follower
 
 Examplary visual boundary detection results:
-With Inter Realsense D435 camera:
+
+With Inter Realsense D435 camera:  
+
 ![](doc/media/boundary_detect.png)
-With iPhone 7 default camera:
+
+With iPhone 7 default camera:  
+
 ![](doc/media/segResult.png)
 
 
