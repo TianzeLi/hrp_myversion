@@ -76,6 +76,7 @@ class BoundaryDetectNode():
 
 		# Specify the location of the images to load.
 		src_path = "../samples/p2_color.png"
+		src_path = "../samples/p101.jpg"
 		src_depth_path = "../samples/p2_depth.png"
 
 		# Select the features for clustering.

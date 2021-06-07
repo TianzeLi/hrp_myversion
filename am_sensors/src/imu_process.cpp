@@ -235,7 +235,7 @@ void IMUProcess::pub_tf(double x, double y, double z, double r, double p, double
 	}
 }
 
-}// namespace am_sensors_imu
+}    // namespace am_sensors_imu
 
 
 

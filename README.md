@@ -56,8 +56,13 @@ Launch files   | Functions
 `roslaunch am_sensors rtabmap.launch`           | Launch visual-SLAM
 `roslaunch am_driver path_follow`				| Run the path follower
 
-Examplary results (you should take it with a pinch of salt):
+Examplary visual boundary detection results:
+With Inter Realsense D435 camera:
 ![](doc/media/boundary_detect.png)
+With iPhone 7 default camera:
+![](doc/media/segResult.png)
+
+
 
 ### In simulation
 Althought not heavily used in this projected, the simulation in Gazebo provides models of the robot and sensors. Two lawn settings are also available in `simulation/am_gazebo/worlds`. In order to launch: 

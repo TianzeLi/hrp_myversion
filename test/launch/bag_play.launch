@@ -1,8 +1,8 @@
 <launch>
 	<arg name="processSensors" default="True" />
-	<arg name="fuseSensors" default="False" />
+	<arg name="fuseSensors" default="True" />
 	<arg name="openRviz" default="True" />
-	<arg name="publishTrackerInRviz" default="False" />
+	<arg name="publishTrackerInRviz" default="True" />
 	<arg name="usePlotjuggler" default="False" />
 
 
@@ -11,7 +11,7 @@
 	<!-- For additional bag file to play concurrently. -->
 	<!-- <arg name="file_2" default="mfile_2" /> -->
 
-	<arg name="rate" default="3.0" />
+	<arg name="rate" default="4.0" />
 
 
 	<node pkg="rosbag" type="play" name="bag_play" output="screen" args=" -r $(arg rate) --clock $(arg path)$(arg file_1) /imu_left/imu/data:=/imu_left/imu/data_old /imu_right/imu/data:=/imu_right/imu/data_old"/>
@@ -25,7 +25,7 @@
 	</group>
 
 
-	<group if="$(arg fuseSensors)" ns="sensorFuse">
+	<group if="$(arg fuseSensors)">
 	  	<include file="$(find am_test)/launch/bag_ekf.launch" />
 	</group>
 
@@ -35,12 +35,12 @@
 	</group>
 
 
-  	<group if="$(arg publishTrackerInRviz)" ns="tracker">
+  	<group if="$(arg publishTrackerInRviz)">
 		<node name="trace_pub"
 		        pkg="am_sensors"
 		        type="tracking_marker_pub"
 		        output="screen">
-		    <param name="trace_amount"  value="4" />
+		    <param name="trace_amount"  value="2" />
 		    <param name="frequency"     value="25" />
 		    <param name="pose_topic1"   value="/odom"/>
 		    <param name="data_type1"    value="nav_msgs/Odometry"/> 
@@ -48,12 +48,12 @@
 		    <param name="pose_topic2"   value="/odometry/filtered" />
 		    <param name="data_type2"    value="nav_msgs/Odometry"/> 
 		    <param name="color2"        value="green"/>
-		    <param name="pose_topic3"   value="/gnss_left/pose" />
+<!-- 		    <param name="pose_topic3"   value="/gnss_left/pose" />
 		    <param name="data_type3"    value="geometry_msgs/PoseWithCovarianceStamped"/> 
 		    <param name="color3"        value="yellow"/>
 		    <param name="pose_topic4"   value="/gnss_right/pose" />
 		    <param name="data_type4"    value="geometry_msgs/PoseWithCovarianceStamped"/> 
-		    <param name="color4"        value="orange"/>
+		    <param name="color4"        value="orange"/> -->
 		    <!-- <param name="pose_topic5"   value="/rtabmap/odom"/> -->
 		    <!-- <param name="data_type5"    value="nav_msgs/Odometry"/>  -->
 		    <!-- <param name="color5"        value="cyan"/> -->
