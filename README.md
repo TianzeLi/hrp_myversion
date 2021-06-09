@@ -52,7 +52,7 @@ Launch files   | Functions
 `roslaunch am_sensors sensors.launch`          	| Launch the added sensors
 `rosrun am_driver hrp_teleop.py`            	| Control via keyboard
 `roslaunch am_driver_safe ekf_template.launch`  | Launch localization
-`./am_vision/scripts/boundary_detect.py`        | Run the boundary detect node (may link to ROS later)
+`python am_vision/scripts/boundary_detect.py`   | Run the boundary detect node (may link to ROS later)
 `roslaunch am_sensors rtabmap.launch`           | Launch visual-SLAM
 `roslaunch am_driver path_follow`				| Run the path follower
 
