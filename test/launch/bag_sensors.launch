@@ -2,7 +2,7 @@
 
   <!-- Select which sensors are to be used -->
   <!-- <arg name="useCustomOdom" default="False"  /> -->
-  <arg name="useLeftGNSS"   default="False" />
+  <arg name="useLeftGNSS"   default="True" />
   <arg name="useRightGNSS"  default="False" />
   <arg name="useLeftIMU"    default="True" />
   <arg name="useRightIMU"   default="True" />
@@ -21,14 +21,19 @@
   <!-- convert the original gnss measurement -->
   <group if="$(arg useLeftGNSS)" 
     ns="gnss_left">
-    <node name="gnss_left_pub"
-          pkg="am_sensors"
-          type="gnss_pub.py">
-      <param name="device_serial_number"  value="285614" />
+    <!-- <node name="gnss_left_pub" -->
+          <!-- pkg="am_sensors" -->
+          <!-- type="gnss_pub.py"> -->
+      <!-- <param name="device_serial_number"  value="285614" /> -->
       <!-- Unit: in second or meter -->
-      <param name="warming_time"   value="50"/> 
-      <param name="pub_frequency"  value="10"/>
-      <param name="control_stdev"  value="10" />      
+      <!-- <param name="warming_time"   value="50"/>  -->
+      <!-- <param name="pub_frequency"  value="10"/> -->
+      <!-- <param name="control_stdev"  value="10" />       -->
+    <!-- </node> -->
+
+    <node name="gnss_left_sim_pub"
+          pkg="am_test"
+          type="gnss_simu.py">   
     </node>
   </group>
 

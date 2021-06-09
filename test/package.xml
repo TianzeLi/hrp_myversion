@@ -36,6 +36,8 @@
   <!--   Note that this is equivalent to the following: -->
     <build_depend>roscpp</build_depend>
     <exec_depend>roscpp</exec_depend>
+    <build_depend>rospy</build_depend>
+    <exec_depend>rospy</exec_depend>
     <build_depend>std_msgs</build_depend>
     <exec_depend>std_msgs</exec_depend>>
     <build_depend>geometry_msgs</build_depend>

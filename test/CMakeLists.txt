@@ -156,7 +156,7 @@ ${catkin_INCLUDE_DIRS}
 
 ## Specify libraries to link a library or executable target against
 
-# target_link_libraries(tracking_marker_pub 
+# target_link_libraries(gnss_simu.py
 #   ${catkin_LIBRARIES}
 # )
 

@@ -1,5 +1,9 @@
 #! /usr/bin/python3
 
+"""
+ Launch ros from scripts.
+
+"""
 import rospy
 # import rosbag
 import roslaunch
