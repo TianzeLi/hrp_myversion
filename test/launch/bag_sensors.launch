@@ -1,22 +1,22 @@
 <launch>
 
   <!-- Select which sensors are to be used -->
-  <!-- <arg name="useCustomOdom" default="False"  /> -->
+  <arg name="useCustomOdom" default="True"  />
   <arg name="useLeftGNSS"   default="True" />
   <arg name="useRightGNSS"  default="False" />
   <arg name="useLeftIMU"    default="True" />
-  <arg name="useRightIMU"   default="True" />
+  <arg name="useRightIMU"   default="False" />
 
   <!-- Only indicating if using cpt filter or magdwick. -->
   <arg name="useCptFilter"  default="True"/>
 
 <!-- Now the odom processing is removed as the original performance is good enough. -->
-<!--   <group if="$(arg useCustomOdom)" >
-    <node name="encoder_odo_pub"
-          pkg="am_sensors"
-          type="encoder_odo">
+  <group if="$(arg useCustomOdom)" >
+    <node name="odom_repub"
+          pkg="am_test"
+          type="odom_repub.py">
     </node>
-  </group> -->
+  </group>
 
   <!-- convert the original gnss measurement -->
   <group if="$(arg useLeftGNSS)" 
@@ -61,6 +61,7 @@
           type="imu_process">
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu01_link"/>
+      <param name="align_with_clock" value="true"/>
       <param name="pub_test_tf" value="false"/>
       <param name="publish_enu_tf"  value="true"/>
       <param name="xyz" value="0.0 0.16 0.37"/>
@@ -101,6 +102,7 @@
           type="imu_process">
       <param name="topic_name" value="imu/data"/>
       <param name="frame_name" value="imu02_link"/>
+      <param name="align_with_clock" value="true"/>
       <param name="pub_test_tf" value="false"/>
       <param name="publish_enu_tf"  value="true"/>
       <param name="xyz" value="0.0 -0.16 0.37"/>

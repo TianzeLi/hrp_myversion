@@ -54,6 +54,8 @@ void IMUProcess::initializeParams()
 		topic_name_ = "imu/data";
 	if (!nh_private_.getParam("frame_name", fixed_frame_))
 		fixed_frame_ = "map";
+	if (!nh_private_.getParam("align_with_clock", align_with_clock_))
+		align_with_clock_ = false;
 	if (!nh_private_.getParam("publish_rpy", publish_rpy_))
 		publish_rpy_ = false;
 	if (!nh_private_.getParam("pub_test_tf", pub_test_tf_))
@@ -104,6 +106,9 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 	std::string test_frame_id = "imu_left_enu";
 
 	imu_tmp.header.frame_id = fixed_frame_;
+
+	if (align_with_clock_)
+		imu_tmp.header.stamp = ros::Time::now();
 
  	// Set the covariance for rpy in orientation.
 	if (do_covariance_adaption_)

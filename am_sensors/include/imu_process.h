@@ -34,6 +34,7 @@ class IMUProcess
   std::string topic_name_;
   std::string pub_topic_;
   std::string fixed_frame_;
+  bool align_with_clock_;
   bool imu_shall_pub_;
   bool publish_rpy_;
   bool pub_test_tf_;

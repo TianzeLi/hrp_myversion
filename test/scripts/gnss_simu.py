@@ -35,17 +35,19 @@ class GNSSSimu():
 	def pose_callback(self, msg):
 		# rospy.loginfo("I heard %s",data.data)
 		self.to_pub = msg
+		# self.to_pub.header.stamp = rospy.Time.now()
 		self.to_pub.pose.pose.position.x *= self.x_scale_factor
 		self.to_pub.pose.pose.position.y *= self.y_scale_factor
 
-		x = -self.to_pub.pose.pose.position.y
-		y = self.to_pub.pose.pose.position.x
+		# self.to_pub.pose.covariance[0] = 30.0
+		# self.to_pub.pose.covariance[7] = 30.0
 
-		self.to_pub.pose.pose.position.x = x
-		self.to_pub.pose.pose.position.y = y
+		# x = -self.to_pub.pose.pose.position.y
+		# y = self.to_pub.pose.pose.position.x
 
-		# self.to_pub.pose.covariance[0] = 30
-		# self.to_pub.pose.covariance[7] = 30
+		# self.to_pub.pose.pose.position.x = x
+		# self.to_pub.pose.pose.position.y = y
+
 
 
 if __name__ == '__main__':

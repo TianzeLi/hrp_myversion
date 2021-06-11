@@ -5,24 +5,26 @@
 	<arg name="publishTrackerInRviz" default="True" />
 	<arg name="usePlotjuggler" default="False" />
 
-
+	<arg name="useSimTime" default="True" />
+	<arg name="rate" default="4.0" />
 	<arg name="path" default=" $(env HOME)/bags/lawn/" />
 	<arg name="file_1" default="lawn_one_lap_20201122.bag" />
+	<!-- <arg name="file_1" default="lawn_three_laps_20201122.bag" /> -->
 	<!-- <arg name="file_1" default="test_2020-11-22-14-45-57.bag" /> -->
-
 	<!-- <arg name="path" default=" $(env HOME)/bags/outdoor_test20200815/" /> -->
 	<!-- <arg name="file_1" default="test_simple_with_vision_20200815.bag" /> -->
-
-
 	
 	<!-- For additional bag file to play concurrently. -->
 	<!-- <arg name="file_2" default="mfile_2" /> -->
 
-	<arg name="rate" default="4.0" />
 
 
 	<node pkg="rosbag" type="play" name="bag_play" output="screen" args=" -r $(arg rate) --clock $(arg path)$(arg file_1) /imu_left/imu/data:=/imu_left/imu/data_old /imu_right/imu/data:=/imu_right/imu/data_old"/>
   	
+	<group if="$(arg useSimTime)">
+		<param name="use_sim_time" value="true" />
+	</group>
+
   	<group if="$(arg openRviz)" ns="rviz">
 		<node type="rviz" name="rviz" pkg="rviz" />
 	</group>
@@ -31,23 +33,20 @@
 	    <include file="$(find am_test)/launch/bag_sensors.launch" />
 	</group>
 
-
 	<group if="$(arg fuseSensors)">
 	  	<include file="$(find am_test)/launch/bag_ekf.launch" />
 	</group>
 
-
 	<group if="$(arg usePlotjuggler)" >
 		<node pkg="plotjuggler" type="PlotJuggler" name="plot_Juggler" args="" />
 	</group>
-
 
   	<group if="$(arg publishTrackerInRviz)">
 		<node name="trace_pub"
 		        pkg="am_sensors"
 		        type="tracking_marker_pub"
 		        output="screen">
-		    <param name="trace_amount"  value="2" />
+		    <param name="trace_amount"  value="3" />
 		    <param name="frequency"     value="25" />
 		    <param name="pose_topic1"   value="/odom"/>
 		    <param name="data_type1"    value="nav_msgs/Odometry"/> 
@@ -55,7 +54,7 @@
 		    <param name="pose_topic2"   value="/odometry/filtered" />
 		    <param name="data_type2"    value="nav_msgs/Odometry"/> 
 		    <param name="color2"        value="green"/>
-		    <param name="pose_topic3"   value="/gnss_left/pose" />
+		    <param name="pose_topic3"   value="/gnss_left/pose_simu" />
 		    <param name="data_type3"    value="geometry_msgs/PoseWithCovarianceStamped"/> 
 		    <param name="color3"        value="yellow"/>
 		    <param name="pose_topic4"   value="/gnss_right/pose" />
