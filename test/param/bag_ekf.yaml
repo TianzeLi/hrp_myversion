@@ -6,7 +6,7 @@ frequency: 20
 # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
 # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
 # filter will generate new output. Defaults to 1 / frequency if not specified.
-# sensor_timeout: 0.05
+sensor_timeout: 0.05
 
 # ekf_localization_node and ukf_localization_node both use a 3D omnidirectional motion model. If this parameter is
 # set to true, no 3D information will be used in your state estimate. It will fuse 0 values for all 3D variables 
@@ -147,6 +147,7 @@ odom0_relative: false
 # imu0_differential: false
 # imu0_relative: false
 # imu0_queue_size: 100
+
 # # imu0_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
 # imu0_twist_rejection_threshold: 1.2                
 # imu0_linear_acceleration_rejection_threshold: 2.0  
@@ -174,7 +175,7 @@ odom0_relative: false
 # imu1_remove_gravitational_acceleration: falsed
 
 # Here can take in GNSS measurements.
-pose0: gnss_left/pose_simu
+pose0: GPSfix_processed
 pose0_config: [true,  true,  false,
                false, false, false,
                false, false, false,
@@ -184,7 +185,7 @@ pose0_differential: false
 pose0_relative: false
 # pose0_queue_size: 100
 # pose0_rejection_threshold: 5  # Note the difference in parameter name
-pose0_nodelay: true
+# pose0_nodelay: true
 
 # pose1: gnss_right/pose
 # pose1_config: [true,  true,  false,

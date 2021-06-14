@@ -6,17 +6,26 @@
   <arg name="useRightGNSS"  default="False" />
   <arg name="useLeftIMU"    default="True" />
   <arg name="useRightIMU"   default="False" />
+  <arg name="useOriginalGPS" default="True"  />
+
 
   <!-- Only indicating if using cpt filter or magdwick. -->
   <arg name="useCptFilter"  default="True"/>
 
-<!-- Now the odom processing is removed as the original performance is good enough. -->
   <group if="$(arg useCustomOdom)" >
     <node name="odom_repub"
           pkg="am_test"
           type="odom_repub.py">
     </node>
   </group>
+
+  <group if="$(arg useOriginalGPS)" >
+    <node name="gnss_process"
+          pkg="am_test"
+          type="gnss_process.py">
+    </node>
+  </group>
+
 
   <!-- convert the original gnss measurement -->
   <group if="$(arg useLeftGNSS)" 
