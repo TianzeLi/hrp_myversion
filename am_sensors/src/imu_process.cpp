@@ -169,7 +169,7 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 		// Transfrom that rotates from base_link to imu_link.
 		transform_stamped_b2i.header.stamp = ros::Time::now();
 		transform_stamped_b2i.header.frame_id = "base_link";
-		transform_stamped_b2i.child_frame_id = "imu_link";
+		transform_stamped_b2i.child_frame_id = fixed_frame_;
 		transform_stamped_b2i.transform.rotation.x = q_b2i.x();
 		transform_stamped_b2i.transform.rotation.y = q_b2i.y();
 		transform_stamped_b2i.transform.rotation.z = q_b2i.z();

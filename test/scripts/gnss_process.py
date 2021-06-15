@@ -37,6 +37,10 @@ class GNSSProcess():
 	def gpsfix_callback(self, msg):
 		to_pub = PoseWithCovarianceStamped()
 		to_pub.header = msg.header
+		to_pub.header.frame_id = "map"
+		# to_pub.header.frame_id = "odom"
+		# to_pub.header.frame_id = "base_link"
+
 		# to_pub.header.stamp = rospy.Time.now()
 
 		if (self.do_estimate_initial):

@@ -139,11 +139,11 @@ odom0_relative: false
 
 imu0: imu_left/imu/data/enu
 imu0_config: [false, false, false,
-              true,  true,  false,
+              true,  true,  true,
               false, false, false,
               true,  true,  true,
               false,  false,  false]
-imu0_nodelay: true
+imu0_nodelay: false
 imu0_differential: false
 imu0_relative: false
 imu0_queue_size: 100
