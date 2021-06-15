@@ -22,7 +22,7 @@ class OdomRepub():
 	def pose_callback(self, msg):
 		to_pub = Odometry()
 		to_pub = msg
-		to_pub.header.stamp = rospy.Time.now()
+		# to_pub.header.stamp = rospy.Time.now()
 		self.sim_pose_pub.publish(to_pub)
 
 

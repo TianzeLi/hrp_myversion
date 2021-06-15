@@ -137,16 +137,16 @@ odom0_relative: false
 # odom1_twist_rejection_threshold: 0.2
 # odom1_nodelay: false
 
-# imu0: imu_left/imu/data/enu
-# imu0_config: [false, false, false,
-#               true,  true,  false,
-#               false, false, false,
-#               true,  true,  true,
-#               false,  false,  false]
-# imu0_nodelay: true
-# imu0_differential: false
-# imu0_relative: false
-# imu0_queue_size: 100
+imu0: imu_left/imu/data/enu
+imu0_config: [false, false, false,
+              true,  true,  false,
+              false, false, false,
+              true,  true,  true,
+              false,  false,  false]
+imu0_nodelay: true
+imu0_differential: false
+imu0_relative: false
+imu0_queue_size: 100
 
 # # imu0_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
 # imu0_twist_rejection_threshold: 1.2                
@@ -183,7 +183,7 @@ pose0_config: [true,  true,  false,
                false, false, false]
 pose0_differential: false
 pose0_relative: false
-# pose0_queue_size: 100
+pose0_queue_size: 10
 # pose0_rejection_threshold: 5  # Note the difference in parameter name
 # pose0_nodelay: true
 

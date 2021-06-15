@@ -20,7 +20,6 @@ import subprocess
 import time
 
 
-
 def status(length, percent):
     sys.stdout.write('\x1B[2K') # Erase entire current line
     sys.stdout.write('\x1B[0E') # Move to the beginning of the current line

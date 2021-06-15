@@ -37,7 +37,7 @@ class GNSSProcess():
 	def gpsfix_callback(self, msg):
 		to_pub = PoseWithCovarianceStamped()
 		to_pub.header = msg.header
-		to_pub.header.stamp = rospy.Time.now()
+		# to_pub.header.stamp = rospy.Time.now()
 
 		if (self.do_estimate_initial):
 			if (self.initial_stack_number > self.number_count):

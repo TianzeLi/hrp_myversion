@@ -2,11 +2,12 @@
 	<arg name="processSensors" default="True" />
 	<arg name="fuseSensors" default="True" />
 	<arg name="openRviz" default="True" />
-	<arg name="publishTrackerInRviz" default="True" />
+	<arg name="showRqt" default="False" />
+	<arg name="publishTrackerInRviz" default="False" />
 	<arg name="usePlotjuggler" default="False" />
 
 	<arg name="useSimTime" default="True" />
-	<arg name="rate" default="4.0" />
+	<arg name="rate" default="1.0" />
 	<arg name="path" default=" $(env HOME)/bags/lawn/" />
 	<arg name="file_1" default="lawn_one_lap_20201122_restamped.bag" />
 	<!-- <arg name="file_1" default="lawn_three_laps_20201122.bag" /> -->
@@ -21,12 +22,23 @@
 
 	<node pkg="rosbag" type="play" name="bag_play" output="screen" args=" -r $(arg rate) --clock $(arg path)$(arg file_1) /imu_left/imu/data:=/imu_left/imu/data_old /imu_right/imu/data:=/imu_right/imu/data_old"/>
   	
+	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+	<param name="robot_description" command="xacro --inorder '$(find am_description)/urdf/automower.urdf.xacro'" />
+
 	<group if="$(arg useSimTime)">
 		<param name="use_sim_time" value="true" />
 	</group>
 
-  	<group if="$(arg openRviz)" ns="rviz">
+  	<group if="$(arg openRviz)">
 		<node type="rviz" name="rviz" pkg="rviz" />
+		<!-- <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find am_test)/rviz/bag_play_with_vision.rviz"/>  -->
+	</group>
+
+	<!-- launch rqt gui -->
+	<group if="$(arg showRqt)">	
+		<node name="rqt" pkg="rqt_gui" type="rqt_gui"></node>
 	</group>
   
   	<group if="$(arg processSensors)">
