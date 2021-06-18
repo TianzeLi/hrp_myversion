@@ -73,7 +73,7 @@ Althought not heavily used in this projected, the simulation in Gazebo provides 
 ```
 roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
 ```
-The robot in simulation also receives control input via the topic `/cmd/vel`, so `hrp_teleop.py` can be severing here.
+The robot in simulation also receives control input via the topic `/cmd/vel`, so `hrp_teleop.py` works here too.
 
 
 
