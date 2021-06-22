@@ -1,9 +1,9 @@
 <launch>
-	<arg name="processSensors" default="True" />
-	<arg name="fuseSensors" default="True" />
-	<arg name="openRviz" default="True" />
+	<arg name="processSensors" default="False" />
+	<arg name="fuseSensors" default="False" />
+	<arg name="openRviz" default="False" />
 	<arg name="showRqt" default="False" />
-	<arg name="publishTrackerInRviz" default="True" />
+	<arg name="publishTrackerInRviz" default="False" />
 	<arg name="usePlotjuggler" default="False" />
 
 	<arg name="rate" default="4.0" />
