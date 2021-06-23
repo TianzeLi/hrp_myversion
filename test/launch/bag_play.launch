@@ -1,9 +1,9 @@
 <launch>
-	<arg name="processSensors" default="False" />
+	<arg name="processSensors" default="True" />
 	<arg name="fuseSensors" default="False" />
-	<arg name="openRviz" default="False" />
+	<arg name="openRviz" default="True" />
 	<arg name="showRqt" default="False" />
-	<arg name="publishTrackerInRviz" default="False" />
+	<arg name="publishTrackerInRviz" default="True" />
 	<arg name="usePlotjuggler" default="False" />
 
 	<arg name="rate" default="4.0" />
@@ -80,10 +80,10 @@
 		    <param name="color2"        value="green"/>
 		    <param name="pose_topic3"   value="/GPSfix_processed" />
 		    <param name="data_type3"    value="geometry_msgs/PoseWithCovarianceStamped"/> 
-		    <param name="color3"        value="yellow"/>
+		    <param name="color3"        value="orange"/>
 		    <param name="pose_topic4"   value="/gnss_right/pose" />
 		    <param name="data_type4"    value="geometry_msgs/PoseWithCovarianceStamped"/> 
-		    <param name="color4"        value="orange"/>
+		    <param name="color4"        value="yellow"/>
 		    <!-- <param name="pose_topic5"   value="/rtabmap/odom"/> -->
 		    <!-- <param name="data_type5"    value="nav_msgs/Odometry"/>  -->
 		    <!-- <param name="color5"        value="cyan"/> -->
