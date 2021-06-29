@@ -1,12 +1,13 @@
 <launch>
 	<arg name="processSensors" default="True" />
-	<arg name="fuseSensors" default="False" />
+	<arg name="fuseSensors" default="True" />
+	<arg name="useMagAndGNSSYaw" default="True" />
 	<arg name="openRviz" default="True" />
 	<arg name="showRqt" default="False" />
 	<arg name="publishTrackerInRviz" default="True" />
 	<arg name="usePlotjuggler" default="False" />
 
-	<arg name="rate" default="4.0" />
+	<arg name="rate" default="5.0" />
 	<arg name="useSimTime" default="True" />
 	<arg name="path" default=" $(env HOME)/bags/lawn/" />
 	<arg name="file_1" default="lawn_one_lap_20201122_restamped.bag" />
@@ -36,6 +37,7 @@
 	    pkg="robot_state_publisher"
 	    type="state_publisher" >
 		<param name="publish_frequency" value="20" /> 
+		<param name="use_tf_static" value="false" /> 
 	</node>
 
 
@@ -59,6 +61,10 @@
 
 	<group if="$(arg fuseSensors)">
 	  	<include file="$(find am_test)/launch/bag_ekf.launch" />
+	</group>
+
+	<group if="$(arg useMagAndGNSSYaw)">
+	  	<node name="yaw_estimator" pkg="am_test" type="mag_gnss_yaw_estimator.py" />
 	</group>
 
 	<group if="$(arg usePlotjuggler)" >
@@ -91,4 +97,11 @@
 	</group>
 
 </launch>
+
+
+<!-- Midsummer 2021 -->
+<!-- Football -->
+<!-- Frisbee -->
+<!-- Speaker -->
+<!-- Anti-mosqito -->
 

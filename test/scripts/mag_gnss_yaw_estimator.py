@@ -16,7 +16,7 @@
 
 import rospy
 import numpy as np
-from math import sqrt, acos
+from math import sqrt, acos, fabs
 from geometry_msgs.msg import PoseWithCovarianceStamped, Quaternion
 from sensor_msgs.msg import NavSatFix, Imu, MagneticField
 
@@ -33,19 +33,25 @@ class MagGNSSYawEstimator():
         # Independent constants 
         self.degree2meter = 111320
         # Fundamental switch
-        self.use_mag = False
-        self.use_gnss = True
+        self.use_mag = True
+        self.use_gnss = False
         # General configurations
         mag_topic_name = "/imu_left/imu/mag" # Need to adjust
-        acc_topic_name = "/imu_left/imu/data/processed" 
+        acc_topic_name = "/imu_left/imu/data/enu" 
         gnss_topic_name = "/GPSfix"
         self.pub_topic_name = "yaw_mag_gnss"
+        self.yaw_frame_id = "map"
+        # self.yaw_frame_id = "base_link"
+
         self.yaw_pub = rospy.Publisher((self.pub_topic_name), PoseWithCovarianceStamped, queue_size=10)
         # Mag and acc specific configurations
         if (self.use_mag):
             self.mag_max_dev = 0.1
             self.mag_yaw_var = 0.0025
-
+            self.mag_pub_num_max = 10
+            self.mag_queue_length = 20
+            
+            self.mag_pub_num = 0 
             self.mag_done = False
             self.acc_available = False
             rospy.Subscriber(mag_topic_name, MagneticField, self.mag_callback)
@@ -53,8 +59,9 @@ class MagGNSSYawEstimator():
         # GNSS specific configuration
         if (self.use_gnss):
             # yaw angle difference
-            self.gnss_yaw_stdev_threshold = 0.05
-            self.gnss_max_dev = 0.15
+            # self.gnss_yaw_stdev_threshold = 0.05
+            self.gnss_max_dev = 0.12
+            self.gnss_queue_length = 12        
             # translational diff 
             self.trans_min_diff = 0.5
 
@@ -65,9 +72,7 @@ class MagGNSSYawEstimator():
 
         # Necessary members
         self.gnss_diff_queue = []
-        self.gnss_queue_length = 9        
         self.mag_queue = []  
-        self.mag_queue_length = 20
 
     def gpsfix_callback(self, msg):
 
@@ -95,14 +100,16 @@ class MagGNSSYawEstimator():
                 rospy.logdebug("The means and dev are {}, {}, {}."
                                 .format(x_mean, y_mean, dev)) 
                 self.gnss_diff_queue.pop(0)
-                if (dev < self.gnss_max_dev):
+                if ((dev < self.gnss_max_dev) 
+                    and (fabs(x_mean) + fabs(y_mean) > self.trans_min_diff*2)):
                     to_publish = True
                     q_mean = self.xy2quaternion(x_mean, y_mean)
 
             if to_publish:
                 yaw_estimated = PoseWithCovarianceStamped()  
                 yaw_estimated.header = msg.header
-                yaw_estimated.header.frame_id = "map"
+                yaw_estimated.header.frame_id = self.yaw_frame_id
+                yaw_estimated.header.stamp = rospy.Time.now()
                 yaw_estimated.pose.pose.orientation.x = q_mean.x
                 yaw_estimated.pose.pose.orientation.y = q_mean.y
                 yaw_estimated.pose.pose.orientation.z = q_mean.z
@@ -120,21 +127,27 @@ class MagGNSSYawEstimator():
             y_sum += y
         mean = [x_sum/len(queue), y_sum/len(queue)]
 
+        count = 0
         for pair in queue:
-            product = (np.dot(mean, pair)/sqrt(mean[0]**2 + mean[1]**2)
-                    /sqrt(pair[0]**2 + pair[1]**2))
-            theta_sum += acos(product)
-        dev = theta_sum/len(queue)
+            product = ((mean[0]*pair[0] + mean[1]*pair[1])
+                    /sqrt(mean[0]**2 + mean[1]**2)/sqrt(pair[0]**2 + pair[1]**2))
+            if fabs(product) <= 1.0:
+                theta_sum += acos(product)
+                count += 1
+        dev = theta_sum/count
 
         return mean[0], mean[1], dev
                 
     def xy2quaternion(self, x, y):
         """ Transfer from x and y projection to quaternion here. """        
+        # q_enu = Quaternion(q0, 0.0, 0.0, q3)
+        q_enu = Quaternion()
         gamma = x*x + y*y  
         beta = sqrt(gamma + x*sqrt(gamma))
-        q0 = beta / (sqrt(2.0 * gamma))  
-        q3 = y / (sqrt(2.0) * beta)
-        q_enu = Quaternion(q0, 0.0, 0.0, q3)
+        # q0 = beta / (sqrt(2.0 * gamma))  
+        # q3 = y / (sqrt(2.0) * beta)
+        q_enu.w = beta / (sqrt(2.0*gamma))  
+        q_enu.z = y / (sqrt(2.0)*beta)
 
         return q_enu
 
@@ -166,14 +179,18 @@ class MagGNSSYawEstimator():
                                 .format(lx_mean, ly_mean, dev))     
                 self.mag_queue.pop(0)
                 if (dev < self.mag_max_dev**2):
-                    # Here need to transfer from NWU to ENU
-                    q_mag_mean = self.xy2quaternion(-ly_mean, lx_mean)
+                    # Here need to transfer from NWU to ENU?
+                    # q_mag_mean = self.xy2quaternion(lx_mean, ly_mean)
+                    # q_mag_mean = self.xy2quaternion(-ly_mean, lx_mean)
+                    # WHY below? Because also need to rotate from imu01_link to base_link?
+                    q_mag_mean = self.xy2quaternion(lx_mean, -ly_mean)
                     ready_to_publish = True
 
             if ready_to_publish:
                 yaw_estimated = PoseWithCovarianceStamped()  
                 yaw_estimated.header = msg.header
-                yaw_estimated.header.frame_id = "map"
+                yaw_estimated.header.frame_id = self.yaw_frame_id
+                # yaw_estimated.header.frame_id = "base_link"
                 yaw_estimated.pose.pose.orientation.x = q_mag_mean.x
                 yaw_estimated.pose.pose.orientation.y = q_mag_mean.y
                 yaw_estimated.pose.pose.orientation.z = q_mag_mean.z
@@ -181,7 +198,9 @@ class MagGNSSYawEstimator():
                 yaw_estimated.pose.covariance[35] = self.mag_yaw_var
 
                 self.yaw_pub.publish(yaw_estimated)
-                self.mag_done = True
+                self.mag_pub_num += 1
+                if self.mag_pub_num >= self.mag_pub_num_max:
+                    self.mag_done = True
 
     def calculate_q_mag(self, ax, ay, az, mx, my, mz):
         """ Compute the initial global yaw angle from mag and acc. 

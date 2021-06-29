@@ -144,7 +144,7 @@
   <joint name="imu01_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="imu01_link" />
-    <origin xyz="0.0 0.16 0.37" rpy="3.142 0.0 1.571" />
+    <origin xyz="0.0 0.16 0.37" rpy="3.1071889 0.0 1.5707963" />
   </joint>
 
     <!-- IMU02-right -->
@@ -161,7 +161,7 @@
   <joint name="imu02_link_joint" type="fixed">
     <parent link="base_link" />
     <child link="imu02_link" />
-    <origin xyz="0.0 -0.16 0.37" rpy="3.142 0.0 1.571" />
+    <origin xyz="0.0 -0.16 0.37" rpy="3.1090238 0.0 1.5707963" />
   </joint>
 
 

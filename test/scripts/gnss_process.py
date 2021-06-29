@@ -22,8 +22,8 @@ class GNSSProcess():
 		self.degree2meter = 111320
 		self.initial_latitude = 59.40455 
 		self.initial_longitude = 17.94965
-		self.latitude_stdev = 5.0
-		self.longitude_stdev = 5.0
+		self.x_stdev = 10.0
+		self.y_stdev = 10.0
 
 		if (self.do_estimate_initial):
 			self.initial_latitude = 0.0 
@@ -39,12 +39,12 @@ class GNSSProcess():
 		to_pub.header = msg.header
 		to_pub.header.frame_id = "map"
 		# to_pub.header.frame_id = "odom"
-		# to_pub.header.frame_id = "base_link"
+		# to_pub.header.frame_id = "gnss01_link"
 
 		# to_pub.header.stamp = rospy.Time.now()
 
 		if (self.do_estimate_initial):
-			if (self.initial_stack_number > self.number_count):
+			if (self.number_count < self.initial_stack_number):
 				self.initial_latitude += msg.latitude
 				self.initial_longitude += msg.longitude
 				self.number_count += 1
@@ -59,8 +59,8 @@ class GNSSProcess():
 			to_pub.pose.pose.position.y = y * self.y_scale_factor
 			# to_pub.pose.pose.covariance[0] = msg.position_covariance[0]
 			# to_pub.pose.pose.covariance[9] = msg.position_covariance[4]
-			to_pub.pose.covariance[0] = self.longitude_stdev
-			to_pub.pose.covariance[9] = self.latitude_stdev
+			to_pub.pose.covariance[0] = self.x_stdev**2
+			to_pub.pose.covariance[7] = self.y_stdev**2
 			self.pose_pub.publish(to_pub)
 
 	def compute_local_corrdinate(self, lati, longi):
