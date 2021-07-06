@@ -32,20 +32,16 @@ class BagPlot():
 
     def __init__(self):
 
+        # Configuration parameters.
         self.plot_from_bag = False
         self.plot_3D = False
 
-        # Configuration parameters.
-        # Make sure the topic inclued are of type nav_msgs/Odometry.
-        # May put in lists that will be ziped latter.
         # topic_list = ["/odom", "/odometry/filtered"]
         topic_list = ["/odom", "/odom"]
         type_list = ["Odometry", "Odometry"]
         color_list = ['r', 'g']
         angle_list = [75.0/180.0*np.pi, 0.0]
         source_list = ["Encoder", "Encoder not rotated"]
-
-        self.do_rotate_map = True
 
 
         if (self.plot_from_bag): 
@@ -62,44 +58,47 @@ class BagPlot():
             self.bag.close()
 
         else:
+            # Real time plot configurations.
+            self.plot_per_points = 10
+            self.point_size = 6
             rospy.init_node('bag_plot', log_level=rospy.DEBUG)
-            plt.ion()
-            # fig = plt.figure() 
-            plt.legend()
-            plt.xlabel('X coordinate')
-            plt.ylabel('Y coordinate')
-            plt.title('Estimation in ENU frame')
-            plt.grid(True)
 
             serial = 0
-            self.counter = 0
-            self.points = []
+            self.counter = []
+            self.legend_added = []
             for topic, topic_type, color, angle, source in zip(
                     topic_list, type_list, color_list, angle_list, source_list):
-                self.points.append([])
                 rospy.logdebug("We have topic {} of type {} in color {}."
                         .format(topic, topic_type, color)) 
                 if (topic_type == "Odometry"): 
                     rospy.Subscriber(topic, Odometry, self.odom_callback,
                                     (serial, color, source, angle))
                 if (topic_type == "PoseWithCovarianceStamped"): 
-                    rospy.Subscriber(topic, PoseWithCovarianceStamped, self.pose_callback, 
+                    rospy.Subscriber(topic, PoseWithCovarianceStamped, 
+                                    self.pose_callback, 
                                     (serial, color, source, angle))
                 serial += 1
+                self.counter.append(0)
+                self.legend_added.append(False)
 
-            rospy.logdebug("In total {} topics.".format(serial)) 
+            plt.ion()
+            plt.axis('scaled')
+            plt.xlabel('X coordinate')
+            plt.ylabel('Y coordinate')
+            plt.title('Estimation in ENU frame')
+            plt.legend(topic_list, source_list)
+            plt.grid(True)
             plt.show(block=True) 
+            rospy.logdebug("In total {} topics.".format(serial)) 
             rospy.spin()
-
 
     def rotate_xypair(self, x, y, theta):
         x_rotated = x*np.cos(theta) - y*np.sin(theta)
         y_rotated = x*np.sin(theta) + y*np.cos(theta)
         return x_rotated, y_rotated
 
-
     def topic_plot(self, topic_name, color, angle, source): 
-
+        """Plot from data stored in rosbag."""
         odom_x = []
         odom_y = []
         for topic, msg, t in self.bag.read_messages(topics=topic_name):
@@ -118,6 +117,23 @@ class BagPlot():
         plt.title('Estimation in ENU frame')
         plt.grid(True)
 
+    def plot_2D(self, x, y, color, source, serial):
+        """Plot x and y coordinates."""
+        plt.plot(x, y, color=color, label=source, 
+                marker=".", markersize=self.point_size)
+        plt.axis('scaled')
+        plt.draw()
+        if not self.legend_added[serial]:
+            plt.legend()
+            self.legend_added[serial] = True
+        # plt.pause(0.0001)
+        rospy.logdebug("For {} to plot {}, {}."
+                        .format(source, x, y))
+    def plot_3D(self, x, y, z, color, source):
+        """Plot xyz coordinates."""
+
+        return 0 
+
 
     def odom_callback(self, msg, args):
 
@@ -126,26 +142,20 @@ class BagPlot():
         source = args[2]
         angle = args[3]
 
-        rospy.logdebug("We have arguments {}, {}, {}."
-                        .format(serial, color, source)) 
-
+        self.counter[serial] += 1
         x = msg.pose.pose.position.x
         y = msg.pose.pose.position.y
         z = msg.pose.pose.position.z
+
         if(angle != 0.0):
             x, y = self.rotate_xypair(x, y, angle)
         if (self.plot_3D):
-            self.points[serial].append([x, y, z])
-        # elif (self.counter % 10 == 0):
-            # self.counter += 1
-        else:
-            self.points[serial].append([x, y])
-            plt.plot(x, y, '*', color = color, label = source)
-            plt.axis('scaled')
-            plt.draw()
-            plt.pause(0.0001)
-            rospy.logdebug("In the topic No.{} to plot {}, {}."
-                            .format(serial, x, y)) 
+            self.plot_3D(x, y, z, color, source)
+
+        elif (self.counter[serial] % self.plot_per_points == 0):
+            self.plot_2D(x, y, color, source, serial)
+
+
 
     def pose_callback(self, msg, args):
 
@@ -154,21 +164,19 @@ class BagPlot():
         source = args[2]
         angle = args[3]
 
+        self.counter[serial] += 1
         x = msg.pose.pose.position.x
         y = msg.pose.pose.position.y
         z = msg.pose.pose.position.z
+
         if(angle != 0.0):
             x, y = self.rotate_xypair(x, y, angle)
         if (self.plot_3D):
             self.points[serial].append([x, y, z])
+            self.plot_3D(x, y, z, color, source)
         else:
             self.points[serial].append([x, y])
-            plt.plot(x, y, color=color, label=source)
-            plt.axis('scaled')
-            plt.draw()
-            plt.pause(0.0001)
-            rospy.logdebug("In the topic No.{} to plot {}, {}."
-                            .format(serial, x, y)) 
+            self.plot_2D( x, y, color, source, serial)
 
 
 if __name__ == '__main__':
