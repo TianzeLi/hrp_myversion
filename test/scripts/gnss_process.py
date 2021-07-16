@@ -15,7 +15,7 @@ class GNSSProcess():
 	def __init__(self):
 
 		topic_name = "/GPSfix"
-		self.x_scale_factor = 0.5
+		self.x_scale_factor = 1.0
 		self.y_scale_factor = 1.0
 		self.do_estimate_initial = True
 		

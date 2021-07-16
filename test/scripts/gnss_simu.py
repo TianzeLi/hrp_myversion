@@ -17,10 +17,10 @@ class GNSSSimu():
 
 	def __init__(self):
 
-		topic_name = "/gnss_left/pose"
+		topic_name = "/GPSfix"
 		pub_rate = 0.1 # Unit in Hz
 		r = rospy.Rate(pub_rate)
-		self.x_scale_factor = 0.5
+		self.x_scale_factor = 1.0
 		self.y_scale_factor = 1.0
 
 		self.to_pub = PoseWithCovarianceStamped()

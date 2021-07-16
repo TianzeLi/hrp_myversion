@@ -29,7 +29,7 @@
 
 
 import sys
-import pickle
+import json
 from math import sqrt
 
 from PyQt5 import QtWidgets, QtGui, QtCore
@@ -357,16 +357,16 @@ class MainWidget(QWidget):
         print(paralist)
 
         file_path = "../param/parameters.data"
-        with open(file_path, 'wb') as f:
-            pickle.dump(paralist, f)
+        with open(file_path, 'r+') as f:
+            json.dump(paralist, f)
         print("Current parameters stored in ", file_path)
 
 
     def paraRead(self):
         """Load the parameter stored in a former use."""
         file_path = "../param/parameters.data"
-        with open(file_path, 'rb') as f:
-            paralist = pickle.load(f)
+        with open(file_path, 'r+') as f:
+            paralist = json.load(f)
         print(paralist)
 
         self.pixel2meter = paralist['pixel2meter']

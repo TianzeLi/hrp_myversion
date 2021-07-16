@@ -26,6 +26,7 @@ from scipy.ndimage import rotate
 from os.path import expanduser
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from sensor_msgs.msg import NavSatFix
 
 
 class BagPlot():
@@ -37,12 +38,35 @@ class BagPlot():
         self.plot_3D = False
 
         # topic_list = ["/odom", "/odometry/filtered"]
-        topic_list = ["/odom", "/odom"]
-        type_list = ["Odometry", "Odometry"]
-        color_list = ['r', 'g']
-        angle_list = [75.0/180.0*np.pi, 0.0]
-        source_list = ["Encoder", "Encoder not rotated"]
+        # topic_list = ["/odometry_filtered", "/odom"]
+        # type_list = ["Odometry", "Odometry"]
+        # color_list = ['orange', 'chocolate']
+        # angle_list = [1.57-0.3, 0.0]
+        # source_list = ["Encoder", "Encoder not rotated"]
 
+        # topic_list = ["/odometry/filtered"]
+        # type_list = ["Odometry"]
+        # color_list = ['orange']
+        # angle_list = [0.0]
+        # source_list = ["IMU without compass"]
+        self.xlim = [-40, 60]
+        self.ylim = [-20, 80] 
+
+        # # GNSS raw
+        # topic_list = ["/gnss_left/fix", "/gnss_right/fix", "/GPSfix"]
+        # type_list = ["NavSatFix", "NavSatFix", "NavSatFix"]
+        # color_list = ["orange", "orangered", "orchid"]
+        # angle_list = [0.0, 0.0, 0.0]
+        # source_list = ["Left GNSS", "Right GNSS", "Original GNSS"]
+        
+        # GNSS ENU xy 
+        topic_list = ["/gnss_left/pose", "/gnss_right/pose", 
+                    "/GPSfix_processed"]
+        type_list = ["PoseWithCovarianceStamped", "PoseWithCovarianceStamped", 
+                    "PoseWithCovarianceStamped"]
+        color_list = ["orange", "orangered", "orchid"]
+        angle_list = [0.0, 0.0, 0.0]
+        source_list = ["Left GNSS", "Right GNSS", "Original GNSS"]
 
         if (self.plot_from_bag): 
             #  Bag location and read.
@@ -59,15 +83,16 @@ class BagPlot():
 
         else:
             # Real time plot configurations.
-            self.plot_per_points = 10
-            self.point_size = 6
+            self.plot_per_points = 3
+            self.point_size = 2
             rospy.init_node('bag_plot', log_level=rospy.DEBUG)
 
             serial = 0
             self.counter = []
             self.legend_added = []
             for topic, topic_type, color, angle, source in zip(
-                    topic_list, type_list, color_list, angle_list, source_list):
+                                        topic_list, type_list, color_list, 
+                                        angle_list, source_list):
                 rospy.logdebug("We have topic {} of type {} in color {}."
                         .format(topic, topic_type, color)) 
                 if (topic_type == "Odometry"): 
@@ -76,6 +101,10 @@ class BagPlot():
                 if (topic_type == "PoseWithCovarianceStamped"): 
                     rospy.Subscriber(topic, PoseWithCovarianceStamped, 
                                     self.pose_callback, 
+                                    (serial, color, source, angle))
+                if (topic_type == "NavSatFix"): 
+                    rospy.Subscriber(topic, NavSatFix, 
+                                    self.gnssfix_callback, 
                                     (serial, color, source, angle))
                 serial += 1
                 self.counter.append(0)
@@ -120,8 +149,13 @@ class BagPlot():
     def plot_2D(self, x, y, color, source, serial):
         """Plot x and y coordinates."""
         plt.plot(x, y, color=color, label=source, 
-                marker=".", markersize=self.point_size)
-        plt.axis('scaled')
+                marker="o", markersize=self.point_size)
+        plt.axis('square')
+        # plt.xlim([-40, 60])
+        # plt.ylim([-20, 80])
+        plt.xlim(self.xlim)
+        plt.ylim(self.ylim)
+
         plt.draw()
         if not self.legend_added[serial]:
             plt.legend()
@@ -129,11 +163,10 @@ class BagPlot():
         # plt.pause(0.0001)
         rospy.logdebug("For {} to plot {}, {}."
                         .format(source, x, y))
+
     def plot_3D(self, x, y, z, color, source):
         """Plot xyz coordinates."""
-
-        return 0 
-
+        pass
 
     def odom_callback(self, msg, args):
 
@@ -151,11 +184,8 @@ class BagPlot():
             x, y = self.rotate_xypair(x, y, angle)
         if (self.plot_3D):
             self.plot_3D(x, y, z, color, source)
-
         elif (self.counter[serial] % self.plot_per_points == 0):
             self.plot_2D(x, y, color, source, serial)
-
-
 
     def pose_callback(self, msg, args):
 
@@ -172,11 +202,28 @@ class BagPlot():
         if(angle != 0.0):
             x, y = self.rotate_xypair(x, y, angle)
         if (self.plot_3D):
-            self.points[serial].append([x, y, z])
             self.plot_3D(x, y, z, color, source)
-        else:
-            self.points[serial].append([x, y])
-            self.plot_2D( x, y, color, source, serial)
+        elif (self.counter[serial] % self.plot_per_points == 0):
+            self.plot_2D(x, y, color, source, serial)
+
+    def gnssfix_callback(self, msg, args):
+
+        serial = args[0]
+        color = args[1]
+        source = args[2]
+        angle = args[3]
+
+        self.counter[serial] += 1
+        x = msg.longitude
+        y = msg.latitude
+        z = msg.altitude
+
+        if(angle != 0.0):
+            x, y = self.rotate_xypair(x, y, angle)
+        if (self.plot_3D):
+            self.plot_3D(x, y, z, color, source)
+        elif (self.counter[serial] % self.plot_per_points == 0):
+            self.plot_2D(x, y, color, source, serial)
 
 
 if __name__ == '__main__':
