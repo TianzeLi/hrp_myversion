@@ -45,10 +45,11 @@ class BagPlot():
         # source_list = ["Encoder", "Encoder not rotated"]
 
         # topic_list = ["/odometry/filtered"]
-        # type_list = ["Odometry"]
-        # color_list = ['orange']
-        # angle_list = [0.0]
-        # source_list = ["IMU without compass"]
+        topic_list = ["/odometry/filtered"]
+        type_list = ["Odometry"]
+        color_list = ["green"]
+        angle_list = [0.0]
+        source_list = ["Fused encoders and IMU"]
         self.xlim = [-40, 60]
         self.ylim = [-20, 80] 
 
@@ -59,14 +60,14 @@ class BagPlot():
         # angle_list = [0.0, 0.0, 0.0]
         # source_list = ["Left GNSS", "Right GNSS", "Original GNSS"]
         
-        # GNSS ENU xy 
-        topic_list = ["/gnss_left/pose", "/gnss_right/pose", 
-                    "/GPSfix_processed"]
-        type_list = ["PoseWithCovarianceStamped", "PoseWithCovarianceStamped", 
-                    "PoseWithCovarianceStamped"]
-        color_list = ["orange", "orangered", "orchid"]
-        angle_list = [0.0, 0.0, 0.0]
-        source_list = ["Left GNSS", "Right GNSS", "Original GNSS"]
+        # # GNSS ENU xy 
+        # topic_list = ["/gnss_left/pose", "/gnss_right/pose", 
+        #             "/GPSfix_processed"]
+        # type_list = ["PoseWithCovarianceStamped", "PoseWithCovarianceStamped", 
+        #             "PoseWithCovarianceStamped"]
+        # color_list = ["orange", "orangered", "orchid"]
+        # angle_list = [0.0, 0.0, 0.0]
+        # source_list = ["Left GNSS", "Right GNSS", "Original GNSS"]
 
         if (self.plot_from_bag): 
             #  Bag location and read.
@@ -84,7 +85,7 @@ class BagPlot():
         else:
             # Real time plot configurations.
             self.plot_per_points = 3
-            self.point_size = 2
+            self.point_size = 3
             rospy.init_node('bag_plot', log_level=rospy.DEBUG)
 
             serial = 0
@@ -115,11 +116,15 @@ class BagPlot():
             plt.xlabel('X coordinate')
             plt.ylabel('Y coordinate')
             plt.title('Estimation in ENU frame')
-            plt.legend(topic_list, source_list)
+            # plt.legend(topic_list, source_list)
+            plt.legend()
             plt.grid(True)
+            plt.xlim(self.xlim)
+            plt.ylim(self.ylim)
+            rospy.logdebug("In total {} topics.".format(serial))
+            # rospy.spin()
             plt.show(block=True) 
-            rospy.logdebug("In total {} topics.".format(serial)) 
-            rospy.spin()
+
 
     def rotate_xypair(self, x, y, theta):
         x_rotated = x*np.cos(theta) - y*np.sin(theta)
@@ -128,6 +133,7 @@ class BagPlot():
 
     def topic_plot(self, topic_name, color, angle, source): 
         """Plot from data stored in rosbag."""
+
         odom_x = []
         odom_y = []
         for topic, msg, t in self.bag.read_messages(topics=topic_name):
@@ -149,18 +155,14 @@ class BagPlot():
     def plot_2D(self, x, y, color, source, serial):
         """Plot x and y coordinates."""
         plt.plot(x, y, color=color, label=source, 
-                marker="o", markersize=self.point_size)
+                marker=".", markersize=self.point_size)
         plt.axis('square')
-        # plt.xlim([-40, 60])
-        # plt.ylim([-20, 80])
         plt.xlim(self.xlim)
         plt.ylim(self.ylim)
-
         plt.draw()
         if not self.legend_added[serial]:
             plt.legend()
             self.legend_added[serial] = True
-        # plt.pause(0.0001)
         rospy.logdebug("For {} to plot {}, {}."
                         .format(source, x, y))
 
@@ -169,7 +171,6 @@ class BagPlot():
         pass
 
     def odom_callback(self, msg, args):
-
         serial = args[0]
         color = args[1]
         source = args[2]

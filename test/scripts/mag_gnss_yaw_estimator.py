@@ -34,9 +34,9 @@ class MagGNSSYawEstimator():
         self.degree2meter = 111320
         # Fundamental switch
         self.use_mag = True
-        self.use_gnss = False
+        self.use_gnss = True
         # General configurations
-        mag_topic_name = "/imu_left/imu/mag" # Need to adjust
+        mag_topic_name = "/imu_left/imu/mag" 
         acc_topic_name = "/imu_left/imu/data/enu" 
         gnss_topic_name = "/GPSfix"
         self.pub_topic_name = "yaw_mag_gnss"
@@ -48,7 +48,7 @@ class MagGNSSYawEstimator():
         if (self.use_mag):
             self.mag_max_dev = 0.1
             self.mag_yaw_var = 0.0025
-            self.mag_pub_num_max = 10
+            self.mag_pub_num_max = 100
             self.mag_queue_length = 20
             
             self.mag_pub_num = 0 
@@ -60,8 +60,8 @@ class MagGNSSYawEstimator():
         if (self.use_gnss):
             # yaw angle difference
             # self.gnss_yaw_stdev_threshold = 0.05
-            self.gnss_max_dev = 0.12
-            self.gnss_queue_length = 12        
+            self.gnss_max_dev = 1
+            self.gnss_queue_length = 3        
             # translational diff 
             self.trans_min_diff = 0.5
 
@@ -114,7 +114,7 @@ class MagGNSSYawEstimator():
                 yaw_estimated.pose.pose.orientation.y = q_mean.y
                 yaw_estimated.pose.pose.orientation.z = q_mean.z
                 yaw_estimated.pose.pose.orientation.w = q_mean.w
-                yaw_estimated.pose.covariance[35] = dev
+                yaw_estimated.pose.covariance[35] = dev*dev*5
                 self.yaw_pub.publish(yaw_estimated)
 
     def compute_diff_mean_dev(self, queue):
