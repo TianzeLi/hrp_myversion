@@ -67,6 +67,8 @@ class BoundaryDetectNode():
 		# Standalone init parameters
 		src_path = "../samples/p3_color.png"
 		src_depth_path = "../samples/p3_depth.png"
+		# iPhone images are p101-103.jpg
+		# src_path = "../samples/p103.jpg"
 
 		# Select the features for clustering.
 		self.use_color_feature = True
@@ -476,7 +478,6 @@ class BoundaryDetectNode():
 				# logger.debug(hierarchy[0][i][2])
 				if hierarchy[0][i][3] > 0:
 					logger.debug('Has the parent contour no. %d' % hierarchy[0][i][3])
-				logger.debug('\n')
 		else:
 			logger.info('No contour fouond before examining the shapes.')
 
@@ -525,9 +526,9 @@ class BoundaryDetectNode():
 		theta_max = np.pi
 		theta_seq = np.pi/6
 		theta_num = int(np.floor(theta_max/theta_seq)+1)
-		wavelength_max = ksize/2
-		wavelength_min = 2.5
-		wavelength_num = 6
+		wavelength_max = ksize/1.5
+		wavelength_min = 2.0
+		wavelength_num = 10
 		wavelength_seq = (wavelength_max - wavelength_min)/wavelength_num
 		gamma = 1.0
 		psi = 0.0
@@ -545,7 +546,9 @@ class BoundaryDetectNode():
 				wavelength = wavelength_min + k*wavelength_seq
 				if (j == 0):
 					wavelength_arr.append(wavelength)				
-				g_kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, wavelength, gamma, psi, ktype=cv2.CV_32F)
+				g_kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, 
+											   wavelength, gamma, psi, 
+											   ktype=cv2.CV_32F)
 				filtered_img = cv2.filter2D(src_gray, cv2.CV_8UC3, g_kernel)
 				
 				# Stored for plotting the gaber filters in the spatial domain.
@@ -560,19 +563,21 @@ class BoundaryDetectNode():
 
 				if (self.texture_feature_valid(filtered_img) == 0):
 					if (self.feature_mat_empty):
-						filtered_img = self.feature_normalize(filtered_img, self.feature_range_texture)
+						filtered_img = self.feature_normalize(filtered_img,
+													 self.feature_range_texture)
 						self.feature_mat = filtered_img.reshape((-1, 1))
 						self.feature_mat_empty = False
 						num_texture_feature = 1
 					else:
-						filtered_img = self.feature_normalize(filtered_img, self.feature_range_texture)
+						filtered_img = self.feature_normalize(filtered_img, 
+													self.feature_range_texture)
 						self.feature_append(self.feature_mat, filtered_img, 1)
 						logger.debug('\tThe feature matrix now has the shape {}.'.format(self.feature_mat.shape))
 					num_texture_feature += 1
 
-				# cv2.imshow('Filtered Image', filtered_img)
+				cv2.imshow('Filtered Image', filtered_img)
 				# cv2.imshow('Filtered Image Thresholded', gray_mask)
-				# cv2.waitKey(0)
+				cv2.waitKey(0)
 
 		# To plot the Gabor filters.
 		if(self.show_gabor_filters):
@@ -637,7 +642,7 @@ class BoundaryDetectNode():
 		array_left_sample = self.left_crop(array)
 		array_right_sample = self.right_crop(array)
 
-		texture_stdvar_threshold_high = 50
+		texture_stdvar_threshold_high = 40
 		texture_stdvar_threshold_low = 10
 
 		logger.debug('\tThe overall std variance = {}'.format(np.std(array)))

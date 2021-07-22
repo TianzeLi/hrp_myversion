@@ -54,7 +54,12 @@ Launch files   | Functions
 `roslaunch am_driver_safe ekf_template.launch`  | Launch localization
 `python am_vision/scripts/boundary_detect.py`   | Run the boundary detect node (may link to ROS later)
 `roslaunch am_sensors rtabmap.launch`           | Launch visual-SLAM
-`roslaunch am_driver path_follow`				| Run the path follower
+`roslaunch am_driver path_follow.launch`		| Run the path follower
+
+Examplary localization result:
+
+![](doc/media/EncoderwTwoIMUwMagwGNSSII.png)
+
 
 Examplary visual boundary detection results:
 
