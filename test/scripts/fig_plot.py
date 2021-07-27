@@ -50,6 +50,13 @@ class BagPlot():
         color_list = ["green"]
         angle_list = [0.0]
         source_list = ["Fused encoders and IMU"]
+
+        topic_list = ["/rtabmap/odom"]
+        type_list = ["Odometry"]
+        color_list = ["green"]
+        angle_list = [1.57-0.3]
+        source_list = ["Visual odometry"]
+
         self.xlim = [-40, 60]
         self.ylim = [-20, 80] 
 

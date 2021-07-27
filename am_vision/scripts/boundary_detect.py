@@ -68,7 +68,7 @@ class BoundaryDetectNode():
 		src_path = "../samples/p3_color.png"
 		src_depth_path = "../samples/p3_depth.png"
 		# iPhone images are p101-103.jpg
-		# src_path = "../samples/p103.jpg"
+		# src_path = "../samples/p203.jpg"
 
 		# Select the features for clustering.
 		self.use_color_feature = True
@@ -80,7 +80,7 @@ class BoundaryDetectNode():
 		self.K = 2
 				
 		# The precentage of accepting points for color seg.
-		self.select_precentage = 0.75
+		self.select_precentage = 0.80
 
 		# The unified size of the image and the depth image.
 		self.fixed_width = 640
@@ -521,14 +521,14 @@ class BoundaryDetectNode():
 		# psi - phase offset
 		# ktype - type and range of values that each pixel in the gabor kernel can hold
 		# g_kernel = cv2.getGaborKernel((15, 15), 7.0, 3.14159/12*0, 2.5, 1.0, 0, ktype=cv2.CV_32F)
-		ksize = 15
-		sigma = 4.0
+		ksize = 20
+		sigma = 5.0
 		theta_max = np.pi
 		theta_seq = np.pi/6
 		theta_num = int(np.floor(theta_max/theta_seq)+1)
 		wavelength_max = ksize/1.5
 		wavelength_min = 2.0
-		wavelength_num = 10
+		wavelength_num = 6
 		wavelength_seq = (wavelength_max - wavelength_min)/wavelength_num
 		gamma = 1.0
 		psi = 0.0

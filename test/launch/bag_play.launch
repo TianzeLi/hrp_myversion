@@ -1,7 +1,8 @@
 <launch>
-	<arg name="processSensors" default="True" />
-	<arg name="fuseSensors" default="True" />
+	<arg name="processSensors" default="False" />
+	<arg name="fuseSensors" default="False" />
 	<arg name="useMagAndGNSSYaw" default="False" />
+	<arg name="runRtabmap" default="True" />
 	<arg name="openRviz" default="False" />
 	<arg name="showRqt" default="False" />
 	<arg name="publishTrackerInRviz" default="True" />
@@ -67,6 +68,10 @@
 
 	<group if="$(arg useMagAndGNSSYaw)">
 	  	<node name="yaw_estimator" pkg="am_test" type="mag_gnss_yaw_estimator.py" />
+	</group>
+
+	<group if="$(arg runRtabmap)">
+	    <include file="$(find am_sensors)/launch/rtabmap.launch" />
 	</group>
 
 	<group if="$(arg usePlotjuggler)" >
