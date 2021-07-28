@@ -21,14 +21,20 @@ This project is designed for Huqvarna automower 450x as a trial to replace the u
 
 The localization function is considered an active approach that applies Kalman filters to fuse the sensors' outputs and can integrate with the estimated pose from the visual SLAM node. Visual boundary detector then is a more passive method based on image segmentation via explicit image processing pipelines, that is, no heavy learning method is applied, for convience and computational effiency. 
 
-The software is designed under Ubuntu 16.04 and ROS Kinetic. The architecture can be seen below in a conceptual but not strict state machine(not implemented in this project):
+The software is designed under Ubuntu 16.04 and ROS Kinetic. 
 
-![](doc/media/states.svg)
-
-
-The hardware setup in this project can be abstracted in the diagram below:
-
-![](doc/media/HardwareSetup.svg)
+<table>
+  <tbody>
+  <tr>
+    <td width="50%"><img src="doc/media/states.svg"></td>
+    <td width="50%"><img src="doc/media/HardwareSetup.svg"></td>
+  </tr>    
+  <tr>
+    <td>The software setup in a conceptual but not strict state machine(not implemented in this project)</td>
+    <td>The hardware setup.</td>
+  </tr> 
+  </tbody>
+</table>
 
 
 
@@ -56,20 +62,47 @@ Launch files   | Functions
 `roslaunch am_sensors rtabmap.launch`           | Launch visual-SLAM
 `roslaunch am_driver path_follow.launch`		| Run the path follower
 
-Examplary localization result:
+Using the GUI in `test/scripts/map_measure.py`, we can calculate the location of the interested points on the map:
 
-![](doc/media/EncoderwTwoIMUwMagwGNSSII.png)
+![](doc/media/mapGUI.png)
+
+Localization results for example: 
+
+<table>
+  <tbody>
+  <tr>
+    <td width="50%"><img src="doc/media/EncoderwTwoIMUwMagwGNSSII.png"></td>
+    <td width="50%"><img src="doc/media/vSLAMMapping.png"></td>
+  </tr>    
+  <tr>
+    <td>EKF localizaton without vision.</td>
+    <td>`rtabmap` result.</td>
+  </tr> 
+  </tbody>
+</table>
 
 
-Examplary visual boundary detection results:
+Visual boundary detection results for example:
 
-With Inter Realsense D435 camera:  
+<table>
+  <tbody>
+  <tr>
+    <td width="50%"><img src="doc/media/boundary_detect.png"></td>
+    <td width="50%"><img src="doc/media/segResult.png"></td>
+  </tr>    
+  <tr>
+    <td>With Inter Realsense D435 camera.</td>
+    <td>With iPhone 7 camera.  
+.</td>
+  </tr> 
+  </tbody>
+</table>
 
-![](doc/media/boundary_detect.png)
 
-With iPhone 7 default camera:  
+Path follower in Gazebo for example: 
 
-![](doc/media/segResult.png)
+![](doc/media/path_follow_simulation.png)
+
 
 
 
