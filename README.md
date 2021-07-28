@@ -30,8 +30,8 @@ The software is designed under Ubuntu 16.04 and ROS Kinetic.
     <td width="50%"><img src="doc/media/HardwareSetup.svg"></td>
   </tr>    
   <tr>
-    <td>The software setup in a conceptual but not strict state machine(not implemented in this project)</td>
-    <td>The hardware setup.</td>
+    <td>The software setup in a conceptual proposed state machine(not implemented in this project)</td>
+    <td>The hardware setup</td>
   </tr> 
   </tbody>
 </table>
@@ -75,8 +75,8 @@ Localization results for example:
     <td width="50%"><img src="doc/media/vSLAMMapping.png"></td>
   </tr>    
   <tr>
-    <td>EKF localizaton without vision.</td>
-    <td>`rtabmap` result.</td>
+    <td>EKF localizaton without vision</td>
+    <td>`rtabmap` result</td>
   </tr> 
   </tbody>
 </table>
@@ -91,9 +91,8 @@ Visual boundary detection results for example:
     <td width="50%"><img src="doc/media/segResult.png"></td>
   </tr>    
   <tr>
-    <td>With Inter Realsense D435 camera.</td>
-    <td>With iPhone 7 camera.  
-.</td>
+    <td>With Inter Realsense D435 camera</td>
+    <td>With iPhone 7 camera</td>
   </tr> 
   </tbody>
 </table>
@@ -101,7 +100,7 @@ Visual boundary detection results for example:
 
 Path follower in Gazebo for example: 
 
-![](doc/media/path_follow_simulation.png)
+![](doc/media/pathFollowerGazebo.png)
 
 
 
