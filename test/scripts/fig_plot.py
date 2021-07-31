@@ -35,9 +35,13 @@ class BagPlot():
 
         # Configuration parameters.
         self.plot_from_bag = False
-        self.plot_3D_trace = False
+        self.plot_3D_trace = True
         self.plot_defined_trace = True
         self.plot_covariance = False
+
+        self.xlim = [-60, 60]
+        self.ylim = [-20, 100] 
+        self.zlim = [-12, 12] 
 
         topic_list = ["/odometry/filtered"]
         # topic_list = ["/odom"]
@@ -46,22 +50,12 @@ class BagPlot():
         angle_list = [1.57-0.3]
         source_list = ["Left IMU"]
 
-        # # topic_list = ["/odometry/filtered"]
-        # topic_list = ["/odometry/filtered"]
-        # type_list = ["Odometry"]
-        # color_list = ["green"]
-        # angle_list = [0.0]
-        # source_list = ["Fused encoders and IMU"]
-
         # # visual-SLAM
         # topic_list = ["/rtabmap/odom"]
         # type_list = ["Odometry"]
         # color_list = ["green"]
         # angle_list = [1.57-0.3]
         # source_list = ["Visual odometry"]
-
-        self.xlim = [-60, 60]
-        self.ylim = [-20, 100] 
 
         # # GNSS raw
         # topic_list = ["/gnss_left/fix", "/gnss_right/fix", "/GPSfix"]
@@ -131,25 +125,33 @@ class BagPlot():
                 self.counter.append(0)
                 self.legend_added.append(False)
 
+            fig = plt.figure()
+            if self.plot_3D_trace:
+                self.ax = fig.add_subplot(projection='3d')
+                self.ax.set_zlim(self.zlim)
+                self.ax.set_box_aspect((1, 1, 0.2))
+            else:
+                self.ax = fig.add_subplot()
+                self.ax.axis('scaled')
+
             plt.ion()
-            plt.axis('scaled')
-            plt.xlabel('X coordinate (m)')
-            plt.ylabel('Y coordinate (m)')
-            plt.title('Estimation in ENU frame')
-            # plt.legend(topic_list, source_list)
-            plt.grid(True)
-            plt.xlim(self.xlim)
-            plt.ylim(self.ylim)
+            self.ax.set_xlabel('X coordinate (m)')
+            self.ax.set_ylabel('Y coordinate (m)')
+            self.ax.set_title('Estimation in ENU frame')
+            self.ax.grid(True)
+            self.ax.set_xlim(self.xlim)
+            self.ax.set_ylim(self.ylim)
 
             if (self.plot_defined_trace):
                 x_trace = [p[0] for p in self.trace]
                 y_trace = [p[1] for p in self.trace]
-                plt.plot(x_trace, y_trace, '-o', 
+                self.ax.plot(x_trace, y_trace, '-o', 
                          label='Aimed path', markersize=5)
-                plt.legend(loc=4)
+                self.ax.legend(loc=4)
 
             rospy.logdebug("In total {} topics.".format(serial))
             plt.show(block=True) 
+            # rospy.spin()
 
 
     def rotate_xypair(self, x, y, theta):
@@ -170,35 +172,27 @@ class BagPlot():
             odom_x.append(x)
             odom_y.append(y)
 
-        plt.plot(odom_x, odom_y, color=color, label=source)
-        plt.axis('scaled')
-        plt.legend(loc=4)
-        plt.xlabel('X coordinate')
-        plt.ylabel('Y coordinate')
-        plt.title('Estimation in ENU frame')
-        plt.grid(True)
+        self.ax.plot(odom_x, odom_y, color=color, label=source)
+        self.ax.axis('scaled')
+        self.ax.legend(loc=4)
+        # self..xlabel('X coordinate')
+        # self..ylabel('Y coordinate')
+        # self.title('Estimation in ENU frame')
+        self.ax.grid(True)
 
     def plot_2D(self, x, y, color, source, serial):
         """Plot x and y coordinates."""
-        plt.plot(x, y, color=color, label=source, 
+        self.ax.plot(x, y, color=color, label=source, 
                 marker=".", markersize=self.point_size)
-        plt.axis('square')
-        plt.xlim(self.xlim)
-        plt.ylim(self.ylim)
-        plt.draw()
         if not self.legend_added[serial]:
-            plt.legend(loc=4)
+            self.ax.legend(loc=4)
             self.legend_added[serial] = True
         rospy.logdebug("For {} to plot {}, {}.".format(source, x, y))
 
     def plot_3D(self, x, y, z, color, source, serial):
         """Plot xyz coordinates."""
-        plt.plot(x, y, z, color=color, label=source, 
+        self.ax.plot(x, y, z, color=color, label=source, 
                 marker=".", markersize=self.point_size)
-        plt.axis('square')
-        plt.xlim(self.xlim)
-        plt.ylim(self.ylim)
-        plt.draw()
         if not self.legend_added[serial]:
             plt.legend(loc=4)
             self.legend_added[serial] = True
