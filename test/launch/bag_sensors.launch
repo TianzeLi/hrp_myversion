@@ -94,7 +94,7 @@
       name="complementary_filter_gain_node_left" output="screen">
       <param name="do_bias_estimation" value="false"/>
       <param name="do_adaptive_gain" value="true"/>
-      <param name="use_mag" value="true"/>
+      <param name="use_mag" value="false"/>
       <param name="gain_acc" value="0.1"/>
       <param name="gain_mag" value="0.00001"/>
       <param name="fixed_frame" value="map"/>
@@ -135,7 +135,7 @@
       name="complementary_filter_gain_node_right" output="screen">
       <param name="do_bias_estimation" value="false"/>
       <param name="do_adaptive_gain" value="true"/>
-      <param name="use_mag" value="true"/>
+      <param name="use_mag" value="false"/>
       <param name="gain_acc" value="0.04"/>
       <param name="gain_mag" value="0.000001"/>
       <param name="fixed_frame" value="map"/>

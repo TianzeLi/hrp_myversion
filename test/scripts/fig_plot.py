@@ -35,30 +35,33 @@ class BagPlot():
 
         # Configuration parameters.
         self.plot_from_bag = False
-        self.plot_3D = False
+        self.plot_3D_trace = False
+        self.plot_defined_trace = True
+        self.plot_covariance = False
 
-        # topic_list = ["/odom", "/odometry/filtered"]
-        # topic_list = ["/odometry_filtered", "/odom"]
-        # type_list = ["Odometry", "Odometry"]
-        # color_list = ['orange', 'chocolate']
-        # angle_list = [1.57-0.3, 0.0]
-        # source_list = ["Encoder", "Encoder not rotated"]
-
-        # topic_list = ["/odometry/filtered"]
         topic_list = ["/odometry/filtered"]
+        # topic_list = ["/odom"]
         type_list = ["Odometry"]
-        color_list = ["green"]
-        angle_list = [0.0]
-        source_list = ["Fused encoders and IMU"]
-
-        topic_list = ["/rtabmap/odom"]
-        type_list = ["Odometry"]
-        color_list = ["green"]
+        color_list = ['coral']
         angle_list = [1.57-0.3]
-        source_list = ["Visual odometry"]
+        source_list = ["Left IMU"]
 
-        self.xlim = [-40, 60]
-        self.ylim = [-20, 80] 
+        # # topic_list = ["/odometry/filtered"]
+        # topic_list = ["/odometry/filtered"]
+        # type_list = ["Odometry"]
+        # color_list = ["green"]
+        # angle_list = [0.0]
+        # source_list = ["Fused encoders and IMU"]
+
+        # # visual-SLAM
+        # topic_list = ["/rtabmap/odom"]
+        # type_list = ["Odometry"]
+        # color_list = ["green"]
+        # angle_list = [1.57-0.3]
+        # source_list = ["Visual odometry"]
+
+        self.xlim = [-60, 60]
+        self.ylim = [-20, 100] 
 
         # # GNSS raw
         # topic_list = ["/gnss_left/fix", "/gnss_right/fix", "/GPSfix"]
@@ -76,6 +79,16 @@ class BagPlot():
         # angle_list = [0.0, 0.0, 0.0]
         # source_list = ["Left GNSS", "Right GNSS", "Original GNSS"]
 
+        self.trace = [[0.00, 0.00],  
+                      [3.80, 25.3],
+                      [19.6, 22.6],
+                      [27.0, 67.9],
+                      [12.5, 73.4],
+                      [-12.7, 60.5],
+                      [-23.1, -0.8],
+                      [-0.50, -4.2],
+                      [-0.30, -1.6]]
+
         if (self.plot_from_bag): 
             #  Bag location and read.
             home = expanduser("~")
@@ -91,7 +104,7 @@ class BagPlot():
 
         else:
             # Real time plot configurations.
-            self.plot_per_points = 3
+            self.plot_per_points = 4
             self.point_size = 3
             rospy.init_node('bag_plot', log_level=rospy.DEBUG)
 
@@ -120,16 +133,22 @@ class BagPlot():
 
             plt.ion()
             plt.axis('scaled')
-            plt.xlabel('X coordinate')
-            plt.ylabel('Y coordinate')
+            plt.xlabel('X coordinate (m)')
+            plt.ylabel('Y coordinate (m)')
             plt.title('Estimation in ENU frame')
             # plt.legend(topic_list, source_list)
-            plt.legend()
             plt.grid(True)
             plt.xlim(self.xlim)
             plt.ylim(self.ylim)
+
+            if (self.plot_defined_trace):
+                x_trace = [p[0] for p in self.trace]
+                y_trace = [p[1] for p in self.trace]
+                plt.plot(x_trace, y_trace, '-o', 
+                         label='Aimed path', markersize=5)
+                plt.legend(loc=4)
+
             rospy.logdebug("In total {} topics.".format(serial))
-            # rospy.spin()
             plt.show(block=True) 
 
 
@@ -153,7 +172,7 @@ class BagPlot():
 
         plt.plot(odom_x, odom_y, color=color, label=source)
         plt.axis('scaled')
-        plt.legend()
+        plt.legend(loc=4)
         plt.xlabel('X coordinate')
         plt.ylabel('Y coordinate')
         plt.title('Estimation in ENU frame')
@@ -168,14 +187,22 @@ class BagPlot():
         plt.ylim(self.ylim)
         plt.draw()
         if not self.legend_added[serial]:
-            plt.legend()
+            plt.legend(loc=4)
             self.legend_added[serial] = True
-        rospy.logdebug("For {} to plot {}, {}."
-                        .format(source, x, y))
+        rospy.logdebug("For {} to plot {}, {}.".format(source, x, y))
 
-    def plot_3D(self, x, y, z, color, source):
+    def plot_3D(self, x, y, z, color, source, serial):
         """Plot xyz coordinates."""
-        pass
+        plt.plot(x, y, z, color=color, label=source, 
+                marker=".", markersize=self.point_size)
+        plt.axis('square')
+        plt.xlim(self.xlim)
+        plt.ylim(self.ylim)
+        plt.draw()
+        if not self.legend_added[serial]:
+            plt.legend(loc=4)
+            self.legend_added[serial] = True
+        rospy.logdebug("For {} to plot {}, {}, {}.".format(source, x, y, z))
 
     def odom_callback(self, msg, args):
         serial = args[0]
@@ -190,10 +217,12 @@ class BagPlot():
 
         if(angle != 0.0):
             x, y = self.rotate_xypair(x, y, angle)
-        if (self.plot_3D):
-            self.plot_3D(x, y, z, color, source)
-        elif (self.counter[serial] % self.plot_per_points == 0):
-            self.plot_2D(x, y, color, source, serial)
+        if (self.counter[serial] % self.plot_per_points == 0):
+            if (self.plot_3D_trace):
+                self.plot_3D(x, y, z, color, source, serial)
+            else:
+                self.plot_2D(x, y, color, source, serial)
+
 
     def pose_callback(self, msg, args):
 
@@ -209,10 +238,11 @@ class BagPlot():
 
         if(angle != 0.0):
             x, y = self.rotate_xypair(x, y, angle)
-        if (self.plot_3D):
-            self.plot_3D(x, y, z, color, source)
-        elif (self.counter[serial] % self.plot_per_points == 0):
-            self.plot_2D(x, y, color, source, serial)
+        if (self.counter[serial] % self.plot_per_points == 0):
+            if (self.plot_3D_trace):
+                self.plot_3D(x, y, z, color, source, serial)
+            else:
+                self.plot_2D(x, y, color, source, serial)
 
     def gnssfix_callback(self, msg, args):
 
@@ -228,8 +258,8 @@ class BagPlot():
 
         if(angle != 0.0):
             x, y = self.rotate_xypair(x, y, angle)
-        if (self.plot_3D):
-            self.plot_3D(x, y, z, color, source)
+        if (self.plot_3D_trace):
+            self.plot_3D(x, y, z, color, source, serial)
         elif (self.counter[serial] % self.plot_per_points == 0):
             self.plot_2D(x, y, color, source, serial)
 

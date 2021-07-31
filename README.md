@@ -76,7 +76,7 @@ Localization results for example:
   </tr>    
   <tr>
     <td>EKF localizaton without vision</td>
-    <td>`rtabmap` result</td>
+    <td> Visual SLAM result based on rtabmap</td>
   </tr> 
   </tbody>
 </table>

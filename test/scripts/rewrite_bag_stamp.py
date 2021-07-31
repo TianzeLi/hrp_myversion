@@ -37,7 +37,8 @@ def status(length, percent):
 #  Bag location and read.
 home = expanduser("~")
 dir_name = home + "/bags/lawn/"
-filename = "lawn_one_lap_20201122"
+# filename = "lawn_one_lap_20201122"
+filename = "lawn_three_laps_20201122"
 orig_bag = rosbag.Bag(dir_name + filename + ".bag")
 restamped_path = dir_name + filename + "_restamped.bag"
 # Threshold that if larger, consider as the lagged time stamp
