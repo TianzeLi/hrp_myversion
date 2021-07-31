@@ -22,6 +22,7 @@ import rosbag
 import rospy
 import matplotlib.pyplot as plt
 import numpy as np
+from math import sqrt
 from scipy.ndimage import rotate
 from os.path import expanduser
 from nav_msgs.msg import Odometry
@@ -35,9 +36,14 @@ class BagPlot():
 
         # Configuration parameters.
         self.plot_from_bag = False
-        self.plot_3D_trace = True
+        self.plot_3D_trace = False
         self.plot_defined_trace = True
-        self.plot_covariance = False
+        self.plot_xy_covariance = True
+        self.plot_yaw_covariance = True
+
+        # Refering to ros msg covariance
+        self.xy_covariance_index = [0, 6]
+        self.plot_yaw_covariance = [35]
 
         self.xlim = [-60, 60]
         self.ylim = [-20, 100] 
@@ -83,6 +89,12 @@ class BagPlot():
                       [-0.50, -4.2],
                       [-0.30, -1.6]]
 
+        self.fig_total_num = 1
+        if self.plot_xy_covariance:
+            self.fig_total_num += 1
+        if self.plot_yaw_covariance:
+            self.fig_total_num += 1
+
         if (self.plot_from_bag): 
             #  Bag location and read.
             home = expanduser("~")
@@ -98,7 +110,7 @@ class BagPlot():
 
         else:
             # Real time plot configurations.
-            self.plot_per_points = 4
+            self.plot_per_points = 10
             self.point_size = 3
             rospy.init_node('bag_plot', log_level=rospy.DEBUG)
 
@@ -125,7 +137,20 @@ class BagPlot():
                 self.counter.append(0)
                 self.legend_added.append(False)
 
+            self.last_x = 0.0
+            self.last_y = 0.0
+            self.length_travelled = 0.0
+
             fig = plt.figure()
+
+            if self.fig_total_num == 2:
+                fig_covar = plt.figure()
+                self.ax_covar1 = fig_covar.add_subplot()
+            if self.fig_total_num == 3:
+                fig_covar = plt.figure()
+                self.ax_covar1 = fig_covar.add_subplot(211)
+                self.ax_covar2 = fig_covar.add_subplot(212)
+
             if self.plot_3D_trace:
                 self.ax = fig.add_subplot(projection='3d')
                 self.ax.set_zlim(self.zlim)
@@ -133,6 +158,7 @@ class BagPlot():
             else:
                 self.ax = fig.add_subplot()
                 self.ax.axis('scaled')
+
 
             plt.ion()
             self.ax.set_xlabel('X coordinate (m)')
@@ -151,7 +177,6 @@ class BagPlot():
 
             rospy.logdebug("In total {} topics.".format(serial))
             plt.show(block=True) 
-            # rospy.spin()
 
 
     def rotate_xypair(self, x, y, theta):
@@ -198,6 +223,23 @@ class BagPlot():
             self.legend_added[serial] = True
         rospy.logdebug("For {} to plot {}, {}, {}.".format(source, x, y, z))
 
+    def update_length_travelled(self, x, y):
+        delta = sqrt((x-self.last_x)**2 + (y - self.last_y)**2)
+        self.last_x = x
+        self.last_y = y
+        self.length_travelled += delta
+
+    def plot_covariance(self, x, y, x_var, y_var, yaw_var):
+        self.update_length_travelled(x, y)
+        if self.plot_xy_covariance:
+            self.ax_covar1.scatter(self.length_travelled, x_var, 
+                                color='salmon', label='x', 
+                                marker=".")
+        if self.plot_yaw_covariance:
+            self.ax_covar2.scatter(self.length_travelled, yaw_var, 
+                                color='tomato', label='yaw', 
+                                marker=".")
+
     def odom_callback(self, msg, args):
         serial = args[0]
         color = args[1]
@@ -208,6 +250,10 @@ class BagPlot():
         x = msg.pose.pose.position.x
         y = msg.pose.pose.position.y
         z = msg.pose.pose.position.z
+        x_var = msg.pose.covariance[0]
+        y_var = msg.pose.covariance[6]
+        yaw_var = msg.pose.covariance[35]
+
 
         if(angle != 0.0):
             x, y = self.rotate_xypair(x, y, angle)
@@ -216,6 +262,8 @@ class BagPlot():
                 self.plot_3D(x, y, z, color, source, serial)
             else:
                 self.plot_2D(x, y, color, source, serial)
+            if self.fig_total_num > 1:
+                self.plot_covariance(x, y, x_var, y_var, yaw_var)
 
 
     def pose_callback(self, msg, args):
@@ -229,6 +277,9 @@ class BagPlot():
         x = msg.pose.pose.position.x
         y = msg.pose.pose.position.y
         z = msg.pose.pose.position.z
+        x_var = msg.pose.covariance[0]
+        y_var = msg.pose.covariance[6]
+        yaw_var = msg.pose.covariance[35]
 
         if(angle != 0.0):
             x, y = self.rotate_xypair(x, y, angle)
@@ -237,6 +288,8 @@ class BagPlot():
                 self.plot_3D(x, y, z, color, source, serial)
             else:
                 self.plot_2D(x, y, color, source, serial)
+            if self.fig_total_num > 1:
+                self.plot_covariance(x, y, x_var, y_var, yaw_var)
 
     def gnssfix_callback(self, msg, args):
 
