@@ -245,7 +245,7 @@ class BagPlot():
 
         if self.plot_yaw_covariance:
             self.ax_covar2.scatter(self.length_travelled, yaw_var, 
-                                color='salmon', label='yaw', marker=".")
+                                color='salmon', label='yaw variance', marker=".")
             if not self.legend_added_yaw_var:
                 self.legend_added_yaw_var = True
                 self.ax_covar2.legend(loc=2)

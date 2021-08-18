@@ -3,7 +3,7 @@
 	<arg name="fuseSensors" default="True" />
 	<arg name="useMagAndGNSSYaw" default="False" />
 	<arg name="runRtabmap" default="False" />
-	<arg name="openRviz" default="False" />
+	<arg name="openRviz" default="True" />
 	<arg name="showRqt" default="False" />
 	<arg name="publishTrackerInRviz" default="False" />
 	<arg name="usePlotjuggler" default="False" />
