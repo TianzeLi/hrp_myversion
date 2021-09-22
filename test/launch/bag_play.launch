@@ -1,16 +1,16 @@
 <launch>
 	<arg name="processSensors" default="True" />
 	<arg name="fuseSensors" default="True" />
-	<arg name="useMagAndGNSSYaw" default="False" />
+	<arg name="useMagAndGNSSYaw" default="True" />
 	<arg name="runRtabmap" default="False" />
-	<arg name="openRviz" default="True" />
+	<arg name="openRviz" default="False" />
 	<arg name="showRqt" default="False" />
-	<arg name="publishTrackerInRviz" default="False" />
+	<arg name="publishTrackerInRviz" default="True" />
 	<arg name="usePlotjuggler" default="False" />
-	<arg name="generatePlot" default="False" />
+	<arg name="generatePlot" default="True" />
 
 
-	<arg name="rate" default="1.0" />
+	<arg name="rate" default="2.0" />
 	<arg name="useSimTime" default="True" />
 	<arg name="path" default=" $(env HOME)/bags/lawn/" />
 	<arg name="file_1" default="lawn_one_lap_20201122_restamped.bag" />

@@ -86,17 +86,26 @@ void IMUProcess::initializeParams()
 	if (!nh_private_.getParam("trans_velocity_threshold", trans_velocity_threshold_))
 		trans_velocity_threshold_ = 1.0;
  	if (!nh_private_.getParam("orientation_stddev_r", orientation_stddev_r_))
- 		orientation_stddev_r_ = 0.001;
+ 		orientation_stddev_r_ = 0.01;
  	if (!nh_private_.getParam("orientation_stddev_p", orientation_stddev_p_))
- 		orientation_stddev_r_ = 0.001;
+ 		orientation_stddev_p_ = 0.01;
  	if (!nh_private_.getParam("orientation_stddev_y", orientation_stddev_y_))
- 		orientation_stddev_r_ = 0.001;
+ 		orientation_stddev_y_ = 0.01;
+ 	if (!nh_private_.getParam("velocity_stddev_r", velocity_stddev_r_))
+ 		velocity_stddev_r_ = 0.001;
+ 	if (!nh_private_.getParam("velocity_stddev_p", velocity_stddev_p_))
+ 		velocity_stddev_p_ = 0.001;
+ 	if (!nh_private_.getParam("velocity_stddev_y", velocity_stddev_y_))
+ 		velocity_stddev_y_ = 0.01;
 
 	ss_tmp << topic_name_ << "/enu";
 	pub_topic_ = ss_tmp.str();
 	orientation_dev_r_ = orientation_stddev_r_*orientation_stddev_r_;
 	orientation_dev_p_ = orientation_stddev_p_*orientation_stddev_p_;
 	orientation_dev_y_ = orientation_stddev_y_*orientation_stddev_y_;
+	velocity_dev_r_ = velocity_stddev_r_*velocity_stddev_r_;
+	velocity_dev_p_ = velocity_stddev_p_*velocity_stddev_p_;
+	velocity_dev_y_ = velocity_stddev_y_*velocity_stddev_y_;
 }
 
 void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
@@ -116,12 +125,18 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 		imu_tmp.orientation_covariance[0] = orientation_dev_r_*uncertainty_coef_r_;
 		imu_tmp.orientation_covariance[4] = orientation_dev_p_*uncertainty_coef_p_;
 		imu_tmp.orientation_covariance[8] = orientation_dev_y_*uncertainty_coef_y_;
+		imu_tmp.angular_velocity_covariance[0] = velocity_dev_r_*uncertainty_coef_r_;
+		imu_tmp.angular_velocity_covariance[4] = velocity_dev_p_*uncertainty_coef_p_;
+		imu_tmp.angular_velocity_covariance[8] = velocity_dev_y_*uncertainty_coef_y_;
 	}
 	else
 	{
 		imu_tmp.orientation_covariance[0] = orientation_dev_r_;
 		imu_tmp.orientation_covariance[4] = orientation_dev_p_;
 		imu_tmp.orientation_covariance[8] = orientation_dev_y_;
+		imu_tmp.angular_velocity_covariance[0] = velocity_dev_r_;
+		imu_tmp.angular_velocity_covariance[4] = velocity_dev_p_;
+		imu_tmp.angular_velocity_covariance[8] = velocity_dev_y_;
 	}
 
 	// Converting the orientation of IMU from NWU to ENU.

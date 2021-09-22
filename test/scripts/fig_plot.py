@@ -32,7 +32,11 @@ class BagPlot():
         self.plot_defined_trace = True
         self.plot_xy_covariance = True
         self.plot_yaw_covariance = True
-
+        self.plot_covariance_in_stdev = True
+        # Real time plot configurations.
+        self.plot_per_points = 20
+        self.point_size = 3
+        
         # Figure scale.
         self.xlim = [-60, 60]
         self.ylim = [-20, 100] 
@@ -41,9 +45,9 @@ class BagPlot():
         # Configure the data to plot.
         topic_list = ["/odometry/filtered"]
         type_list = ["Odometry"]
-        color_list = ['coral']
-        angle_list = [1.57-0.3]
-        source_list = ["Left IMU"]
+        color_list = ['green']
+        angle_list = [0.0]
+        source_list = ["E.+IMU+GNSS"]
 
         # # Visual-SLAM.
         # topic_list = ["/rtabmap/odom"]
@@ -99,9 +103,6 @@ class BagPlot():
             self.bag.close()
 
         else:
-            # Real time plot configurations.
-            self.plot_per_points = 20
-            self.point_size = 3
             rospy.init_node('bag_plot', log_level=rospy.DEBUG)
 
             serial = 0
@@ -143,14 +144,22 @@ class BagPlot():
                 self.ax_covar1 = fig_covar.add_subplot(211)
                 self.ax_covar2 = fig_covar.add_subplot(212)
             if self.plot_xy_covariance:
-                self.ax_covar1.set_xlabel('Distance travelled (m)')
-                self.ax_covar1.set_ylabel('Variance')
-                self.ax_covar1.set_title('Variance in estimated x and y')
+                # self.ax_covar1.set_xlabel('Distance travelled (m)')
+                if self.plot_covariance_in_stdev:
+                    self.ax_covar1.set_ylabel('Standard deviation')
+                    self.ax_covar1.set_title('Standard deviation in x, y and yaw')
+                else:
+                    self.ax_covar1.set_ylabel('Variance')
+                    self.ax_covar1.set_title('Variance in estimated x, y and yaw')
                 self.ax_covar1.grid(True)
             if self.plot_yaw_covariance:
                 self.ax_covar2.set_xlabel('Distance travelled (m)')
-                self.ax_covar2.set_ylabel('Variance')
-                self.ax_covar2.set_title('Variance in estimated yaw')
+                if self.plot_covariance_in_stdev:
+                    self.ax_covar2.set_ylabel('Standard deviation')
+                #     self.ax_covar2.set_title('Standard deviation in estimated yaw')
+                else:
+                    self.ax_covar2.set_ylabel('Variance')
+                #     self.ax_covar2.set_title('Variance in estimated yaw')
                 self.ax_covar2.grid(True)
 
             if self.plot_3D_trace:
@@ -234,7 +243,7 @@ class BagPlot():
         self.update_length_travelled(x, y)
         if self.plot_xy_covariance:
             self.ax_covar1.scatter(self.length_travelled, x_var, 
-                                color='orangered', label='x variance', 
+                                color='plum', label='x variance', 
                                 marker=".")
             self.ax_covar1.scatter(self.length_travelled, y_var, 
                                 color='tomato', label='y variance', 
@@ -250,6 +259,29 @@ class BagPlot():
                 self.legend_added_yaw_var = True
                 self.ax_covar2.legend(loc=2)
 
+    def plot_stdev(self, x, y, x_var, y_var, yaw_var):
+        self.update_length_travelled(x, y)
+        x_stdev = sqrt(x_var)
+        y_stdev = sqrt(y_var)
+        yaw_stdev = sqrt(yaw_var)
+        if self.plot_xy_covariance:
+            self.ax_covar1.scatter(self.length_travelled, x_stdev, 
+                                color='plum', label='x stdev', 
+                                marker=".")
+            self.ax_covar1.scatter(self.length_travelled, y_stdev, 
+                                color='tomato', label='y stdev', 
+                                marker=".")
+            if not self.legend_added_xy_var:
+                self.legend_added_xy_var = True
+                self.ax_covar1.legend(loc=2)
+
+        if self.plot_yaw_covariance:
+            self.ax_covar2.scatter(self.length_travelled, yaw_stdev, 
+                                color='salmon', label='yaw stdev', marker=".")
+            if not self.legend_added_yaw_var:
+                self.legend_added_yaw_var = True
+                self.ax_covar2.legend(loc=2)
+
     def odom_callback(self, msg, args):
         serial = args[0]
         color = args[1]
@@ -261,7 +293,7 @@ class BagPlot():
         y = msg.pose.pose.position.y
         z = msg.pose.pose.position.z
         x_var = msg.pose.covariance[0]
-        y_var = msg.pose.covariance[6]
+        y_var = msg.pose.covariance[7]
         yaw_var = msg.pose.covariance[35]
 
         if(angle != 0.0):
@@ -272,7 +304,10 @@ class BagPlot():
             else:
                 self.plot_2D(x, y, color, source, serial)
             if self.plot_total_num > 1:
-                self.plot_covariance(x, y, x_var, y_var, yaw_var)
+                if self.plot_covariance_in_stdev:
+                    self.plot_stdev(x, y, x_var, y_var, yaw_var)
+                else:
+                    self.plot_covariance(x, y, x_var, y_var, yaw_var)
 
     def pose_callback(self, msg, args):
 
@@ -286,7 +321,7 @@ class BagPlot():
         y = msg.pose.pose.position.y
         z = msg.pose.pose.position.z
         x_var = msg.pose.covariance[0]
-        y_var = msg.pose.covariance[6]
+        y_var = msg.pose.covariance[7]
         yaw_var = msg.pose.covariance[35]
 
         if(angle != 0.0):
@@ -296,8 +331,10 @@ class BagPlot():
                 self.plot_3D(x, y, z, color, source, serial)
             else:
                 self.plot_2D(x, y, color, source, serial)
-            if self.plot_total_num > 1:
-                self.plot_covariance(x, y, x_var, y_var, yaw_var)
+                if self.plot_covariance_in_stdev:
+                    self.plot_stdev(x, y, x_var, y_var, yaw_var)
+                else:
+                    self.plot_covariance(x, y, x_var, y_var, yaw_var)
 
     def gnssfix_callback(self, msg, args):
 

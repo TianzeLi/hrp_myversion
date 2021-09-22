@@ -1,7 +1,7 @@
 # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin
 # computation until it receives at least one message from one of the inputs. It will then run continuously at the
 # frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
-frequency: 20
+frequency: 30
 
 # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
 # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
@@ -31,7 +31,7 @@ print_diagnostics: true
 # Debug settings. Not for the faint of heart. Outputs a ludicrous amount of information to the file specified by
 # debug_out_file. I hope you like matrices! Please note that setting this to true will have strongly deleterious
 # effects on the performance of the node. Defaults to false if unspecified.
-debug: false
+debug: true
 
 # Defaults to "robot_localization_debug.txt" if unspecified. Please specify the full path.
 debug_out_file: /home/tianze/robot_localization_debug.txt
@@ -86,12 +86,12 @@ odom0: /odom_repub
 odom0_config: [false,  false,  false,
                false, false, false,
                true, true, true,
-               false, false, false,
+               false, false, true,
                false, false, false]
 
 # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
 # the size of the subscription queue so that more measurements are fused.
-odom0_queue_size: 2
+odom0_queue_size: 1
 
 # [ADVANCED] Large messages in ROS can exhibit strange behavior when they arrive at a high frequency. This is a result
 # of Nagle's algorithm. This option tells the ROS subscriber to use the tcpNoDelay option, which disables Nagle's
@@ -139,52 +139,56 @@ odom0_relative: false
 
 imu0: imu_left/imu/data/enu
 imu0_config: [false, false, false,
-              true,  true,  true,
+              true,  true,  false,
               false, false, false,
-              true,  true,  true,
-              false,  false,  false]
+              false,  false,  true,
+              false, false, false,
+              # true,  true,  true
+             ]
 imu0_nodelay: false
 imu0_differential: false
 imu0_relative: false
 imu0_queue_size: 5
 
 # # imu0_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
-# imu0_twist_rejection_threshold: 1.2                
-# imu0_linear_acceleration_rejection_threshold: 2.0  
+# imu0_twist_rejection_threshold: 2.0                
+imu0_linear_acceleration_rejection_threshold: 0.8 
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
 # imu0_remove_gravitational_acceleration: true
 
-# imu1: imu_right/imu/data/enu
-# imu1_config: [false, false, false,
-#               true,  true,  true,
-#               false, false, false,
-#               true,  true,  true,
-#               false,  false,  false]
-# imu1_nodelay: false
-# imu1_differential: false
-# imu1_relative: false
-# imu1_queue_size: 5
+imu1: imu_right/imu/data/enu
+imu1_config: [false, false, false,
+              true,  true,  false,
+              false, false, false,
+              false,  false,  true,
+              false,  false,  false,
+              # true,  true,  true
+             ]
+imu1_nodelay: false
+imu1_differential: false
+imu1_relative: false
+imu1_queue_size: 5
 
 # imu1_pose_rejection_threshold: 0.1                 # Note the difference in parameter names
 # imu1_twist_rejection_threshold: 1.2                
-# imu1_linear_acceleration_rejection_threshold: 2.0  
+imu1_linear_acceleration_rejection_threshold: 0.8  
 
 # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
 # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
 # imu1_remove_gravitational_acceleration: falsed
 
 # Here can take in GNSS measurements.
-# pose0: GPSfix_processed
-# pose0_config: [true,  true,  false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false]
-# pose0_differential: false
-# pose0_relative: false
-# pose0_queue_size: 5
+pose0: GPSfix_processed
+pose0_config: [true,  true,  false,
+               false, false, false,
+               false, false, false,
+               false, false, false,
+               false, false, false]
+pose0_differential: false
+pose0_relative: false
+pose0_queue_size: 1
 
 # pose0_rejection_threshold: 5  # Note the difference in parameter name
 # pose0_nodelay: true
@@ -202,15 +206,15 @@ imu0_queue_size: 5
 # pose1_nodelay: false
 
 # # Below for the compass and gnss global yaw estimator.
-# pose0: yaw_mag_gnss
-# pose0_config: [false, false, false,
-#                false, false, true,
-#                false, false, false,
-#                false, false, false,
-#                false, false, false]
-# pose0_differential: false
-# pose0_relative: false
-# pose0_queue_size: 10
+pose1: yaw_mag_gnss
+pose1_config: [false, false, false,
+               false, false, true,
+               false, false, false,
+               false, false, false,
+               false, false, false]
+pose1_differential: false
+pose1_relative: false
+pose1_queue_size: 100
 
 # pose0_nodelay: ture
 # pose0_rejection_threshold: 5  # Note the difference in parameter name
@@ -295,21 +299,38 @@ control_config: [true, false, false, false, false, true]
 # to be larger, which will cause the filter to trust the incoming measurement more during correction. The values are
 # ordered as x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. Defaults to the matrix below if
 # unspecified.
-process_noise_covariance: [0.006,0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0.006,0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+
+# process_noise_covariance: [0.05, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+#                            0,    0.05, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+#                            0,    0,    0.06, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+#                            0,    0,    0,    0.03, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+#                            0,    0,    0,    0,    0.03, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+#                            0,    0,    0,    0,    0,    0.06, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+#                            0,    0,    0,    0,    0,    0,    0.025, 0,     0,    0,    0,    0,    0,    0,    0,
+#                            0,    0,    0,    0,    0,    0,    0,     0.025, 0,    0,    0,    0,    0,    0,    0,
+#                            0,    0,    0,    0,    0,    0,    0,     0,     0.04, 0,    0,    0,    0,    0,    0,
+#                            0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
+#                            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
+#                            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02, 0,    0,    0,
+#                            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
+#                            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
+#                            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]
+
+process_noise_covariance: [0.004,0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0.0001,0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
                            0,    0,    0.0001,0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0.00005,0,  0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0.00005,0,  0,     0,     0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0.0005,0,     0,    0,    0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0.0006,0,    0,   0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0.00002,0,  0,    0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0.0001,0, 0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0.00001, 0,    0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.00001, 0,    0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.0005, 0,    0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
-                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.01]
+                           0,    0,    0,    0.0001,0,  0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0.0001,0,  0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0.001,0,     0,    0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0.025, 0,    0,   0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0.025,0,  0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0.04,0, 0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0.001, 0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.001, 0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.004, 0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.1, 0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.1, 0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.1]
 
 # [ADVANCED] This represents the initial value for the state estimate error covariance matrix. Setting a diagonal
 # value (variance) to a large value will result in rapid convergence for initial measurements of the variable in
@@ -337,7 +358,7 @@ initial_estimate_covariance: [1e-9, 0,    0,    0,    0,    0,    0,    0,    0,
                               0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                              0,    0,    0,    0,    0,    1,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    1e-4, 0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    1e-9, 0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,     0,     0,     0,    0,    0,

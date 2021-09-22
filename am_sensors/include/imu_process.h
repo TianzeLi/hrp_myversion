@@ -48,6 +48,12 @@ class IMUProcess
   double orientation_dev_r_;
   double orientation_dev_p_;
   double orientation_dev_y_;
+  double velocity_stddev_r_;
+  double velocity_stddev_p_;
+  double velocity_stddev_y_;
+  double velocity_dev_r_;
+  double velocity_dev_p_;
+  double velocity_dev_y_;
   double uncertainty_coef_r_;
   double uncertainty_coef_p_;
   double uncertainty_coef_y_;

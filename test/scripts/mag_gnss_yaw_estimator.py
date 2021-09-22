@@ -48,7 +48,7 @@ class MagGNSSYawEstimator():
         if (self.use_mag):
             self.mag_max_dev = 0.1
             self.mag_yaw_var = 0.0025
-            self.mag_pub_num_max = 100
+            self.mag_pub_num_max = 200
             self.mag_queue_length = 20
             
             self.mag_pub_num = 0 

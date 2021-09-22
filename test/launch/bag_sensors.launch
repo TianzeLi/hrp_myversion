@@ -85,9 +85,12 @@
       <param name="trans_velocity_threshold" value="1.0"/>
       <param name="angular_velocity_threshold" value="1.5"/>
       <param name="do_covariance_adaption" value="true"/>
-      <param name="orientation_stddev_r" value="0.05"/>
-      <param name="orientation_stddev_p" value="0.05"/>
-      <param name="orientation_stddev_y" value="0.10"/>
+      <param name="orientation_stddev_r" value="0.02"/>
+      <param name="orientation_stddev_p" value="0.02"/>
+      <param name="orientation_stddev_y" value="0.1"/>
+      <param name="velocity_stddev_r" value="0.02"/>
+      <param name="velocity_stddev_p" value="0.02"/>
+      <param name="velocity_stddev_y" value="0.1"/>
     </node>
 
     <node pkg="imu_complementary_filter" type="complementary_filter_node"
@@ -95,7 +98,7 @@
       <param name="do_bias_estimation" value="false"/>
       <param name="do_adaptive_gain" value="true"/>
       <param name="use_mag" value="false"/>
-      <param name="gain_acc" value="0.1"/>
+      <param name="gain_acc" value="0.06"/>
       <param name="gain_mag" value="0.00001"/>
       <param name="fixed_frame" value="map"/>
       <param name="publish_tf"  value="false"/>     
@@ -126,9 +129,12 @@
       <param name="trans_velocity_threshold" value="1.0"/>
       <param name="angular_velocity_threshold" value="1.5"/>
       <param name="do_covariance_adaption" value="true"/>
-      <param name="orientation_stddev_r" value="0.05"/>
-      <param name="orientation_stddev_p" value="0.05"/>
-      <param name="orientation_stddev_y" value="0.10"/>
+      <param name="orientation_stddev_r" value="0.02"/>
+      <param name="orientation_stddev_p" value="0.02"/>
+      <param name="orientation_stddev_y" value="0.4"/>
+      <param name="velocity_stddev_r" value="0.002"/>
+      <param name="velocity_stddev_p" value="0.002"/>
+      <param name="velocity_stddev_y" value="0.04"/>
     </node>
 
     <node pkg="imu_complementary_filter" type="complementary_filter_node"
@@ -136,16 +142,15 @@
       <param name="do_bias_estimation" value="false"/>
       <param name="do_adaptive_gain" value="true"/>
       <param name="use_mag" value="false"/>
-      <param name="gain_acc" value="0.04"/>
+      <param name="gain_acc" value="0.035"/>
       <param name="gain_mag" value="0.000001"/>
       <param name="fixed_frame" value="map"/>
       <param name="publish_tf"  value="false"/>
       <param name="orientation_stddev" value="0.01"/>
-
       <!-- Customized part, low-pass filters for acc and mag added -->
-      <param name="do_acc_lowpass" value="true"/>
+      <param name="do_acc_lowpass" value="false"/>
       <param name="do_mag_lowpass" value="true"/>
-      <param name="alpha_acc" value="0.1"/>
+      <param name="alpha_acc" value="0.5"/>
       <param name="alpha_mag" value="0.10"/>
     </node>
   </group>
