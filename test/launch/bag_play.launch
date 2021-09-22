@@ -1,13 +1,13 @@
 <launch>
 	<arg name="processSensors" default="True" />
 	<arg name="fuseSensors" default="True" />
-	<arg name="useMagAndGNSSYaw" default="True" />
 	<arg name="runRtabmap" default="False" />
 	<arg name="openRviz" default="False" />
 	<arg name="showRqt" default="False" />
 	<arg name="publishTrackerInRviz" default="True" />
 	<arg name="usePlotjuggler" default="False" />
 	<arg name="generatePlot" default="True" />
+	<!-- <arg name="useMagAndGNSSYaw" default="True" /> -->
 
 
 	<arg name="rate" default="2.0" />
@@ -66,9 +66,9 @@
 	  	<include file="$(find am_test)/launch/bag_ekf.launch" />
 	</group>
 
-	<group if="$(arg useMagAndGNSSYaw)">
+<!-- 	<group if="$(arg useMagAndGNSSYaw)">
 	  	<node name="yaw_estimator" pkg="am_test" type="mag_gnss_yaw_estimator.py" />
-	</group>
+	</group> -->
 
 	<group if="$(arg runRtabmap)">
 	    <include file="$(find am_sensors)/launch/rtabmap.launch" />

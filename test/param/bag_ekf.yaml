@@ -139,9 +139,9 @@ odom0_relative: false
 
 imu0: imu_left/imu/data/enu
 imu0_config: [false, false, false,
-              true,  true,  false,
+              true,  true,  true,
               false, false, false,
-              false,  false,  true,
+              false, false, false,
               false, false, false,
               # true,  true,  true
              ]
@@ -160,10 +160,10 @@ imu0_linear_acceleration_rejection_threshold: 0.8
 
 imu1: imu_right/imu/data/enu
 imu1_config: [false, false, false,
-              true,  true,  false,
+              true,  true,  true,
               false, false, false,
-              false,  false,  true,
-              false,  false,  false,
+              false, false, false,
+              false, false, false,
               # true,  true,  true
              ]
 imu1_nodelay: false

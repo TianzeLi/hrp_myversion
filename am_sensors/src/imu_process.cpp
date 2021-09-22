@@ -30,6 +30,8 @@ IMUProcess::IMUProcess(
 	imu_pub_= nh_.advertise<sensor_msgs::Imu>(pub_topic_, 200);
 	imu_sub_ = nh_.subscribe(topic_name_, 10, &IMUProcess::IMUCallback, this);
 	cmd_vel_sub_ = nh_.subscribe("/cmd_vel", 10, &IMUProcess::CmdVelCallback, this);
+	if (do_yaw_offset_correction_)
+		imu_offset_sub_ = nh_.subscribe(offset_topic_name_, 10, &IMUProcess::offsetCallback, this);
 	if(publish_rpy_)
 		imu_pub_rpy_ = nh_.advertise<geometry_msgs::Vector3>("rpy", 200);
 }
@@ -49,6 +51,7 @@ void IMUProcess::initializeParams()
 	uncertainty_coef_r_ = 1.0;
 	uncertainty_coef_p_ = 1.0;
 	uncertainty_coef_y_ = 1.0;
+	q_offset_.setRPY(0, 0, 0);
 
 	if (!nh_private_.getParam("topic_name", topic_name_))
 		topic_name_ = "imu/data";
@@ -97,6 +100,11 @@ void IMUProcess::initializeParams()
  		velocity_stddev_p_ = 0.001;
  	if (!nh_private_.getParam("velocity_stddev_y", velocity_stddev_y_))
  		velocity_stddev_y_ = 0.01;
+
+ 	if (!nh_private_.getParam("do_yaw_offset_correction", do_yaw_offset_correction_))
+ 		do_yaw_offset_correction_ = false;
+	if (!nh_private_.getParam("offset_topic_name", offset_topic_name_))
+ 		offset_topic_name_ = "yaw_mag_gnss";
 
 	ss_tmp << topic_name_ << "/enu";
 	pub_topic_ = ss_tmp.str();
@@ -148,6 +156,10 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 	quat_msg.w=0.707;
    	tf2::convert(quat_msg , q_rot); 	
 	q_enu = q_rot*q_nwu;
+	if (do_yaw_offset_correction_)
+	{
+		q_enu = q_offset_*q_enu;
+	}
 	q_enu.normalize();
 	tf2::convert(q_enu, imu_tmp.orientation);
 
@@ -210,7 +222,7 @@ void IMUProcess::IMUCallback(const sensor_msgs::Imu &msg)
 	}
 }
 
-void IMUProcess::CmdVelCallback(const geometry_msgs::Twist msg)
+void IMUProcess::CmdVelCallback(const geometry_msgs::Twist &msg)
 {
 	double vt, vr;
 	// double vr_max = angular_velocity_threshold_;
@@ -236,6 +248,11 @@ void IMUProcess::CmdVelCallback(const geometry_msgs::Twist msg)
 		uncertainty_coef_p_ = 1.0 + 10*vr + 5*vt;
 		uncertainty_coef_y_ = 1.0 + 20*vr + 10*vt;
 	}
+}
+
+void IMUProcess::offsetCallback(const geometry_msgs::PoseWithCovarianceStamped &msg)
+{
+	tf2::convert(msg.pose.pose.orientation, q_offset_);
 }
 
 void IMUProcess::pub_tf(double x, double y, double z, double r, double p, double yaw, const std::string frame_name)

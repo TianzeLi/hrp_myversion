@@ -91,6 +91,8 @@
       <param name="velocity_stddev_r" value="0.02"/>
       <param name="velocity_stddev_p" value="0.02"/>
       <param name="velocity_stddev_y" value="0.1"/>
+      <param name="do_yaw_offset_correction" value="true"/>
+      <!-- <param name="offset_topic_name" value="/yaw_mag_gnss"/>      -->
     </node>
 
     <node pkg="imu_complementary_filter" type="complementary_filter_node"
@@ -108,6 +110,12 @@
       <param name="do_mag_lowpass" value="true"/>
       <param name="alpha_acc" value="0.5"/>
       <param name="alpha_mag" value="0.10"/>
+    </node>
+
+    <node name="imu_left_yaw_offset_estimator"
+          pkg="am_test"
+          type="mag_gnss_yaw_estimator.py">
+      <param name="initial_yaw_offset" value="0.35"/>
     </node>
   </group>
 
@@ -135,6 +143,8 @@
       <param name="velocity_stddev_r" value="0.002"/>
       <param name="velocity_stddev_p" value="0.002"/>
       <param name="velocity_stddev_y" value="0.04"/>
+      <param name="do_yaw_offset_correction" value="true"/>
+      <!-- <param name="offset_topic_name" value="/yaw_mag_gnss"/>      -->
     </node>
 
     <node pkg="imu_complementary_filter" type="complementary_filter_node"
@@ -152,6 +162,12 @@
       <param name="do_mag_lowpass" value="true"/>
       <param name="alpha_acc" value="0.5"/>
       <param name="alpha_mag" value="0.10"/>
+    </node>
+
+    <node name="imu_right_yaw_offset_estimator"
+          pkg="am_test"
+          type="mag_gnss_yaw_estimator.py">
+      <param name="initial_yaw_offset" value="0.10"/>
     </node>
   </group>
 

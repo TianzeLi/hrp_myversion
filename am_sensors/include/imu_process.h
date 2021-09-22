@@ -29,11 +29,13 @@ class IMUProcess
   ros::Subscriber imu_sub_;
   ros::Subscriber cmd_vel_sub_; 
   ros::Publisher imu_pub_rpy_;
+  ros::Subscriber imu_offset_sub_;
   // static tf2_ros::TransformBroadcaster tf_broadcaster_;
 
   std::string topic_name_;
   std::string pub_topic_;
   std::string fixed_frame_;
+  std::string offset_topic_name_;
   bool align_with_clock_;
   bool imu_shall_pub_;
   bool publish_rpy_;
@@ -62,10 +64,13 @@ class IMUProcess
   bool do_pub_control_;
   double trans_velocity_threshold_;
   double angular_velocity_threshold_;
+  bool do_yaw_offset_correction_;
+  tf2::Quaternion q_offset_;
 
   void initializeParams();
   void IMUCallback(const sensor_msgs::Imu &msg);
-  void CmdVelCallback(const geometry_msgs::Twist msg);
+  void CmdVelCallback(const geometry_msgs::Twist &msg);
+  void offsetCallback(const geometry_msgs::PoseWithCovarianceStamped &msg);
   void pub_tf(double x, double y, double z, double r, double p, double yaw, const std::string frame_name);
 };
 

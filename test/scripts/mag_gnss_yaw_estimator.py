@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/python2.7
 
 """
  Use magnetometer and GNSS to estimate the yaw angle.
@@ -18,7 +18,8 @@ import rospy
 import numpy as np
 from math import sqrt, acos, fabs
 from geometry_msgs.msg import PoseWithCovarianceStamped, Quaternion
-from sensor_msgs.msg import NavSatFix, Imu, MagneticField
+from sensor_msgs.msg import NavSatFix, Imu, MagneticField  
+from tf.transformations import quaternion_from_euler, quaternion_multiply
 
 # rospy.logdebug(msg, *args)
 # rospy.logwarn(msg, *args)
@@ -34,14 +35,17 @@ class MagGNSSYawEstimator():
         self.degree2meter = 111320
         # Fundamental switch
         self.use_mag = True
-        self.use_gnss = True
+        self.use_gnss = False
         # General configurations
-        mag_topic_name = "/imu_left/imu/mag" 
-        acc_topic_name = "/imu_left/imu/data/enu" 
+        mag_topic_name = "imu/mag" 
+        imu_topic_name = "imu/data/enu" 
         gnss_topic_name = "/GPSfix"
         self.pub_topic_name = "yaw_mag_gnss"
         self.yaw_frame_id = "map"
         # self.yaw_frame_id = "base_link"
+        # initial_yaw_offset = 0.3
+        initial_yaw_offset = rospy.get_param('~initial_yaw_offset')
+        self.q_initial_offset = quaternion_from_euler(0, 0, initial_yaw_offset)
 
         self.yaw_pub = rospy.Publisher((self.pub_topic_name), PoseWithCovarianceStamped, queue_size=10)
         # Mag and acc specific configurations
@@ -55,7 +59,7 @@ class MagGNSSYawEstimator():
             self.mag_done = False
             self.acc_available = False
             rospy.Subscriber(mag_topic_name, MagneticField, self.mag_callback)
-            rospy.Subscriber(acc_topic_name, Imu, self.acc_callback)
+            rospy.Subscriber(imu_topic_name, Imu, self.imu_callback)
         # GNSS specific configuration
         if (self.use_gnss):
             # yaw angle difference
@@ -155,7 +159,7 @@ class MagGNSSYawEstimator():
         factor = sqrt(ax*ax + ay*ay + az*az)
         return ax/factor, ay/factor, az/factor
 
-    def acc_callback(self, msg):
+    def imu_callback(self, msg):
         if not (self.mag_done):
             self.ax = msg.linear_acceleration.x
             self.ay = msg.linear_acceleration.y
@@ -186,15 +190,22 @@ class MagGNSSYawEstimator():
                     q_mag_mean = self.xy2quaternion(lx_mean, -ly_mean)
                     ready_to_publish = True
 
+
             if ready_to_publish:
+                quaternion = (
+                    q_mag_mean.x,
+                    q_mag_mean.y,
+                    q_mag_mean.z,
+                    q_mag_mean.w)
+                quaternion = quaternion_multiply(self.q_initial_offset, quaternion)
                 yaw_estimated = PoseWithCovarianceStamped()  
                 yaw_estimated.header = msg.header
                 yaw_estimated.header.frame_id = self.yaw_frame_id
                 # yaw_estimated.header.frame_id = "base_link"
-                yaw_estimated.pose.pose.orientation.x = q_mag_mean.x
-                yaw_estimated.pose.pose.orientation.y = q_mag_mean.y
-                yaw_estimated.pose.pose.orientation.z = q_mag_mean.z
-                yaw_estimated.pose.pose.orientation.w = q_mag_mean.w
+                yaw_estimated.pose.pose.orientation.x = quaternion[0]
+                yaw_estimated.pose.pose.orientation.y = quaternion[1]
+                yaw_estimated.pose.pose.orientation.z = quaternion[2]
+                yaw_estimated.pose.pose.orientation.w = quaternion[3]
                 yaw_estimated.pose.covariance[35] = self.mag_yaw_var
 
                 self.yaw_pub.publish(yaw_estimated)
