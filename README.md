@@ -71,7 +71,7 @@ Localization results for example:
 <table>
   <tbody>
   <tr>
-    <td width="50%"><img src="doc/media/EncoderwTwoIMUwMagwGNSSII.png"></td>
+    <td width="50%"><img src="doc/media/EncoderwTwoIMUwMagwGNSSAdaptive.png"></td>
     <td width="50%"><img src="doc/media/vSLAMMapping.png"></td>
   </tr>    
   <tr>

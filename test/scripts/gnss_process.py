@@ -19,7 +19,7 @@ class GNSSProcess():
         self.x_scale_factor = 1.0
         self.y_scale_factor = 1.0
         self.do_estimate_initial = True
-        self.adaptiveR =True
+        self.adaptiveR =False
 
         self.degree2meter = 111320
         self.initial_latitude = 59.40455 

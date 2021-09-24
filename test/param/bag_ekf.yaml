@@ -206,15 +206,15 @@ pose0_queue_size: 1
 # pose1_nodelay: false
 
 # # Below for the compass and gnss global yaw estimator.
-pose1: yaw_mag_gnss
-pose1_config: [false, false, false,
-               false, false, true,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-pose1_differential: false
-pose1_relative: false
-pose1_queue_size: 100
+# pose1: yaw_mag_gnss
+# pose1_config: [false, false, false,
+#                false, false, true,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# pose1_differential: false
+# pose1_relative: false
+# pose1_queue_size: 100
 
 # pose0_nodelay: ture
 # pose0_rejection_threshold: 5  # Note the difference in parameter name

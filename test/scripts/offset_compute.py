@@ -49,6 +49,24 @@ IMU_w_encoder = [[7.4, 26.0],
                  [-1.9,	-7.7],
                  [0.1,	-2.4]]
 
+all_non_vision = [[7.1, 26.0],
+                  [20.4, 23.3],
+                  [29.4, 67.7],
+                  [17.1, 74.4],
+                  [-11.9, 62.7],
+                  [-21.3, -4.7],
+                  [-4.3, -7.4],
+                  [-2.9,  -2.4]]
+
+all_non_vision_adaptive = [[6.4, 25.3],
+                           [20.1, 22.3],
+                           [29.1, 66.7],
+                           [17.1, 72.4],
+                           [-12.6, 61.3],
+                           [-21.6, -5.1],
+                           [-4.9, -8.1],
+                           [-4.6,  -2.4]]
+
 def compute_offset(ref, array):
     offset_list = []
     for i, p in enumerate(ref):
@@ -56,8 +74,8 @@ def compute_offset(ref, array):
         offset_list.append(offset)
     return offset_list
 
-for est in [encoder, IMU_left, IMU_right, IMU_w_encoder]:
+for est in [encoder, IMU_left, IMU_right, IMU_w_encoder, 
+            all_non_vision,all_non_vision_adaptive]:
     offset_table = compute_offset(cp, est)
     print("\n")
     print(offset_table)
-

@@ -49,6 +49,13 @@ class BagPlot():
         angle_list = [0.0]
         source_list = ["E.+IMU+GNSS"]
 
+        # To plot the adaptive R matrix.
+        # topic_list = ["/GPSfix_processed"]
+        # type_list = ["PoseWithCovarianceStamped"]
+        # color_list = ['green']
+        # angle_list = [0.0]
+        # source_list = ["Adaptive GNSS"]
+
         # # Visual-SLAM.
         # topic_list = ["/rtabmap/odom"]
         # type_list = ["Odometry"]
