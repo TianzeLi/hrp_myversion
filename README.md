@@ -1,6 +1,6 @@
 Boundary Guard for Field Robot 
 ======
-**_(Finishing soon but still under construction.)_**
+<!-- **_(Finishing soon but still under construction.)_** -->
 ![](doc/media/projectTheme2.png)
 
 ## Contents
@@ -17,9 +17,9 @@ Boundary Guard for Field Robot
 ## Overview
 <a name="Overview"></a>
 
-This project is designed for Huqvarna automower 450x as a trial to replace the underlaid wire boundary. The repository is based on ![Husqvarna Research Platform](https://github.com/HusqvarnaResearch/hrp), however has added a localization module and a visual boundary detector, upon additional two IMU, two GNSS and one Intel Realsense D435 depth camera. 
+This project is designed for Huqvarna automower 450x as a trial to replace the underlaid wire boundary. The repository is based on ![Husqvarna Research Platform](https://github.com/HusqvarnaResearch/hrp), and has added a localization module and a visual boundary detector, upon additional two IMU, two GNSS and one Intel Realsense D435 depth camera. 
 
-The localization function is considered an active approach that applies Kalman filters to fuse the sensors' outputs and can integrate with the estimated pose from the visual SLAM node. Visual boundary detector then is a more passive method based on image segmentation via explicit image processing pipelines, that is, no heavy learning method is applied, for convience and computational effiency. 
+The localization function is considered as an active approach that applies Kalman filters to fuse the sensors' outputs and can integrate with the estimated pose from the visual SLAM node. Visual boundary detector then is a more passive method based on image segmentation via explicit image processing pipelines, that is, no heavy learning method is applied, for convenience and computational effiency. 
 
 The software is designed under Ubuntu 16.04 and ROS Kinetic. 
 
@@ -42,7 +42,7 @@ The software is designed under Ubuntu 16.04 and ROS Kinetic.
 ## Dependency and installation
 <a name="Installation"></a>
 
-Due to the multiple hectorgeneous sensors we choose, and the customized changes in depent packages, the installation steps is prolonged and rather shown in a seperate [installation page](https://github.com/TianzeLi/hrp_myversion/wiki/Installation) in the repository wiki. 
+Due to the multiple hectorgeneous sensors we choose, and the customized changes in depent packages, the installation steps are prolonged and shown in a seperate [installation page](https://github.com/TianzeLi/hrp_myversion/wiki/Installation) in the repository wiki. 
 
 
 ## Launch
@@ -62,7 +62,7 @@ Launch files   | Functions
 `roslaunch am_sensors rtabmap.launch`           | Launch visual-SLAM
 `roslaunch am_driver path_follow.launch`		| Run the path follower
 
-Using the GUI in `test/scripts/map_measure.py`, we can calculate the location of the interested points on the map:
+Using the GUI in `test/scripts/map_measure.py`, we can calculate the positions of the interested points on the map:
 
 ![](doc/media/mapGUI.png)
 
@@ -91,7 +91,7 @@ Visual boundary detection results for example:
     <td width="50%"><img src="doc/media/segResult.png"></td>
   </tr>    
   <tr>
-    <td>With Inter Realsense D435 camera</td>
+    <td>With Intel Realsense D435 camera</td>
     <td>With iPhone 7 camera</td>
   </tr> 
   </tbody>
@@ -106,7 +106,7 @@ Path follower in Gazebo for example:
 
 
 ### In simulation
-Althought not heavily used in this projected, the simulation in Gazebo provides models of the robot and sensors. Two lawn settings are also available in `simulation/am_gazebo/worlds`. In order to launch: 
+Althought not heavily used in this project, the simulation in Gazebo provides models of the robot and sensors. Two lawn settings are also available in `simulation/am_gazebo/worlds`. In order to launch: 
 ```
 roslaunch am_gazebo am_gazebo_hrp.launch gui:=true
 ```
