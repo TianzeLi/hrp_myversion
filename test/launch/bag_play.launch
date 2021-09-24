@@ -2,11 +2,11 @@
 	<arg name="processSensors" default="True" />
 	<arg name="fuseSensors" default="True" />
 	<arg name="runRtabmap" default="False" />
-	<arg name="openRviz" default="False" />
+	<arg name="openRviz" default="True" />
 	<arg name="showRqt" default="False" />
 	<arg name="publishTrackerInRviz" default="True" />
 	<arg name="usePlotjuggler" default="False" />
-	<arg name="generatePlot" default="True" />
+	<arg name="generatePlot" default="False" />
 	<!-- <arg name="useMagAndGNSSYaw" default="True" /> -->
 
 
